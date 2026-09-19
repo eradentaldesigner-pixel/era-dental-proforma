@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Proera P logo">
+  <defs>
+    <linearGradient id="top" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#20B8FF"/>
+      <stop offset="0.55" stop-color="#0A78FF"/>
+      <stop offset="1" stop-color="#0756E8"/>
+    </linearGradient>
+    <linearGradient id="lower" x1="0" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#129BFF"/>
+      <stop offset="1" stop-color="#0664F2"/>
+    </linearGradient>
+    <linearGradient id="fold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0847C9"/>
+      <stop offset="1" stop-color="#032D8E"/>
+    </linearGradient>
+  </defs>
+  <!-- upper ribbon -->
+  <path fill="url(#top)" d="M112 86h176c74 0 132 55 132 126 0 70-57 126-128 126H210v-82h80c27 0 48-19 48-44s-21-44-48-44H112z"/>
+  <!-- folded dark facet -->
+  <path fill="url(#fold)" d="M112 86l98 82h-98z"/>
+  <!-- descending stem / lower ribbon -->
+  <path fill="url(#lower)" d="M112 168h98v160c0 49-26 84-98 112z"/>
+  <!-- inner shadow/fold -->
+  <path fill="#064FCB" opacity=".9" d="M210 256h78c-31 13-55 34-78 65z"/>
+</svg>
