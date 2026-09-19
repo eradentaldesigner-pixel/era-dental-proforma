@@ -225,7 +225,33 @@ async function bootWorkspace(){if(!(await resolveWorkspace()))return;document.ge
 function updateAuthGate(){document.getElementById('authGate').style.display=currentUser?'none':'grid';if(!currentUser){currentCompanyId=null;document.getElementById('syncStatus').textContent='● Giriş gerekli';return}bootWorkspace()}
 let authMode='login';
 function setAuthMode(mode){authMode=mode;tabLogin.classList.toggle('active',mode==='login');tabSignup.classList.toggle('active',mode==='signup');nameArea.style.display=mode==='signup'?'block':'none';passwordArea.style.display='block';confirmPasswordArea.style.display=mode==='signup'?'block':'none';newPasswordArea.style.display='none';authPassword.autocomplete=mode==='signup'?'new-password':'current-password';authActions.innerHTML=mode==='login'?'<button class="btn primary" onclick="loginUser()">Giriş Yap</button><button class="btn light" onclick="resetPassword()">Şifremi Unuttum</button>':'<button class="btn primary" onclick="signupUser()">Üyelik Oluştur</button>';authMsg.textContent=mode==='signup'?'E-posta adresinizi doğruladıktan sonra firma kurulumuna geçeceksiniz.':''}
-async function loginUser(){const email=authEmail.value.trim(),password=authPassword.value;if(!email||!password){authMsg.textContent='E-posta ve şifrenizi girin.';return}authMsg.textContent='Giriş yapılıyor…';const {error}=await sb.auth.signInWithPassword({email,password});authMsg.textContent=error?('Hata: '+error.message):'Giriş başarılı.'}
+async function loginUser(){
+  const email=authEmail.value.trim(),password=authPassword.value;
+  if(!email||!password){authMsg.textContent='E-posta ve şifrenizi girin.';return}
+  const btn=authActions.querySelector('.primary');
+  if(btn){btn.disabled=true;btn.textContent='Giriş yapılıyor…'}
+  authMsg.textContent='Giriş yapılıyor…';
+  try{
+    const timeout=new Promise((_,reject)=>setTimeout(()=>reject(new Error('Giriş isteği zaman aşımına uğradı. İnternet bağlantınızı kontrol edip tekrar deneyin.')),12000));
+    const result=await Promise.race([sb.auth.signInWithPassword({email,password}),timeout]);
+    if(result?.error)throw result.error;
+    if(!result?.data?.session)throw new Error('Oturum oluşturulamadı. E-posta adresinizi doğruladığınızdan emin olun.');
+    currentUser=result.data.user||result.data.session.user;
+    authMsg.textContent='Giriş başarılı. Panel hazırlanıyor…';
+    await updateAuthGate();
+  }catch(e){
+    console.error('Proera login error',e);
+    const raw=String(e?.message||e||'Bilinmeyen hata');
+    const lower=raw.toLowerCase();
+    let msg=raw;
+    if(lower.includes('invalid login credentials'))msg='E-posta veya şifre hatalı.';
+    else if(lower.includes('email not confirmed'))msg='E-posta adresiniz henüz doğrulanmamış. Gelen kutunuzu kontrol edin.';
+    else if(lower.includes('failed to fetch')||lower.includes('network'))msg='Sunucuya ulaşılamadı. İnternet bağlantınızı kontrol edip tekrar deneyin.';
+    authMsg.textContent='Giriş yapılamadı: '+msg;
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='Giriş Yap'}
+  }
+}
 async function signupUser(){const name=authName.value.trim(),email=authEmail.value.trim(),password=authPassword.value,password2=authPassword2.value;if(!name){authMsg.textContent='Ad Soyad alanını doldurun.';return}if(!email){authMsg.textContent='E-posta adresinizi yazın.';return}if(password.length<8){authMsg.textContent='Şifre en az 8 karakter olmalıdır.';return}if(password!==password2){authMsg.textContent='Şifreler birbiriyle aynı değil.';return}authMsg.textContent='Üyelik oluşturuluyor…';const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:name},emailRedirectTo:location.origin+'/app.html'}});if(error){authMsg.textContent='Hata: '+error.message;return}if(data.session){authMsg.textContent='Üyelik oluşturuldu. Firma kurulumu açılıyor…'}else{authMsg.innerHTML='<b>Üyeliğiniz oluşturuldu.</b><br>E-posta adresinize gönderilen doğrulama bağlantısına tıklayın, ardından giriş yapın.'}}
 async function loginGoogle(){authMsg.textContent='Google’a yönlendiriliyorsunuz…';const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+'/app.html',queryParams:{access_type:'offline',prompt:'consent'}}});if(error)authMsg.textContent='Google giriş hatası: '+error.message}
 async function resetPassword(){const email=authEmail.value.trim();if(!email){authMsg.textContent='Önce e-posta adresinizi yazın.';return}const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/app.html'});authMsg.textContent=error?('Hata: '+error.message):'Şifre yenileme bağlantısı e-posta adresinize gönderildi.'}
