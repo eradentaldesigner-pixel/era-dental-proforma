@@ -781,6 +781,13 @@ body.mobile-drawer-open{overflow:hidden!important}
  #dashboardOverlay .dash-stats{margin-bottom:18px!important;gap:10px!important}
  #dashboardOverlay .dash-grid{gap:12px!important}
 }
+</style><style id="v195-dashboard-search">
+#dashboardOverlay .dash-lower-content>.dash-panel,
+#dashboardOverlay .dash-lower-content>.dash-chart-grid{width:100%!important;max-width:100%!important;margin-left:0!important;margin-right:0!important;box-sizing:border-box}
+#dashboardOverlay .dash-chart-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:16px!important;margin-top:14px!important}
+#dashboardOverlay .dash-chart-grid .chart-box{width:100%!important;min-width:0!important;box-sizing:border-box!important}
+#dashboardOverlay #dashSalesFlow{width:100%!important}
+@media(max-width:760px){#dashboardOverlay .dash-chart-grid{grid-template-columns:1fr!important;gap:12px!important}.gs-input input{font-size:14px}}
 </style></head><body>
 
 <aside class="desktop-side" aria-label="Ana navigasyon">
@@ -807,7 +814,7 @@ body.mobile-drawer-open{overflow:hidden!important}
  <div class="notification-tabs"><button class="active" onclick="renderUnifiedNotifications('all',this)">Tümü</button><button onclick="renderUnifiedNotifications('urgent',this)">Önemli</button></div>
  <div id="unifiedNotificationList" class="notification-list"><div class="muted">Yükleniyor…</div></div></div>
 </div><div id="globalSearchOverlay" class="global-search-overlay" onclick="if(event.target===this)closeGlobalSearch()">
- <div class="global-search-card"><div class="gs-input"><span>⌕</span><input id="globalSearchInput" placeholder="Müşteri, proforma, ürün, servis veya CRM ara…" autocomplete="off" oninput="runGlobalSearch(this.value)"><kbd>ESC</kbd></div><div id="globalSearchResults" class="gs-results"><div class="gs-empty">Aramak için en az 2 karakter yazın.</div></div></div>
+ <div class="global-search-card"><div class="gs-input"><span>⌕</span><input id="globalSearchInput" placeholder="Proforma veya teknik servis kaydı ara…" autocomplete="off" oninput="runGlobalSearch(this.value)"><kbd>ESC</kbd></div><div id="globalSearchResults" class="gs-results"><div class="gs-empty">Aramak için en az 2 karakter yazın.</div></div></div>
 </div><input type="checkbox" id="mobileNavToggle" aria-hidden="true">
 <button class="desktop-global-search" type="button" onclick="openGlobalSearch()">⌕ <span>Proera’da ara…</span><kbd>Ctrl K</kbd></button><div class="mobile-appbar" aria-label="Mobil üst menü">
   <label class="m-icon" for="mobileNavToggle" onclick="toggleMobileDrawer(event,true)" aria-label="Menüyü aç"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></label>
@@ -897,11 +904,9 @@ body.mobile-drawer-open{overflow:hidden!important}
 <div class="dash-lower-content">
 <div class="dash-panel" style="margin-top:14px"><div class="chart-title"><h3>Satış Takibi / Son Görüşmeler</h3></div><div id="dashCrm" class="dash-crm"><div class="muted">Yükleniyor…</div></div></div>
 <div class="dash-panel" style="margin-top:14px"><div class="chart-title"><h3>Teknik Servis Takibi</h3><button class="btn light" onclick="appNavigate('service')">Teknik Servisi Aç</button></div><div id="dashService"><div class="muted">Yükleniyor…</div></div></div>
-<div class="dash-panel" style="margin-top:14px"><div class="chart-title"><h3>Satış Temsilcisi Performansı</h3><small>Görüşme ve dönüşüm</small></div><div id="dashSalesReps"><div class="muted">Yükleniyor…</div></div></div>
 
 
- </div>
-</div>
+
 <div class="dash-panel" style="margin-top:14px"><div class="chart-title"><h3>Satış Akışı</h3><small>Görüşme → Ürün → Teklif / Proforma</small></div><div id="dashSalesFlow"><div class="muted">Yükleniyor…</div></div></div>
 <div class="dash-chart-grid">
  <div class="chart-box"><div class="chart-title"><h3>Teklif Aktivitesi</h3><small>Son 6 ay</small></div><div id="dashBarChart" class="bar-chart"></div></div>
@@ -1346,7 +1351,7 @@ function toggleMobileDrawer(e,force){
  t.checked=open;sh.classList.toggle('drawer-open',open);document.body.classList.toggle('mobile-drawer-open',open);
 }
 function closeMobileDrawer(){toggleMobileDrawer(null,false)}
-function openGlobalSearch(){const o=document.getElementById('globalSearchOverlay');if(!o)return;o.classList.add('open');setTimeout(()=>document.getElementById('globalSearchInput')?.focus(),40)}
+function openGlobalSearch(){const o=document.getElementById('globalSearchOverlay');if(!o)return;const i=document.getElementById('globalSearchInput'),role=String(currentMembership?.role||'viewer').toLowerCase();if(i)i.placeholder=role==='service'?'Teknik servis kaydı ara…':['sales','accounting'].includes(role)?'Proforma ara…':'Proforma veya teknik servis kaydı ara…';o.classList.add('open');setTimeout(()=>i?.focus(),40)}
 function closeGlobalSearch(){document.getElementById('globalSearchOverlay')?.classList.remove('open')}
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openGlobalSearch()}else if(e.key==='Escape'){closeGlobalSearch();closeMobileDrawer()}});
 let gsTimer;
@@ -1356,22 +1361,20 @@ function runGlobalSearch(q){
  box.innerHTML='<div class="gs-empty">Aranıyor…</div>';gsTimer=setTimeout(()=>doGlobalSearch(q),220)
 }
 async function doGlobalSearch(q){
- if(!currentCompanyId)return;const like=`%${q.replace(/[%_]/g,'')}%`;
- const [c,p,sr,cr,pf]=await Promise.all([
-  sb.from('customers').select('id,name,phone').eq('company_id',currentCompanyId).or(`name.ilike.${like},phone.ilike.${like}`).limit(6),
-  sb.from('products').select('id,name,product_code').eq('company_id',currentCompanyId).eq('active',true).or(`name.ilike.${like},product_code.ilike.${like}`).limit(6),
-  sb.from('service_requests').select('id,subject,customer_name').eq('company_id',currentCompanyId).is('deleted_at',null).or(`subject.ilike.${like},customer_name.ilike.${like}`).limit(6),
-  sb.from('customer_interactions').select('id,company_name,contact_name').eq('company_id',currentCompanyId).is('deleted_at',null).or(`company_name.ilike.${like},contact_name.ilike.${like}`).limit(6),
-  sb.from('proformas').select('id,proforma_number,customer_name').eq('company_id',currentCompanyId).or(`proforma_number.ilike.${like},customer_name.ilike.${like}`).limit(6)
- ]);
- const rows=[
- ...(c.data||[]).map(x=>['Müşteri',x.name,x.phone||'',()=>openCustomers()]),
- ...(p.data||[]).map(x=>['Ürün',x.name,x.product_code||'',()=>openCatalog('manage')]),
- ...(sr.data||[]).map(x=>['Teknik Servis',x.customer_name||x.subject,x.subject||'',()=>openServiceRequests()]),
- ...(cr.data||[]).map(x=>['CRM',x.company_name||x.contact_name,x.contact_name||'',()=>openCrm()]),
- ...(pf.data||[]).map(x=>['Proforma',x.proforma_number,x.customer_name||'',()=>openArchive()])
- ];
+ if(!currentCompanyId)return;
+ const like=`%${q.replace(/[%_]/g,'')}%`,role=String(currentMembership?.role||'viewer').toLowerCase();
+ const canProforma=['owner','admin','sales','accounting'].includes(role);
+ const canService=['owner','admin','service'].includes(role);
+ const jobs=[];
+ if(canService)jobs.push(sb.from('service_requests').select('id,subject,customer_name,contact_name,phone,product_names,serial_numbers').eq('company_id',currentCompanyId).is('deleted_at',null).or(`subject.ilike.${like},customer_name.ilike.${like},contact_name.ilike.${like},phone.ilike.${like}`).limit(12).then(r=>({kind:'service',data:r.data||[]})));
+ if(canProforma)jobs.push(sb.from('proformas').select('id,proforma_number,customer_name,status,grand_total,currency').eq('company_id',currentCompanyId).or(`proforma_number.ilike.${like},customer_name.ilike.${like}`).limit(12).then(r=>({kind:'proforma',data:r.data||[]})));
+ const result=await Promise.all(jobs),rows=[];
+ result.forEach(group=>{
+   if(group.kind==='service')group.data.forEach(x=>rows.push(['Teknik Servis',x.customer_name||x.contact_name||x.subject||'Servis kaydı',x.subject||((x.product_names||[]).join(', ')),()=>openServiceRequests()]));
+   if(group.kind==='proforma')group.data.forEach(x=>rows.push(['Proforma',x.proforma_number,x.customer_name||'',()=>openArchive()]));
+ });
  window._globalSearchActions=rows.map(x=>x[3]);const box=document.getElementById('globalSearchResults');
+ if(!canService&&!canProforma){box.innerHTML='<div class="gs-empty">Rolünüz için aranabilir bir kayıt türü bulunmuyor.</div>';return}
  box.innerHTML=rows.map((x,i)=>`<button onclick="closeGlobalSearch();window._globalSearchActions[${i}]()"><span class="gs-type">${esc(x[0])}</span><b>${esc(x[1]||'-')}</b><small>${esc(x[2]||'')}</small><i>›</i></button>`).join('')||'<div class="gs-empty">Sonuç bulunamadı.</div>';
 }
 
