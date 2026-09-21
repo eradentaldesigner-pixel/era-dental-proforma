@@ -765,6 +765,22 @@ body.mobile-drawer-open{overflow:hidden!important}
 .dash-hero.premium{background:linear-gradient(125deg,#071d3d,#0a356b 65%,#075da8);border:1px solid rgba(255,255,255,.08);border-radius:22px;padding:24px;color:#fff;box-shadow:0 18px 48px rgba(4,26,58,.18)}.dash-hero.premium h1{color:#fff;margin:4px 0}.dash-hero.premium p{color:#c8d9ec}.dash-eyebrow{font-size:10px;font-weight:900;letter-spacing:1.5px;color:#55b8ff}.dash-hero-actions{display:flex;gap:8px}.dash-action-center{margin-top:14px;background:#fff;border:1px solid #e5ebf2;border-radius:20px;padding:17px;box-shadow:0 8px 28px rgba(15,43,77,.06)}.dash-action-head{display:flex;align-items:center;justify-content:space-between;gap:14px}.dash-action-head h2{font-size:18px;color:#10254b;margin:3px 0 12px}.dash-action-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.unified-item{border:1px solid #e6edf4;background:#fbfdff;border-radius:14px;padding:11px 12px;display:grid;grid-template-columns:12px 1fr 14px;gap:9px;align-items:center;text-align:left;color:#10254b;cursor:pointer}.unified-item:hover{border-color:#b9d9ff;background:#f5faff}.unified-item span:nth-child(2){display:flex;flex-direction:column;min-width:0}.unified-item small{font-size:9px;text-transform:uppercase;letter-spacing:.7px;color:#7a8da1;font-weight:900}.unified-item b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.unified-item em{font-style:normal;font-size:11px;color:#718096}.unified-item i{font-style:normal;font-size:20px;color:#9bacc0}.action-dot{width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 4px rgba(0,0,0,.03)}.action-dot.red{background:#e5484d;animation:softPulseRed 1.8s infinite}.action-dot.yellow{background:#e5a600}.action-dot.blue{background:#1478ff}.action-dot.green{background:#16a66a}.dash-all-clear{grid-column:1/-1;padding:18px;text-align:center;border-radius:14px;background:#effaf5;color:#16734b;font-weight:800}
 .notification-center{display:none;position:fixed;inset:0;z-index:12500;background:rgba(3,13,26,.55);backdrop-filter:blur(7px);justify-content:flex-end}.notification-center.open{display:flex}.notification-card{width:min(430px,100%);height:100%;background:#fff;padding:20px;box-shadow:-20px 0 60px rgba(0,0,0,.22);overflow:auto}.notification-head{display:flex;justify-content:space-between;align-items:flex-start}.notification-head h2{margin:3px 0 14px;color:#10254b}.notification-head button{border:0;background:#eef3f8;width:38px;height:38px;border-radius:12px;font-size:22px}.notification-tabs{display:flex;gap:6px;margin-bottom:10px}.notification-tabs button{border:0;border-radius:10px;padding:8px 12px;background:#eef3f8;color:#53677e;font-weight:800}.notification-tabs button.active{background:#1478ff;color:#fff}.notification-list{display:flex;flex-direction:column;gap:7px}.notification-list .unified-item{width:100%}
 @media(max-width:760px){.dash-hero.premium{border-radius:17px;padding:17px;align-items:flex-start}.dash-hero-actions .btn.light{display:none}.dash-action-center{padding:13px;border-radius:17px}.dash-action-head h2{font-size:16px}.dash-action-head .btn{font-size:10px;padding:7px}.dash-action-items{grid-template-columns:1fr}.notification-card{width:100%;padding-top:max(18px,env(safe-area-inset-top));padding-bottom:80px}.dash-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important}.dashboard-page{padding-left:10px!important;padding-right:10px!important}}
+</style><style id="v194-dashboard-layout">
+#dashboardOverlay .dashboard-page{width:min(1324px,calc(100% - 40px));max-width:1324px;margin:0 auto;padding-bottom:0!important}
+#dashboardOverlay .dash-action-center{margin-bottom:24px!important}
+#dashboardOverlay .dash-stats{margin-top:0!important;margin-bottom:24px!important;gap:14px!important}
+#dashboardOverlay .dash-grid{gap:16px!important;margin-top:0!important}
+#dashboardOverlay .dash-lower-content{width:min(1324px,calc(100% - 40px));max-width:1324px;margin:0 auto;padding:0 0 34px}
+#dashboardOverlay .dash-lower-content>.dash-panel,
+#dashboardOverlay .dash-lower-content>.dash-grid,
+#dashboardOverlay .dash-lower-content>.dash-chart-grid{width:100%;max-width:100%;box-sizing:border-box}
+#dashboardOverlay .dash-panel{overflow:hidden}
+@media(max-width:760px){
+ #dashboardOverlay .dashboard-page,#dashboardOverlay .dash-lower-content{width:100%;max-width:none;padding-left:10px!important;padding-right:10px!important}
+ #dashboardOverlay .dash-action-center{margin-bottom:18px!important}
+ #dashboardOverlay .dash-stats{margin-bottom:18px!important;gap:10px!important}
+ #dashboardOverlay .dash-grid{gap:12px!important}
+}
 </style></head><body>
 
 <aside class="desktop-side" aria-label="Ana navigasyon">
@@ -856,7 +872,7 @@ body.mobile-drawer-open{overflow:hidden!important}
 <button class="mobile-modal-menu" type="button" onclick="openMobileNavFromLayer()" aria-label="Menüyü aç">☰</button>
 <section id="dashboardOverlay" class="dashboard-overlay">
  <div class="dashboard-page">
-  <div class="dash-hero premium"><div><span class="dash-eyebrow">PROERA WORKSPACE</span><h1 id="dashGreeting">Merhaba 👋</h1><p id="dashCompany">Çalışma alanınızın güncel özeti.</p></div><div class="dash-hero-actions"><button class="btn light" onclick="openGlobalSearch()">⌕ Ara</button><button class="btn primary" onclick="toggleQuickActions(true)">＋ Yeni İşlem</button></div></div>
+  <div class="dash-hero premium"><div><span class="dash-eyebrow">PROERA WORKSPACE</span><h1 id="dashGreeting">Merhaba 👋</h1><p id="dashCompany">Çalışma alanınızın güncel özeti.</p></div><div class="dash-hero-actions"><button class="btn light" onclick="openGlobalSearch()">⌕ Ara</button></div></div>
   <div class="dash-action-center">
    <div class="dash-action-head"><div><span class="dash-eyebrow">AKSİYON MERKEZİ</span><h2>Bugün ilgilenmeniz gerekenler</h2></div><button class="btn light" onclick="openNotificationCenter()">Tüm bildirimler</button></div>
    <div id="dashActionItems" class="dash-action-items"><div class="muted">Kontrol ediliyor…</div></div>
@@ -878,18 +894,19 @@ body.mobile-drawer-open{overflow:hidden!important}
   </div>
  </div>
 
-
+<div class="dash-lower-content">
 <div class="dash-panel" style="margin-top:14px"><div class="chart-title"><h3>Satış Takibi / Son Görüşmeler</h3></div><div id="dashCrm" class="dash-crm"><div class="muted">Yükleniyor…</div></div></div>
 <div class="dash-panel" style="margin-top:14px"><div class="chart-title"><h3>Teknik Servis Takibi</h3><button class="btn light" onclick="appNavigate('service')">Teknik Servisi Aç</button></div><div id="dashService"><div class="muted">Yükleniyor…</div></div></div>
 <div class="dash-panel" style="margin-top:14px"><div class="chart-title"><h3>Satış Temsilcisi Performansı</h3><small>Görüşme ve dönüşüm</small></div><div id="dashSalesReps"><div class="muted">Yükleniyor…</div></div></div>
 
 
- <div class="dash-panel"><div class="chart-title"><h3>Yaklaşan Planlar</h3><small>Önümüzdeki 7 gün</small></div><div id="dashUpcomingSchedule"><div class="muted">Yükleniyor…</div></div></div>
+ </div>
 </div>
 <div class="dash-panel" style="margin-top:14px"><div class="chart-title"><h3>Satış Akışı</h3><small>Görüşme → Ürün → Teklif / Proforma</small></div><div id="dashSalesFlow"><div class="muted">Yükleniyor…</div></div></div>
 <div class="dash-chart-grid">
  <div class="chart-box"><div class="chart-title"><h3>Teklif Aktivitesi</h3><small>Son 6 ay</small></div><div id="dashBarChart" class="bar-chart"></div></div>
  <div class="chart-box"><div class="chart-title"><h3>Teklif Durumları</h3><small>Genel dağılım</small></div><div class="donut-wrap"><div id="dashDonut" class="donut" style="--g:0%;--y:0%;--r:0%"></div><div id="dashLegend" class="legend"></div></div></div>
+</div>
 </div>
 </section>
 
