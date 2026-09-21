@@ -726,6 +726,14 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
  .svc-logo-settings>div{align-items:flex-start!important}.svc-pdf-logo-preview{max-width:130px}
  .svc-history-row{grid-template-columns:1fr!important;gap:5px!important}
 }
+</style><style id="v181-photo-slots">
+.svc-photo-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:8px 0}
+.svc-photo-slot{position:relative;min-height:130px;border:1.5px dashed #b9c7d8;border-radius:14px;background:#f8fbff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;overflow:hidden;color:#52657a}
+.svc-photo-slot input{position:absolute!important;inset:0;width:100%!important;height:100%!important;opacity:0;cursor:pointer;z-index:3}
+.svc-photo-slot span{font-size:28px;line-height:1}.svc-photo-slot b{font-size:11px}.svc-photo-slot img{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.svc-photo-slot.has-photo img{display:block}.svc-photo-slot.has-photo span,.svc-photo-slot.has-photo b{display:none}
+.svc-photo-slot.has-photo:after{content:"Değiştir";position:absolute;right:6px;bottom:6px;z-index:2;background:#071c35dd;color:#fff;border-radius:8px;padding:4px 7px;font-size:9px;font-weight:800}
+@media(max-width:760px){.svc-photo-slots{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.svc-photo-slot{min-height:125px}}
 </style></head><body>
 
 <aside class="desktop-side" aria-label="Ana navigasyon">
@@ -994,7 +1002,13 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
  <div><small>Para Birimi</small><select id="svcCurrency" onchange="updateServicePriceSummary()"><option>TRY</option><option>EUR</option><option>USD</option></select></div>
  <div class="svc-price-total"><small>Genel Toplam</small><b id="svcPriceTotal">0,00 TRY</b></div>
 </div></div>
-<div class="full"><label>Ürün Fotoğrafları</label><div class="svc-photo-upload"><input id="svcPhotos" type="file" accept="image/jpeg,image/png,image/webp" multiple onchange="previewServicePhotos()"><small>En fazla 4 fotoğraf • JPG, PNG veya WEBP • Fotoğraf başına en fazla 10 MB</small></div><div id="svcPhotoPreview" class="svc-photo-preview"></div></div>
+<div class="full"><label>Ürün Fotoğrafları <small class="muted">• 4 ayrı fotoğraf ekleyebilirsiniz</small></label>
+<div class="svc-photo-slots">
+ <label class="svc-photo-slot"><input id="svcPhoto1" type="file" accept="image/jpeg,image/png,image/webp" onchange="previewServicePhotos()"><span>＋</span><b>Fotoğraf 1</b><img id="svcPhotoImg1"></label>
+ <label class="svc-photo-slot"><input id="svcPhoto2" type="file" accept="image/jpeg,image/png,image/webp" onchange="previewServicePhotos()"><span>＋</span><b>Fotoğraf 2</b><img id="svcPhotoImg2"></label>
+ <label class="svc-photo-slot"><input id="svcPhoto3" type="file" accept="image/jpeg,image/png,image/webp" onchange="previewServicePhotos()"><span>＋</span><b>Fotoğraf 3</b><img id="svcPhotoImg3"></label>
+ <label class="svc-photo-slot"><input id="svcPhoto4" type="file" accept="image/jpeg,image/png,image/webp" onchange="previewServicePhotos()"><span>＋</span><b>Fotoğraf 4</b><img id="svcPhotoImg4"></label>
+</div><small class="muted">JPG, PNG veya WEBP • Fotoğraf başına en fazla 10 MB</small><div id="svcPhotoPreview" style="display:none"></div></div>
 </div><div class="actions"><button type="button" class="btn primary" onclick="saveServiceRequest()">☁ Servis Kaydını Kaydet</button><button type="button" class="btn light" onclick="printCurrentServiceForm()">▤ Servis Formu PDF</button><button type="button" class="btn light" onclick="clearServiceForm()">Temizle</button></div></div>
 <div id="svcHistory" class="dash-panel" style="display:none;margin-bottom:14px"><div class="chart-title"><h3>Ürün Servis Geçmişi</h3><small>Seçili ürün / seri numarası</small></div><div id="svcHistoryRows"></div></div>
 </div><div id="svcArchiveView" style="display:none"><div class="svc-archive-head"><div><h3>Teknik Servis Arşivi</h3><div class="muted">Kaydedilmiş servis formlarını görüntüleyin, PDF alın veya durumunu güncelleyin.</div></div></div><div class="catalog-toolbar"><input id="serviceQuery" placeholder="Firma, seri no, personel, ürün, telefon veya konu ara" oninput="renderServiceRequests()"><select id="serviceStatusFilter" onchange="renderServiceRequests()"><option value="all">Tüm Durumlar</option><option value="bekliyor">Çözüm Bekliyor</option><option value="cozuldu">Çözüldü</option><option value="cozulemedi">Çözülemedi</option></select></div><div id="serviceList" class="service-list"></div></div>
@@ -1061,22 +1075,32 @@ function updateServicePriceSummary(){const p=servicePriceValues(),el=document.ge
 /* V17.1 Smart Teknik Servis */
 window._serviceRequests=[];let serviceProducts=[],serviceSelectedProducts=[],servicePreviewUrls=[];
 function serviceLocalDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
-function clearServiceForm(){['svcSubject','svcContact','svcPhone','svcCompanyName','svcAssigned','svcDescription','svcResolution','svcProductSearch'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});svcPriority.value='normal';svcStatus.value='bekliyor';svcDate.value=serviceLocalDate();svcNotified.checked=false;svcNotifiedAt.value='';svcNotifiedAt.disabled=true;svcPhotos.value='';svcLaborPrice.value='0';svcPartsPrice.value='0';svcDiscount.value='0';svcVatRate.value='20';svcCurrency.value='TRY';updateServicePriceSummary();serviceSelectedProducts=[];servicePreviewUrls.forEach(URL.revokeObjectURL);servicePreviewUrls=[];renderSelectedServiceProducts();previewServicePhotos();showServiceHistory()}
+function clearServiceForm(){['svcSubject','svcContact','svcPhone','svcCompanyName','svcAssigned','svcDescription','svcResolution','svcProductSearch'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});svcPriority.value='normal';svcStatus.value='bekliyor';svcDate.value=serviceLocalDate();svcNotified.checked=false;svcNotifiedAt.value='';svcNotifiedAt.disabled=true;[1,2,3,4].forEach(i=>{const e=document.getElementById('svcPhoto'+i);if(e)e.value='' });svcLaborPrice.value='0';svcPartsPrice.value='0';svcDiscount.value='0';svcVatRate.value='20';svcCurrency.value='TRY';updateServicePriceSummary();serviceSelectedProducts=[];servicePreviewUrls.forEach(URL.revokeObjectURL);servicePreviewUrls=[];renderSelectedServiceProducts();previewServicePhotos();showServiceHistory()}
 function renderServiceSuggestions(){const box=svcSuggestions,q=(svcProductSearch.value||'').trim().toLocaleLowerCase('tr-TR');if(q.length<2){box.classList.remove('open');box.innerHTML='';return}const rows=serviceProducts.filter(x=>!serviceSelectedProducts.some(y=>String(y.id)===String(x.id))&&((x.name||'').toLocaleLowerCase('tr-TR').includes(q)||(x.product_code||'').toLocaleLowerCase('tr-TR').includes(q))).slice(0,8);box.innerHTML=rows.map(x=>`<div class="svc-suggestion" onclick="addServiceProduct('${x.id}')"><span><b>${esc(x.name)}</b><small>${esc(x.product_code||'')}</small></span><small>Stok: ${+x.stock_quantity||0}</small></div>`).join('')||'<div class="svc-suggestion muted">Eşleşen ürün yok.</div>';box.classList.add('open')}
 function addServiceProduct(id){const p=serviceProducts.find(x=>String(x.id)===String(id));if(p&&!serviceSelectedProducts.some(x=>String(x.id)===String(id)))serviceSelectedProducts.push({...p,serial:''});svcProductSearch.value='';svcSuggestions.classList.remove('open');renderSelectedServiceProducts();showServiceHistory()}
 function removeServiceProduct(id){serviceSelectedProducts=serviceSelectedProducts.filter(x=>String(x.id)!==String(id));renderSelectedServiceProducts();showServiceHistory()}
 function setServiceSerial(id,v){const p=serviceSelectedProducts.find(x=>String(x.id)===String(id));if(p)p.serial=v.trim();showServiceHistory()}
 function renderSelectedServiceProducts(){svcSelectedProducts.innerHTML=serviceSelectedProducts.map(x=>`<div class="svc-product-chip"><span><b>${esc(x.name)}</b><small>${x.product_code?' • '+esc(x.product_code):''}</small></span><input placeholder="Seri No" value="${esc(x.serial||'')}" oninput="setServiceSerial('${x.id}',this.value)"><button class="svc-remove" onclick="removeServiceProduct('${x.id}')">✕</button></div>`).join('')}
-function previewServicePhotos(){servicePreviewUrls.forEach(URL.revokeObjectURL);servicePreviewUrls=[];let files=[...(svcPhotos?.files||[])];if(files.length>4){alert('En fazla 4 fotoğraf ekleyebilirsiniz. İlk 4 fotoğraf kullanılacak.');const dt=new DataTransfer();files.slice(0,4).forEach(f=>dt.items.add(f));svcPhotos.files=dt.files;files=files.slice(0,4)}svcPhotoPreview.innerHTML=files.map(f=>{const u=URL.createObjectURL(f);servicePreviewUrls.push(u);return `<img src="${u}" title="${esc(f.name)}">`}).join('')}
-async function uploadServicePhotos(){const files=[...(svcPhotos?.files||[])].slice(0,4),urls=[];for(const f of files){if(f.size>10485760)throw new Error(f.name+' 10 MB sınırını aşıyor.');const ext=(f.name.split('.').pop()||'jpg').toLowerCase(),path=`${currentCompanyId}/${Date.now()}-${crypto.randomUUID()}.${ext}`;const {error}=await sb.storage.from('service-photos').upload(path,f,{contentType:f.type,upsert:false});if(error)throw error;const {data}=sb.storage.from('service-photos').getPublicUrl(path);urls.push(data.publicUrl)}return urls}
-function showServiceView(view){
- const isArchive=view==='archive';
- const nv=document.getElementById('svcNewView'),av=document.getElementById('svcArchiveView');
- if(nv)nv.style.display=isArchive?'none':'block';
- if(av)av.style.display=isArchive?'block':'none';
- document.getElementById('svcNewTab')?.classList.toggle('active',!isArchive);
- document.getElementById('svcArchiveTab')?.classList.toggle('active',isArchive);
- if(isArchive)loadServiceRequests();
+function getServicePhotoFiles(){return [1,2,3,4].map(i=>document.getElementById('svcPhoto'+i)?.files?.[0]).filter(Boolean)}
+function previewServicePhotos(){
+ servicePreviewUrls.forEach(URL.revokeObjectURL);servicePreviewUrls=[];
+ for(let i=1;i<=4;i++){
+  const input=document.getElementById('svcPhoto'+i),img=document.getElementById('svcPhotoImg'+i),slot=input?.closest('.svc-photo-slot'),f=input?.files?.[0];
+  if(f){
+   if(f.size>10485760){alert(f.name+' 10 MB sınırını aşıyor.');input.value='';img.removeAttribute('src');slot?.classList.remove('has-photo');continue}
+   const u=URL.createObjectURL(f);servicePreviewUrls.push(u);img.src=u;slot?.classList.add('has-photo');
+  }else{img?.removeAttribute('src');slot?.classList.remove('has-photo')}
+ }
+}
+async function uploadServicePhotos(){
+ const files=getServicePhotoFiles(),urls=[];
+ for(const f of files){
+  if(f.size>10485760)throw new Error(f.name+' 10 MB sınırını aşıyor.');
+  const ext=(f.name.split('.').pop()||'jpg').toLowerCase(),path=`${currentCompanyId}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+  const {error}=await sb.storage.from('service-photos').upload(path,f,{contentType:f.type,upsert:false});if(error)throw error;
+  const {data}=sb.storage.from('service-photos').getPublicUrl(path);urls.push(data.publicUrl)
+ }
+ return urls
 }
 async function openServiceRequests(){setActiveSection('service');closeAllProeraViews();serviceOverlay.style.display='block';serviceOverlay.classList.add('open');showServiceView('new');await loadServicePdfLogo();if(!svcDate.value)svcDate.value=serviceLocalDate();const pr=await sb.from('products').select('id,name,product_code,stock_quantity').eq('company_id',currentCompanyId).eq('active',true).order('name');serviceProducts=pr.data||[];renderSelectedServiceProducts();await loadServiceRequests()}
 function closeServiceRequests(){serviceOverlay.style.display='none';serviceOverlay.classList.remove('open');svcSuggestions.classList.remove('open')}
