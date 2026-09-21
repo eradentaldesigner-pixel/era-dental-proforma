@@ -971,17 +971,64 @@ async function deleteServiceRequest(id){if(!confirm('Bu teknik servis kaydı sil
 async function loadDashboardService(){const box=document.getElementById('dashService');if(!box||!currentCompanyId)return;const {data,error}=await sb.from('service_requests').select('*').eq('company_id',currentCompanyId).order('service_date',{ascending:false}).order('created_at',{ascending:false}).limit(8);if(error){box.innerHTML='<div class="muted">Teknik servis verileri yüklenemedi.</div>';return}box.innerHTML=(data||[]).map(r=>{const[tone,label]=serviceStatusMeta(r.status),products=(r.product_names||[]).join(', ')||r.product_name||'Ürün belirtilmedi',serials=(r.serial_numbers||[]).map(x=>x.serial).filter(Boolean).join(', ');return `<div class="dash-service-row"><span><b>${esc(r.customer_name||'-')}</b><small>${esc(r.subject||'')}</small></span><span class="svc-detail"><b>${esc(products)}</b><small>${serials?'Seri: '+esc(serials)+' • ':''}🛠 ${esc(r.assigned_to||'-')}</small></span><span class="svc-detail">${r.phone?'☎ '+esc(r.phone):'Telefon yok'}<small>${esc(r.contact_name||'Firma yetkilisi yok')}</small></span><span><b>${esc(r.service_date||'')}</b></span><span class="svc-light ${tone}">${label}</span></div>`}).join('')||'<div class="muted">Henüz teknik servis kaydı yok.</div>'}
 async function getServiceBranding(){
  let cfg={};try{const {data}=await sb.from('company_settings').select('*').eq('company_id',currentCompanyId).maybeSingle();cfg=data||{}}catch(e){}
+ const previewLogo=document.querySelector('#logoPreview img,#companyLogoPreview img,.logo-preview img,#pdfLogo,img[data-company-logo]');
+ const logo=cfg.logo_url||cfg.company_logo_url||cfg.logo||cfg.logo_data_url||previewLogo?.src||'';
  return {
   company:cfg.company_name||cfg.legal_name||currentCompany?.name||'PROERA',
   address:cfg.address||cfg.company_address||'',
   taxOffice:cfg.tax_office||'',taxNo:cfg.tax_no||'',
   phone:cfg.phone||cfg.company_phone||'',email:cfg.email||cfg.company_email||'',web:cfg.website||'',
-  logo:cfg.logo_url||cfg.logo||'',
-  title:cfg.service_form_title||'TEKNİK SERVİS FORMU',footer:cfg.service_form_footer||'Teşekkür ederiz.',
-  customerSign:cfg.service_customer_signature_label||'Müşteri İmza',staffSign:cfg.service_staff_signature_label||'Teknik Servis Sorumlusu İmza'
+  logo,
+  title:cfg.service_form_title||'TEKNİK SERVİS FORMU',
+  footer:cfg.service_form_footer||'Teşekkür ederiz.',
+  customerSign:cfg.service_customer_signature_label||'Müşteri İmza',
+  staffSign:cfg.service_staff_signature_label||'Teknik Servis Sorumlusu İmza'
  }
 }
-function servicePrintHtml(r,b){const products=(r.product_names||[]).map((n,i)=>`${esc(n)}${r.serial_numbers?.[i]?.serial?' — Seri No: '+esc(r.serial_numbers[i].serial):''}`).join('<br>')||'-';const[tone,status]=serviceStatusMeta(r.status);return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(b.title)}</title><style>@page{size:A4;margin:12mm}*{box-sizing:border-box}body{font:12px Arial;color:#17243a;margin:0}.head{display:grid;grid-template-columns:150px 1fr;gap:18px;align-items:center;border-bottom:3px solid #1677ff;padding-bottom:12px}.logo{max-width:140px;max-height:65px}.brand{text-align:right}.brand h2{margin:0 0 4px}.title{text-align:center;font-size:20px;font-weight:900;margin:18px 0 10px}.box{border:1px solid #dce3eb;border-radius:8px;padding:11px;margin-top:10px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.label{font-size:9px;font-weight:800;color:#68788e;text-transform:uppercase;margin-bottom:3px}.photos{display:flex;gap:6px;flex-wrap:wrap}.photos img{width:130px;height:95px;object-fit:cover;border-radius:6px}.signatures{display:grid;grid-template-columns:1fr 1fr;gap:70px;margin-top:45px}.sign{height:80px;border-top:1px solid #7b8795;text-align:center;padding-top:7px;font-weight:700}.footer{text-align:center;margin-top:28px;color:#65758b;font-size:10px}.status{font-weight:900}.yellow{color:#c98700}.green{color:#168e45}.red{color:#cf2f2f}</style></head><body><div class="head"><div>${b.logo?`<img class="logo" src="${esc(b.logo)}">`:'<b style="font-size:25px">PROERA</b>'}</div><div class="brand"><h2>${esc(b.company)}</h2>${b.address?`<div>${esc(b.address)}</div>`:''}<div>${[b.phone,b.email,b.web].filter(Boolean).map(esc).join(' • ')}</div>${b.taxNo?`<div>${esc(b.taxOffice)} • ${esc(b.taxNo)}</div>`:''}</div></div><div class="title">${esc(b.title)}</div><div class="box grid"><div><div class="label">Firma</div><b>${esc(r.customer_name||'-')}</b></div><div><div class="label">Tarih</div>${esc(r.service_date||'-')}</div><div><div class="label">Firma Yetkilisi / Telefon</div>${esc(r.contact_name||'-')} • ${esc(r.phone||'-')}</div><div><div class="label">İlgilenen Personel</div>${esc(r.assigned_to||'-')}</div><div><div class="label">Servis Konusu</div>${esc(r.subject||'-')}</div><div><div class="label">Durum</div><span class="status ${tone}">${esc(status)}</span></div><div><div class="label">Ürün / Seri No</div>${products}</div><div><div class="label">Müşteriye Bilgi</div>${r.notified_customer?'Evet'+(r.notified_at?' — '+esc(r.notified_at):''):'Hayır'}</div></div><div class="box"><div class="label">Arıza / Talep</div>${esc(r.description||'-')}</div><div class="box"><div class="label">Yapılan İşlem / Çözüm</div>${esc(r.resolution||'-')}</div>${(r.photo_urls||[]).length?`<div class="box"><div class="label">Ürün Fotoğrafları</div><div class="photos">${r.photo_urls.map(u=>`<img src="${u}">`).join('')}</div></div>`:''}<div class="signatures"><div class="sign">${esc(b.customerSign)}</div><div class="sign">${esc(b.staffSign)}<br><small>${esc(r.assigned_to||'')}</small></div></div><div class="footer">${esc(b.footer)}</div><script>setTimeout(()=>window.print(),700)<\/script></body></html>`}
+function servicePrintHtml(r,b){
+ const products=(r.product_names||[]).map((n,i)=>`${esc(n)}${r.serial_numbers?.[i]?.serial?' — Seri No: '+esc(r.serial_numbers[i].serial):''}`).join('<br>')||'-';
+ const[tone,status]=serviceStatusMeta(r.status);
+ const logoHtml=b.logo?`<img class="company-logo" src="${esc(b.logo)}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div class="logo-fallback">PROERA</div>`:`<div class="logo-fallback" style="display:block">PROERA</div>`;
+ return `<!doctype html><html><head><meta charset="utf-8"><title>${esc(b.title)}</title>
+ <style>
+ @page{size:A4 portrait;margin:10mm}
+ *{box-sizing:border-box}html,body{width:210mm;min-height:297mm;margin:0;padding:0;background:#fff}
+ body{font-family:Arial,Helvetica,sans-serif;color:#17243a;font-size:10.5px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .page{width:190mm;min-height:277mm;margin:0 auto;position:relative;padding-bottom:24mm}
+ .head{display:grid;grid-template-columns:52mm 1fr;gap:8mm;align-items:center;border-bottom:2.5px solid #1677ff;padding:0 0 6mm}
+ .logo-wrap{height:24mm;display:flex;align-items:center}.company-logo{max-width:48mm;max-height:22mm;object-fit:contain;object-position:left center}
+ .logo-fallback{display:none;font-size:24px;font-weight:900;color:#1677ff}
+ .brand{text-align:right;line-height:1.45}.brand h2{font-size:13px;margin:0 0 2mm}.brand div{font-size:9px}
+ .title{text-align:center;font-size:17px;font-weight:900;letter-spacing:.4px;margin:6mm 0 4mm}
+ .meta{display:grid;grid-template-columns:1fr 1fr;border:1px solid #cfd8e3}
+ .cell{padding:3mm;border-right:1px solid #d8e0e9;border-bottom:1px solid #d8e0e9;min-height:13mm}.cell:nth-child(even){border-right:0}
+ .label{font-size:8px;font-weight:900;color:#64748b;text-transform:uppercase;margin-bottom:1.2mm}.value{font-size:10.5px;font-weight:600;line-height:1.4}
+ .section{margin-top:4mm;border:1px solid #cfd8e3}.section-title{background:#f1f5f9;padding:2.2mm 3mm;font-size:9px;font-weight:900}.section-body{padding:3mm;line-height:1.55;min-height:15mm}
+ .product-table{width:100%;border-collapse:collapse}.product-table th,.product-table td{border:1px solid #d8e0e9;padding:2.5mm;text-align:left}.product-table th{background:#f1f5f9;font-size:8px}
+ .photos{display:flex;gap:2.5mm;flex-wrap:wrap}.photos img{width:39mm;height:29mm;object-fit:cover;border:1px solid #d8e0e9;border-radius:2mm}
+ .status{font-weight:900}.yellow{color:#c98700}.green{color:#168e45}.red{color:#cf2f2f}
+ .signatures{position:absolute;left:0;right:0;bottom:9mm;display:grid;grid-template-columns:1fr 1fr;gap:30mm}.sign{padding-top:4mm;border-top:1px solid #6b7787;text-align:center;font-size:9px;font-weight:800;min-height:18mm}.sign small{display:block;margin-top:2mm;font-weight:400}
+ .footer{position:absolute;left:0;right:0;bottom:0;text-align:center;color:#718096;font-size:8px}
+ @media print{html,body{width:210mm;height:297mm}.page{page-break-after:avoid}}
+ </style></head><body><main class="page">
+ <header class="head"><div class="logo-wrap">${logoHtml}</div><div class="brand"><h2>${esc(b.company)}</h2>${b.address?`<div>${esc(b.address)}</div>`:''}<div>${[b.phone,b.email,b.web].filter(Boolean).map(esc).join(' • ')}</div>${b.taxNo?`<div>${esc(b.taxOffice)} • ${esc(b.taxNo)}</div>`:''}</div></header>
+ <div class="title">${esc(b.title)}</div>
+ <section class="meta">
+  <div class="cell"><div class="label">Müşteri / Firma</div><div class="value">${esc(r.customer_name||'-')}</div></div>
+  <div class="cell"><div class="label">Tarih</div><div class="value">${esc(r.service_date||'-')}</div></div>
+  <div class="cell"><div class="label">Firma Yetkilisi / Telefon</div><div class="value">${esc(r.contact_name||'-')} • ${esc(r.phone||'-')}</div></div>
+  <div class="cell"><div class="label">İlgilenen Personel</div><div class="value">${esc(r.assigned_to||'-')}</div></div>
+  <div class="cell"><div class="label">Servis Konusu</div><div class="value">${esc(r.subject||'-')}</div></div>
+  <div class="cell"><div class="label">Durum / Müşteri Bilgisi</div><div class="value"><span class="status ${tone}">${esc(status)}</span> • ${r.notified_customer?'Bilgi verildi'+(r.notified_at?' ('+esc(r.notified_at)+')':''):'Bilgi verilmedi'}</div></div>
+ </section>
+ <section class="section"><div class="section-title">ÜRÜN BİLGİLERİ</div><div class="section-body"><table class="product-table"><thead><tr><th>Ürün</th><th>Seri No</th></tr></thead><tbody>${(r.product_names||[]).length?(r.product_names||[]).map((n,i)=>`<tr><td>${esc(n)}</td><td>${esc(r.serial_numbers?.[i]?.serial||'-')}</td></tr>`).join(''):`<tr><td colspan="2">-</td></tr>`}</tbody></table></div></section>
+ <section class="section"><div class="section-title">ARIZA / TALEP</div><div class="section-body">${esc(r.description||'-')}</div></section>
+ <section class="section"><div class="section-title">YAPILAN İŞLEM / ÇÖZÜM</div><div class="section-body">${esc(r.resolution||'-')}</div></section>
+ ${(r.photo_urls||[]).length?`<section class="section"><div class="section-title">ÜRÜN FOTOĞRAFLARI</div><div class="section-body photos">${r.photo_urls.slice(0,8).map(u=>`<img src="${u}">`).join('')}</div></section>`:''}
+ <div class="signatures"><div class="sign">${esc(b.customerSign)}<small>Ad Soyad / İmza</small></div><div class="sign">${esc(b.staffSign)}<small>${esc(r.assigned_to||'Ad Soyad / İmza')}</small></div></div>
+ <div class="footer">${esc(b.footer)}</div>
+ </main><script>Promise.all(Array.from(document.images).map(i=>i.complete?Promise.resolve():new Promise(res=>{i.onload=i.onerror=res}))).then(()=>setTimeout(()=>window.print(),250));<\/script></body></html>`;
+}
 async function printServiceRecord(id){const r=(window._serviceRequests||[]).find(x=>x.id===id);if(!r)return;const brand=await getServiceBranding(),w=window.open('','_blank');w.document.write(servicePrintHtml(r,brand));w.document.close()}
 async function printCurrentServiceForm(){const brand=await getServiceBranding(),r={service_date:svcDate.value,customer_name:svcCompanyName.value,contact_name:svcContact.value,phone:svcPhone.value,subject:svcSubject.value,assigned_to:svcAssigned.value,status:svcStatus.value,product_names:serviceSelectedProducts.map(x=>x.name),serial_numbers:serviceSelectedProducts.map(x=>({serial:x.serial})),description:svcDescription.value,resolution:svcResolution.value,photo_urls:servicePreviewUrls,notified_customer:svcNotified.checked,notified_at:svcNotifiedAt.value};const w=window.open('','_blank');w.document.write(servicePrintHtml(r,brand));w.document.close()}
 function toggleNotifications(e){if(e)e.stopPropagation();document.getElementById('notifyPanel')?.classList.toggle('open')}
@@ -1200,8 +1247,13 @@ function closeAllProeraViews(){
 let proeraActiveSection='home';
 function setActiveSection(action){
  proeraActiveSection=action;
- document.querySelectorAll('[onclick^="appNavigate("],[onclick^="mobileNavigate("]').forEach(b=>b.classList.remove('proera-active'));
- document.querySelectorAll(`[onclick="appNavigate('${action}')"],[onclick="mobileNavigate('${action}')"]`).forEach(b=>b.classList.add('proera-active'));
+ document.querySelectorAll('[onclick^="appNavigate("],[onclick^="mobileNavigate("]').forEach(b=>{
+   b.classList.remove('proera-active','active','current','selected');
+   b.removeAttribute('aria-current');
+ });
+ document.querySelectorAll(`[onclick="appNavigate('${action}')"],[onclick="mobileNavigate('${action}')"]`).forEach(b=>{
+   b.classList.add('proera-active');b.setAttribute('aria-current','page');
+ });
 }
 async function refreshNavBadges(){
  if(!sb||!currentCompanyId)return;
