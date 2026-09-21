@@ -534,6 +534,35 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
 @media(prefers-reduced-motion:reduce){.tone-green,.tone-yellow,.tone-red{animation:none!important}.dash-card,.bar{transition:none!important}}
 </style>
 
+
+<style id="v1440-crm-guide">
+/* stronger traffic lights */
+.status-pill:before,.stock-pill:before{width:10px!important;height:10px!important;box-shadow:0 0 10px currentColor}
+.tone-green{color:#087443!important;background:#dff8e9!important;border:1px solid #7edca8!important}
+.tone-yellow{color:#8b5d00!important;background:#fff0b8!important;border:1px solid #f0c84d!important}
+.tone-red{color:#a91d25!important;background:#ffdede!important;border:1px solid #ef858a!important}
+@keyframes strongGreen{50%{box-shadow:0 0 0 7px rgba(22,166,106,.20),0 0 18px rgba(22,166,106,.18)}}
+@keyframes strongYellow{50%{box-shadow:0 0 0 7px rgba(229,166,0,.22),0 0 18px rgba(229,166,0,.20)}}
+@keyframes strongRed{50%{box-shadow:0 0 0 7px rgba(229,72,77,.22),0 0 18px rgba(229,72,77,.20)}}
+.tone-green{animation:strongGreen 1.8s ease-in-out infinite!important}.tone-yellow{animation:strongYellow 1.8s ease-in-out infinite!important}.tone-red{animation:strongRed 1.8s ease-in-out infinite!important}
+
+.crm-overlay,.guide-overlay{position:fixed;inset:0;background:rgba(5,18,39,.62);z-index:10040;display:none;align-items:center;justify-content:center;padding:20px}
+.crm-overlay.open,.guide-overlay.open{display:flex}
+.crm-modal{width:min(1120px,96vw);max-height:91vh;background:#f6f9fc;border-radius:22px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 90px rgba(0,0,0,.3)}
+.crm-head{background:linear-gradient(135deg,#071d3d,#0b3971);color:#fff;padding:18px 20px;display:flex;justify-content:space-between;align-items:center}
+.crm-head h2{margin:0;font-size:21px}.crm-tools{display:flex;gap:9px}
+.crm-body{overflow:auto;padding:16px}.crm-form{background:#fff;border:1px solid #e1e8f1;border-radius:16px;padding:15px;margin-bottom:14px;display:none}.crm-form.open{display:block}
+.crm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.crm-grid .wide{grid-column:span 2}.crm-grid .full{grid-column:1/-1}
+.crm-list{display:grid;gap:9px}.crm-row{background:#fff;border:1px solid #e1e8f1;border-radius:14px;padding:13px;display:grid;grid-template-columns:1.2fr 1fr 1fr .8fr auto;gap:10px;align-items:center}
+.crm-row small{color:#718096;display:block;margin-top:3px}.crm-actions{display:flex;gap:6px}
+.crm-report{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}.crm-metric{background:#fff;border:1px solid #e1e8f1;border-radius:13px;padding:12px}.crm-metric b{font-size:19px;display:block;margin-top:4px}
+.guide-card{width:min(720px,94vw);background:#fff;border-radius:24px;padding:25px;box-shadow:0 30px 90px rgba(0,0,0,.28)}
+.guide-top{display:flex;justify-content:space-between;gap:16px}.guide-top h2{margin:0;color:#10213a}.guide-progress{height:7px;background:#e9eef5;border-radius:8px;overflow:hidden;margin:18px 0}.guide-progress i{display:block;height:100%;background:#1478ff;width:14%;transition:.25s}
+.guide-step{background:#f6f9fd;border:1px solid #e0e8f2;border-radius:16px;padding:18px}.guide-step h3{margin:0 0 7px}.guide-actions{display:flex;justify-content:space-between;gap:10px;margin-top:18px}
+.dash-crm{display:grid;gap:8px}.dash-crm-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid #edf1f5;font-size:12px}
+@media(max-width:800px){.crm-overlay,.guide-overlay{padding:0;align-items:stretch}.crm-modal{width:100%;max-height:none;height:100%;border-radius:0}.crm-grid{grid-template-columns:1fr}.crm-grid .wide,.crm-grid .full{grid-column:auto}.crm-report{grid-template-columns:1fr 1fr}.crm-row{grid-template-columns:1fr 1fr}.crm-actions{grid-column:1/-1}.guide-card{margin:auto;border-radius:20px}.crm-head{padding-left:64px}}
+</style>
+
 </head><body>
 
 <aside class="desktop-side" aria-label="Ana navigasyon">
@@ -543,6 +572,8 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
   <button class="ds-btn primary" type="button" onclick="appNavigate('new')"><span class="ds-icon">＋</span>Yeni Proforma</button>
   <button class="ds-btn" type="button" onclick="appNavigate('archive')"><span class="ds-icon">▣</span>Proforma Arşivi</button>
   <button class="ds-btn" type="button" onclick="appNavigate('customers')"><span class="ds-icon">◎</span>Müşteriler</button>
+<button class="mobile-nav-item" type="button" onclick="mobileNavigate('crm')"><span class="mi">◉</span>Görüşmeler</button>
+  <button class="ds-btn" type="button" onclick="appNavigate('crm')"><span class="ds-icon">◉</span>Görüşmeler</button>
   <button class="ds-btn" type="button" onclick="appNavigate('catalog')"><span class="ds-icon">◇</span>Ürün Kataloğu</button>
   <button class="ds-btn" type="button" onclick="appNavigate('stock')"><span class="ds-icon">▦</span>Stok Kontrolü</button>
   <button class="ds-btn" type="button" onclick="appNavigate('settings')"><span class="ds-icon">⚙</span>Ayarlar</button>
@@ -621,11 +652,43 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
   </div>
  </div>
 
+
+<div class="dash-panel" style="margin-top:14px"><div class="chart-title"><h3>Satış Takibi / Son Görüşmeler</h3><button class="btn light" onclick="appNavigate('crm')">Tümünü Gör</button></div><div id="dashCrm" class="dash-crm"><div class="muted">Yükleniyor…</div></div></div>
 <div class="dash-chart-grid">
  <div class="chart-box"><div class="chart-title"><h3>Teklif Aktivitesi</h3><small>Son 6 ay</small></div><div id="dashBarChart" class="bar-chart"></div></div>
  <div class="chart-box"><div class="chart-title"><h3>Teklif Durumları</h3><small>Genel dağılım</small></div><div class="donut-wrap"><div id="dashDonut" class="donut" style="--g:0%;--y:0%;--r:0%"></div><div id="dashLegend" class="legend"></div></div></div>
 </div>
 </section>
+
+<div id="crmOverlay" class="crm-overlay">
+ <div class="crm-modal">
+  <div class="crm-head"><div><h2>Görüşmeler & Satış Takibi</h2><small>Müşteri temaslarını, ürün ilgisini ve takip durumunu yönetin.</small></div><div class="crm-tools"><button class="btn light" onclick="newInteraction()">＋ Yeni Görüşme</button><button class="btn light" onclick="closeCrm()">✕</button></div></div>
+  <div class="crm-body">
+   <div id="crmReport" class="crm-report"></div>
+   <div id="crmForm" class="crm-form">
+    <input id="ciId" type="hidden">
+    <div class="crm-grid">
+     <div><label>Ad Soyad</label><input id="ciContact"></div><div><label>Firma</label><input id="ciCompany"></div><div><label>Telefon</label><input id="ciPhone"></div>
+     <div><label>İl</label><input id="ciCity" placeholder="İstanbul"></div><div><label>Görüşme Tarihi</label><input id="ciDate" type="date"></div>
+     <div><label>Durum</label><select id="ciStatus"><option value="gorusuluyor">Görüşülüyor / Takipte</option><option value="onaylandi">Onaylandı</option><option value="kaybedildi">Olumsuz / Kaçtı</option></select></div>
+     <div class="wide"><label>Görüşülen Ürün</label><select id="ciProduct"></select></div><div><label>Sonraki Takip</label><input id="ciFollow" type="date"></div>
+     <div class="full"><label>Görüşme Notu</label><textarea id="ciNotes" rows="4" placeholder="Müşteriyle ne konuşuldu, talebi, fiyat beklentisi, sonraki adım..."></textarea></div>
+    </div>
+    <div class="actions"><button class="btn primary" onclick="saveInteraction()">Kaydet</button><button class="btn light" onclick="document.getElementById('crmForm').classList.remove('open')">Vazgeç</button></div>
+   </div>
+   <div style="display:flex;gap:8px;margin-bottom:12px"><input id="crmSearch" placeholder="Firma, kişi, telefon, il, ürün veya not ara..." oninput="renderCrm()" style="flex:1"><input id="crmMonth" type="month" onchange="renderCrm()" style="max-width:170px"></div>
+   <div id="crmList" class="crm-list"></div>
+  </div>
+ </div>
+</div>
+<div id="guideOverlay" class="guide-overlay">
+ <div class="guide-card">
+  <div class="guide-top"><div><small>PROERA BAŞLANGIÇ REHBERİ</small><h2 id="guideTitle">Hoş geldiniz 👋</h2></div><button class="btn light" onclick="finishGuide()">Atla</button></div>
+  <div class="guide-progress"><i id="guideProgress"></i></div>
+  <div id="guideStep" class="guide-step"></div>
+  <div class="guide-actions"><button class="btn light" onclick="guidePrev()">← Geri</button><button class="btn primary" onclick="guideNext()">Devam →</button></div>
+ </div>
+</div>
 <div id="authGate" class="auth-shell"><div class="auth-card"><div class="auth-mark">P</div><h1 class="auth-title">Proera</h1><div class="muted">Teklif ve proformalarınızı profesyonelce hazırlayın, müşterilerinizi ve ürünlerinizi tek çalışma alanında yönetin.</div><button class="google-btn" onclick="loginGoogle()">G&nbsp;&nbsp; Google ile Devam Et</button><div class="auth-sep">veya e-posta ile</div><div class="auth-tabs"><button id="tabLogin" class="active" onclick="setAuthMode('login')">Giriş</button><button id="tabSignup" onclick="setAuthMode('signup')">Üyelik</button></div><div id="nameArea" style="display:none"><label>Ad Soyad</label><input id="authName" autocomplete="name" placeholder="Ad Soyad"></div><label>E-posta</label><input id="authEmail" type="email" autocomplete="email" placeholder="ornek@firma.com"><div id="passwordArea"><label style="margin-top:10px">Şifre</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="En az 8 karakter"></div><div id="confirmPasswordArea" style="display:none"><label style="margin-top:10px">Şifre Tekrar</label><input id="authPassword2" type="password" autocomplete="new-password" placeholder="Şifrenizi tekrar yazın"></div><div id="newPasswordArea" style="display:none"><label style="margin-top:10px">Yeni Şifre</label><input id="authNewPassword" type="password" autocomplete="new-password" placeholder="En az 8 karakter"><label style="margin-top:10px">Yeni Şifre Tekrar</label><input id="authNewPassword2" type="password" autocomplete="new-password" placeholder="Şifrenizi tekrar yazın"></div><div class="actions" id="authActions"><button class="btn primary" onclick="loginUser()">Giriş Yap</button><button class="btn light" onclick="resetPassword()">Şifremi Unuttum</button></div><div id="authMsg" class="muted" style="margin-top:12px"></div></div></div><div id="onboardOverlay" class="onboard-overlay"><div class="onboard-card"><div class="auth-mark">✦</div><h2 style="font-size:26px;margin:14px 0 6px">Firmanızı oluşturalım</h2><div class="muted" style="margin-bottom:18px">Bu bilgiler yalnızca sizin çalışma alanınızda kullanılacak. Daha sonra Ayarlar'dan değiştirebilirsiniz.</div><div class="onboard-grid"><div class="full"><label>Firma / Marka Adı *</label><input id="onboardCompany" placeholder="Örn: ABC Teknoloji"></div><div><label>Yetkili Adı</label><input id="onboardPerson" placeholder="Ad Soyad"></div><div><label>Telefon</label><input id="onboardPhone" placeholder="Telefon"></div></div><div class="actions" style="justify-content:flex-end"><button class="btn primary" onclick="createWorkspace()">Çalışma Alanını Oluştur →</button></div><div id="onboardMsg" class="muted" style="margin-top:10px"></div></div></div><header class="top"><div class="brand"><img id="headerLogo" class="logo-preview" style="display:none;vertical-align:middle;margin:0 10px 0 0;max-height:42px" alt="Logo"><span id="headerCompanyName">PROERA</span> <span>BUSINESS</span></div><div class="top-actions"><div class="profile-pill"><div class="profile-avatar" id="profileAvatar">P</div><div><b id="profileCompany">Firma</b><div id="profileEmail" style="opacity:.65;font-size:10px"></div></div></div><span id="syncStatus" style="font-size:12px;margin-right:5px">● Bulut</span><button class="btn light" style="padding:7px 10px" onclick="openArchive()">📁 Proforma Arşivi</button><button class="btn light" style="padding:7px 10px" onclick="openCatalog('manage')">📦 Ürün Kataloğu</button><div class="notify-wrap" id="notifyWrap"><button class="btn light notify-bell" type="button" onclick="toggleNotifications(event)" title="Stok Bildirimleri">🔔<span id="notifyCount" class="notify-count">0</span></button><div id="notifyPanel" class="notify-panel"><div class="notify-head"><span>Stok Bildirimleri</span><button class="notify-readall" onclick="markAllNotificationsRead(event)">Tümünü okundu yap</button></div><div id="notifyList" class="notify-empty">Bildirim yok.</div></div></div><button class="btn light" style="padding:7px 10px" onclick="openStockControl()">📊 Stok Kontrolü</button><button class="btn light" style="padding:7px 10px" onclick="openSettings()">⚙️ Ayarlar</button><button class="btn light" style="padding:7px 10px" onclick="logoutUser()">Çıkış</button></div></header><div id="settingsOverlay" class="settings-overlay"><div class="settings-modal"><div class="settings-head"><div><h2 style="margin:0">⚙️ Ayarlar Merkezi</h2><div class="muted">Sabit şirket bilgileri burada merkezi olarak yönetilir.</div></div><button class="btn light" onclick="closeSettings()">✕ Kapat</button></div><div class="settings-body"><div class="settings-card"><h3>Firma Profili</h3><div class="hint">Bu bilgiler yalnızca sizin firmanıza aittir ve proformanın Satıcı bölümünde kullanılır.</div><div class="company-profile-grid"><div><label>Kısa Firma / Marka Adı</label><input id="companyDisplayName" placeholder="Firma adı"></div><div><label>Resmi Ünvan</label><input id="companyLegalName" placeholder="Resmi şirket ünvanı"></div><div class="full"><label>Adres</label><textarea id="companyAddress" placeholder="Firma adresi"></textarea></div><div><label>Vergi Dairesi</label><input id="companyTaxOffice"></div><div><label>Vergi No</label><input id="companyTaxNumber"></div><div><label>Telefon</label><input id="companyPhone"></div><div><label>E-posta</label><input id="companyEmail" type="email"></div><div class="full"><label>Web Sitesi</label><input id="companyWebsite" placeholder="www.firma.com"></div></div></div><div class="settings-card"><h3>Şirket Logosu</h3><div class="hint">Logo tüm bilgisayarlarda ve proformalarda otomatik kullanılır.</div><div class="settings-logo-row"><div class="settings-logo-box"><img id="logoPreview" class="logo-preview" alt="Şirket logosu"></div><div style="flex:1"><input id="logo" type="file" accept="image/png,image/jpeg,image/webp"><div class="muted" style="margin-top:6px">PNG / JPG / WEBP önerilir.</div></div></div></div><div class="settings-card"><h3>Kurumsal Tasarım</h3><div class="hint">Proforma başlıkları, tablo ve toplam alanlarında kullanılacak renk.</div><div class="grid"><div><label>Kurumsal Renk</label><input id="corpColor" type="color" value="#111827" style="height:42px;padding:4px"></div><div><label>Renk Kodu</label><input id="corpHex" value="#111827" placeholder="#111827"></div></div></div>
 <div class="settings-card">
  <h3>Proforma Görünümü & Kişiselleştirme</h3>
@@ -853,7 +916,7 @@ function saveDraft(){render();const data={};fields.forEach(id=>data[id]=val(id))
 function resetForm(){if(!confirm('Form temizlensin mi?'))return;localStorage.removeItem('eraProformaDraft');localStorage.removeItem('eraAutoDraft');location.reload()}
 
 function closeAllAppLayers(){
-  const ids=['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay'];
+  const ids=['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay','crmOverlay'];
   ids.forEach(id=>{
     const el=document.getElementById(id);
     if(el){el.classList.remove('open');el.style.display='';}
@@ -876,7 +939,7 @@ function desktopNavigate(action){
 
 function closeAllProeraViews(){
   document.getElementById('dashboardOverlay')?.classList.remove('open');
-  ['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay'].forEach(id=>{
+  ['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay','crmOverlay'].forEach(id=>{
     const el=document.getElementById(id); if(!el)return;
     el.classList.remove('open'); el.style.display='';
   });
@@ -892,6 +955,7 @@ function appNavigate(action){
     if(action==='catalog')return openCatalog('manage');
     if(action==='stock')return openStockControl();
     if(action==='settings'){openSettings();loadProeraPrefs();return}
+    if(action==='crm')return openCrm()
   }));
 }
 function mobileNavigate(action){const t=document.getElementById('mobileNavToggle');if(t)t.checked=false;setTimeout(()=>appNavigate(action),80)}
@@ -903,7 +967,7 @@ async function loadDashboard(){
   const [pr,cu,po]=await Promise.all([
     sb.from('proformas').select('id,proforma_number,proforma_date,customer_name,currency,grand_total,status,created_at').order('created_at',{ascending:false}).limit(50),
     sb.from('customers').select('id',{count:'exact',head:true}),
-    sb.from('products').select('id,name,product_code,stock_quantity,low_stock_threshold').order('stock_quantity',{ascending:true}).limit(100)
+    sb.from('products').select('id,name,product_code,stock_quantity,stock_low_threshold,stock_good_threshold').order('stock_quantity',{ascending:true}).limit(100)
   ]);
   const rows=pr.data||[], month=rows.filter(x=>(x.proforma_date||'')>=first), approved=rows.filter(x=>statusLabel(x.status)==='Onaylandı'), waiting=rows.filter(x=>statusLabel(x.status)==='Onaya Gönderildi');
   const totals={}; month.forEach(x=>{const c=x.currency||'';totals[c]=(totals[c]||0)+(+x.grand_total||0)});
@@ -911,8 +975,8 @@ async function loadDashboard(){
   document.getElementById('dashMonthTotal').textContent=Object.entries(totals).map(([c,v])=>money(v)+' '+c).join(' · ')||'0';
   document.getElementById('dashApproved').textContent=approved.length;document.getElementById('dashWaiting').textContent=waiting.length;
   document.getElementById('dashCustomers').textContent=cu.count||0;
-  const products=po.data||[], low=products.filter(x=>(+x.stock_quantity||0)<=(+x.low_stock_threshold||5));
-  renderSmartDashboard(rows,products);
+  const products=po.data||[], low=products.filter(x=>(+x.stock_quantity||0)<=(+x.stock_low_threshold||5));
+  renderSmartDashboard(rows,products);loadDashboardCrm();
   document.getElementById('dashLowStock').textContent=low.length;
       const company=document.getElementById('profileCompany')?.textContent||'';
   document.getElementById('dashCompany').textContent=(company&&company!=='Firma'?company+' • ':'')+'Çalışma alanınızın güncel özeti.';
@@ -935,9 +999,9 @@ function proformaTone(status){
   return ['gray',statusLabel(status)||'Taslak'];
 }
 function stockTone(p){
-  const q=+p.stock_quantity||0, low=+(p.low_stock_threshold??5), warn=Math.max(low+1,Math.ceil(low*2));
+  const q=+p.stock_quantity||0, low=+(p.stock_low_threshold??5), warn=Math.max(low+1,Math.ceil(low*2));
   if(q<=low)return ['red','Kritik'];
-  if(q<=warn)return ['yellow','Azalıyor'];
+  if(q<good)return ['yellow','Azalıyor'];
   return ['green','Normal'];
 }
 function renderSmartDashboard(rows,products){
@@ -968,4 +1032,44 @@ async function refreshDailyStockNotifications(){
 }
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshDailyStockNotifications()});
 
+
+let crmData=[],crmProducts=[];
+function crmTone(s){return s==='onaylandi'?['green','Onaylandı']:s==='kaybedildi'?['red','Olumsuz / Kaçtı']:['yellow','Görüşülüyor']}
+async function openCrm(){
+ closeAllProeraViews();document.getElementById('crmOverlay')?.classList.add('open');document.body.style.overflow='hidden';
+ const [ir,pr]=await Promise.all([sb.from('customer_interactions').select('*').order('interaction_date',{ascending:false}),sb.from('products').select('id,name,product_code').eq('active',true).order('name')]);
+ crmData=ir.data||[];crmProducts=pr.data||[];
+ const sel=document.getElementById('ciProduct');if(sel)sel.innerHTML='<option value="">Ürün seçin</option>'+crmProducts.map(x=>`<option value="${x.id}">${esc(x.product_code||'')} ${esc(x.name||'')}</option>`).join('');
+ const m=document.getElementById('crmMonth');if(m&&!m.value)m.value=new Date().toISOString().slice(0,7);renderCrm();
+}
+function closeCrm(){document.getElementById('crmOverlay')?.classList.remove('open');document.body.style.overflow=''}
+function newInteraction(){const f=document.getElementById('crmForm');f.classList.add('open');['ciId','ciContact','ciCompany','ciPhone','ciCity','ciFollow','ciNotes'].forEach(id=>document.getElementById(id).value='');document.getElementById('ciDate').value=new Date().toISOString().slice(0,10);document.getElementById('ciStatus').value='gorusuluyor';document.getElementById('ciProduct').value=''}
+function renderCrm(){
+ const q=(document.getElementById('crmSearch')?.value||'').toLocaleLowerCase('tr-TR'),month=document.getElementById('crmMonth')?.value||'';
+ const rows=crmData.filter(x=>(!month||(x.interaction_date||'').startsWith(month))&&[x.contact_name,x.company_name,x.phone,x.city,x.product_name,x.notes].some(v=>String(v||'').toLocaleLowerCase('tr-TR').includes(q)));
+ const a=rows.filter(x=>x.status==='onaylandi').length,w=rows.filter(x=>x.status==='gorusuluyor').length,l=rows.filter(x=>x.status==='kaybedildi').length,rate=rows.length?Math.round(a/rows.length*100):0;
+ document.getElementById('crmReport').innerHTML=`<div class="crm-metric"><small>Görüşme</small><b>${rows.length}</b></div><div class="crm-metric"><small>Onaylandı</small><b>${a}</b></div><div class="crm-metric"><small>Takipte</small><b>${w}</b></div><div class="crm-metric"><small>Kaçtı</small><b>${l}</b></div><div class="crm-metric"><small>Dönüşüm</small><b>%${rate}</b></div>`;
+ document.getElementById('crmList').innerHTML=rows.map(x=>{const[t,lbl]=crmTone(x.status);return `<div class="crm-row"><div><b>${esc(x.contact_name||x.company_name||'Görüşme')}</b><small>${esc(x.company_name||'')} ${x.phone?'• '+esc(x.phone):''}</small></div><div><b>${esc(x.product_name||'Ürün belirtilmedi')}</b><small>${esc(x.city||'')} • ${esc(x.interaction_date||'')}</small></div><div><span class="status-pill tone-${t}">${lbl}</span><small>${x.next_follow_up?'Takip: '+esc(x.next_follow_up):''}</small></div><div><small>${esc((x.notes||'').slice(0,100))}</small></div><div class="crm-actions"><button class="btn light" onclick="editInteraction(${x.id})">Düzenle</button><button class="btn light" onclick="deleteInteraction(${x.id})">Sil</button></div></div>`}).join('')||'<div class="customer-empty">Bu dönem için görüşme kaydı bulunamadı.</div>';
+}
+function editInteraction(id){const x=crmData.find(v=>+v.id===+id);if(!x)return;document.getElementById('crmForm').classList.add('open');document.getElementById('ciId').value=x.id;document.getElementById('ciContact').value=x.contact_name||'';document.getElementById('ciCompany').value=x.company_name||'';document.getElementById('ciPhone').value=x.phone||'';document.getElementById('ciCity').value=x.city||'';document.getElementById('ciDate').value=x.interaction_date||'';document.getElementById('ciStatus').value=x.status||'gorusuluyor';document.getElementById('ciProduct').value=x.product_id||'';document.getElementById('ciFollow').value=x.next_follow_up||'';document.getElementById('ciNotes').value=x.notes||''}
+async function saveInteraction(){const pid=document.getElementById('ciProduct').value,prod=crmProducts.find(x=>+x.id===+pid),id=document.getElementById('ciId').value;const payload={company_id:currentCompanyId,contact_name:document.getElementById('ciContact').value.trim(),company_name:document.getElementById('ciCompany').value.trim(),phone:document.getElementById('ciPhone').value.trim(),city:document.getElementById('ciCity').value.trim(),interaction_date:document.getElementById('ciDate').value||new Date().toISOString().slice(0,10),product_id:pid?+pid:null,product_name:prod?.name||null,notes:document.getElementById('ciNotes').value.trim(),next_follow_up:document.getElementById('ciFollow').value||null,status:document.getElementById('ciStatus').value,updated_at:new Date().toISOString()};const r=id?await sb.from('customer_interactions').update(payload).eq('id',id):await sb.from('customer_interactions').insert(payload);if(r.error){alert('Görüşme kaydedilemedi: '+r.error.message);return}document.getElementById('crmForm').classList.remove('open');await openCrm()}
+async function deleteInteraction(id){if(!confirm('Bu görüşme kaydı silinsin mi?'))return;const r=await sb.from('customer_interactions').delete().eq('id',id);if(r.error){alert(r.error.message);return}crmData=crmData.filter(x=>+x.id!==+id);renderCrm()}
+async function loadDashboardCrm(){const box=document.getElementById('dashCrm');if(!box)return;const {data}=await sb.from('customer_interactions').select('*').order('interaction_date',{ascending:false}).limit(6);const rows=data||[];box.innerHTML=rows.map(x=>{const[t,l]=crmTone(x.status);return `<div class="dash-crm-row"><span><b>${esc(x.contact_name||x.company_name||'-')}</b><br><small>${esc(x.product_name||'Ürün belirtilmedi')}</small></span><span class="status-pill tone-${t}">${l}</span></div>`}).join('')||'<div class="muted">Henüz görüşme kaydı yok.</div>'}
+const GUIDE_KEY='proera_onboarding_guide_v1';let guideIndex=0;
+const guideSteps=[
+ ['Hoş geldiniz 👋','Proera; müşterilerinizi, ürünlerinizi, stoklarınızı, görüşmelerinizi ve proformalarınızı tek çalışma alanında yönetir.'],
+ ['Firma bilgilerinizi tamamlayın','Ayarlar bölümünden firma bilgilerinizi, logonuzu ve banka hesaplarınızı kontrol edin.'],
+ ['Müşteri ekleyin','Müşteriler bölümünde firma ve iletişim bilgilerini kaydedin.'],
+ ['Ürün ve stok ekleyin','Ürün Kataloğu ve Stok Kontrolü bölümlerinde ürünleri ve kırmızı/sarı/yeşil eşiklerini belirleyin.'],
+ ['Görüşmeleri takip edin','Görüşmeler bölümünde müşteri temasını, konuşulan ürünü, notu ve sonraki takip tarihini kaydedin.'],
+ ['İlk proformanızı hazırlayın','Yeni Proforma ile müşteriyi ve ürünleri seçip PDF teklifinizi oluşturun.'],
+ ['Dashboard’u takip edin','Ana Sayfa; teklif, stok ve satış görüşmelerinizin güncel özetini gösterir.']
+];
+function showGuide(){guideIndex=0;document.getElementById('guideOverlay')?.classList.add('open');renderGuide()}
+function renderGuide(){const s=guideSteps[guideIndex];document.getElementById('guideTitle').textContent=s[0];document.getElementById('guideStep').innerHTML=`<h3>${esc(s[0])}</h3><p>${esc(s[1])}</p><small>${guideIndex+1} / ${guideSteps.length}</small>`;document.getElementById('guideProgress').style.width=((guideIndex+1)/guideSteps.length*100)+'%'}
+function guideNext(){if(guideIndex>=guideSteps.length-1)return finishGuide();guideIndex++;renderGuide()}
+function guidePrev(){if(guideIndex>0){guideIndex--;renderGuide()}}
+function finishGuide(){localStorage.setItem(GUIDE_KEY,'done');document.getElementById('guideOverlay')?.classList.remove('open')}
+
+setTimeout(()=>{if(currentUser&&!localStorage.getItem(GUIDE_KEY))showGuide()},1800);
 </script></body></html>
