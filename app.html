@@ -677,11 +677,16 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
  .ds-btn:hover{transform:translateX(2px)}
  .ds-btn.proera-active{background:linear-gradient(135deg,rgba(0,122,255,.92),rgba(26,145,255,.76))!important;color:#fff!important;border:1px solid rgba(255,255,255,.22)!important;box-shadow:0 8px 24px rgba(0,104,255,.28),inset 0 1px 0 rgba(255,255,255,.25)!important;backdrop-filter:blur(18px) saturate(160%)}
  .ds-btn.proera-active:before{opacity:1;transform:translateX(0)}
- .top{background:rgba(255,255,255,.78)!important;backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);border:1px solid rgba(255,255,255,.68)!important;box-shadow:0 10px 35px rgba(22,50,83,.08)!important}
+ .top{background:linear-gradient(135deg,rgba(8,25,49,.97),rgba(10,36,68,.95))!important;backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);border:1px solid rgba(255,255,255,.09)!important;box-shadow:0 10px 35px rgba(3,14,30,.22)!important;color:#fff!important}
+ .top .brand,.top .brand *, .top-account,.top-account *{color:#fff!important}
+ .top .notify-bell{background:rgba(255,255,255,.09)!important;border:1px solid rgba(255,255,255,.12)!important;color:#fff!important}
+ .top .notify-bell:hover{background:rgba(255,255,255,.16)!important}
 }
 .proera-view-enter{animation:proeraGlassEnter .34s cubic-bezier(.22,.9,.28,1)}
 @keyframes proeraGlassEnter{0%{opacity:.35;transform:translateY(8px) scale(.992);filter:blur(3px)}100%{opacity:1;transform:none;filter:blur(0)}}
 @media(prefers-reduced-motion:reduce){.proera-view-enter{animation:none}.ds-btn{transition:none!important}}
+</style><style id="v1781-notification-fix">
+.notify-wrap{position:relative;z-index:10020}.notify-bell{position:relative;min-width:42px;height:38px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}.notify-count{position:absolute;right:-4px;top:-5px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#ef4444;color:#fff!important;font-size:10px;font-weight:900;display:none;align-items:center;justify-content:center}.notify-count.has-count{display:flex}.notify-panel{position:absolute!important;right:0!important;top:46px!important;width:min(380px,calc(100vw - 28px))!important;max-height:440px!important;overflow:auto!important;background:#fff!important;color:#14233b!important;border:1px solid #dbe5ef!important;border-radius:16px!important;box-shadow:0 22px 60px rgba(2,14,31,.28)!important;padding:0!important;z-index:10030!important;display:none}.notify-panel.open{display:block!important}.notify-head{position:sticky;top:0;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:13px 14px;border-bottom:1px solid #e6edf5;font-weight:900;color:#14233b!important}.notify-readall{border:0;background:transparent;color:#0878ef!important;font-weight:800;cursor:pointer}.notify-empty{padding:18px 14px;color:#718096!important}.notify-item{padding:11px 14px;border-bottom:1px solid #edf2f7;color:#14233b!important;cursor:pointer}.notify-item:hover{background:#f5f9ff}.notify-item.unread{background:#eef6ff}
 </style></head><body>
 
 <aside class="desktop-side" aria-label="Ana navigasyon">
@@ -1298,6 +1303,15 @@ async function refreshNavBadges(){
  const {count}=await sb.from('service_requests').select('id',{count:'exact',head:true}).eq('company_id',currentCompanyId).eq('status','bekliyor');
  ['desktopServiceBadge','mobileServiceBadge'].forEach(id=>{const e=document.getElementById(id);if(!e)return;e.textContent=count||'';e.classList.toggle('show',!!count)});
 }
+function toggleNotifications(e){
+ if(e){e.preventDefault();e.stopPropagation()}
+ const panel=document.getElementById('notifyPanel');if(!panel)return;
+ panel.classList.toggle('open');
+}
+document.addEventListener('click',function(e){
+ const panel=document.getElementById('notifyPanel'),wrap=document.getElementById('notifyWrap');
+ if(panel&&panel.classList.contains('open')&&wrap&&!wrap.contains(e.target))panel.classList.remove('open');
+});
 function animateActiveView(){
  requestAnimationFrame(()=>{const candidates=['dashboardOverlay','archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay','crmOverlay','calendarOverlay','reportsOverlay','serviceOverlay'];const el=candidates.map(id=>document.getElementById(id)).find(x=>x&&(x.classList.contains('open')||getComputedStyle(x).display!=='none'));const target=el||document.querySelector('main.wrap');if(!target)return;target.classList.remove('proera-view-enter');void target.offsetWidth;target.classList.add('proera-view-enter');setTimeout(()=>target.classList.remove('proera-view-enter'),380)})}
 function appNavigate(action){
