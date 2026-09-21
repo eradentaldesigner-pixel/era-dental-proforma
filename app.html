@@ -443,18 +443,35 @@ input,textarea,select{border:1px solid rgba(15,23,42,.12)!important;border-radiu
 @media(max-width:800px){.desktop-side{display:none!important}}
 </style>
 
+
+<style id="v14318-desktop-nav-fix">
+@media(min-width:801px){
+  /* Left sidebar is the only primary navigation on desktop. */
+  .top .top-actions > .btn:not(.notify-bell):not(#syncBtn),
+  .top .top-actions > button:not(.notify-bell):not(#syncBtn){display:none!important}
+  .top{min-height:58px!important}
+  .top:after{
+    content:"Teklif & Proforma Yönetimi";
+    margin-left:auto;color:#73839a;font-size:11px;font-weight:800;letter-spacing:.02em
+  }
+  .top-actions{margin-left:12px!important}
+  .top-actions .notify-bell{display:inline-flex!important}
+  #syncBtn{display:inline-flex!important}
+}
+</style>
+
 </head><body>
 
 <aside class="desktop-side" aria-label="Ana navigasyon">
  <div class="ds-brand"><img src="proera-silver-p.png" alt="Proera"><span>Proera</span></div>
  <nav class="ds-nav">
-  <button class="ds-btn" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="ds-icon">⌂</span>Ana Sayfa</button>
-  <button class="ds-btn primary" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>document.getElementById('buyerName')?.focus(),300)"><span class="ds-icon">▤</span>Yeni Proforma</button>
-  <button class="ds-btn" type="button" onclick="openArchive()"><span class="ds-icon">▰</span>Proforma Arşivi</button>
-  <button class="ds-btn" type="button" onclick="openCustomers()"><span class="ds-icon">♟</span>Müşteriler</button>
-  <button class="ds-btn" type="button" onclick="openCatalog('manage')"><span class="ds-icon">◇</span>Ürün Kataloğu</button>
-  <button class="ds-btn" type="button" onclick="openStockControl()"><span class="ds-icon">▥</span>Stok Kontrolü</button>
-  <button class="ds-btn" type="button" onclick="openSettings()"><span class="ds-icon">⚙</span>Ayarlar</button>
+  <button class="ds-btn" type="button" onclick="desktopNavigate('home')"><span class="ds-icon">⌂</span>Ana Sayfa</button>
+  <button class="ds-btn primary" type="button" onclick="desktopNavigate('new')"><span class="ds-icon">▤</span>Yeni Proforma</button>
+  <button class="ds-btn" type="button" onclick="desktopNavigate('archive')"><span class="ds-icon">▰</span>Proforma Arşivi</button>
+  <button class="ds-btn" type="button" onclick="desktopNavigate('customers')"><span class="ds-icon">♟</span>Müşteriler</button>
+  <button class="ds-btn" type="button" onclick="desktopNavigate('catalog')"><span class="ds-icon">◇</span>Ürün Kataloğu</button>
+  <button class="ds-btn" type="button" onclick="desktopNavigate('stock')"><span class="ds-icon">▥</span>Stok Kontrolü</button>
+  <button class="ds-btn" type="button" onclick="desktopNavigate('settings')"><span class="ds-icon">⚙</span>Ayarlar</button>
  </nav>
  <div class="ds-spacer"></div>
  <div class="ds-profile"><b id="desktopSideCompany">Çalışma Alanı</b><span>Teklif & Proforma Yönetimi</span></div>
@@ -710,4 +727,26 @@ let _autoSaveTimer;document.addEventListener('input',()=>{clearTimeout(_autoSave
 initCloud();setupLogo();document.getElementById('date').value=new Date().toISOString().slice(0,10);updateValidity();render();
 function saveDraft(){render();const data={};fields.forEach(id=>data[id]=val(id));data.banks=getBanks();data.items=[...document.querySelectorAll('.item')].map(x=>({desc:x.querySelector('.desc').value,gtip:x.querySelector('.gtip')?.value||'',brand:x.querySelector('.pbrand')?.value||'',origin:x.querySelector('.porigin')?.value||'',model:x.querySelector('.pmodel')?.value||'',serial:x.querySelector('.pserial')?.value||'',qty:x.querySelector('.qty').value,price:x.querySelector('.price').value,vat:x.querySelector('.vat').value}));localStorage.setItem('eraProformaDraft',JSON.stringify(data));alert('Taslak tarayıcıya kaydedildi.');}
 function resetForm(){if(!confirm('Form temizlensin mi?'))return;localStorage.removeItem('eraProformaDraft');localStorage.removeItem('eraAutoDraft');location.reload()}
+
+function closeAllAppLayers(){
+  const ids=['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay'];
+  ids.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.classList.remove('open');el.style.display='';}
+  });
+  document.body.style.overflow='';
+}
+function desktopNavigate(action){
+  closeAllAppLayers();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    if(action==='home'){window.scrollTo({top:0,behavior:'smooth'});return;}
+    if(action==='new'){window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>document.getElementById('buyerName')?.focus(),280);return;}
+    if(action==='archive' && typeof openArchive==='function')openArchive();
+    if(action==='customers' && typeof openCustomers==='function')openCustomers();
+    if(action==='catalog' && typeof openCatalog==='function')openCatalog('manage');
+    if(action==='stock' && typeof openStockControl==='function')openStockControl();
+    if(action==='settings' && typeof openSettings==='function')openSettings();
+  }));
+}
+
 </script></body></html>
