@@ -629,6 +629,18 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
 }
 </style>
 
+
+<style id="v1460-reporting">
+.reports-overlay{position:fixed;inset:0;z-index:10035;background:#eef3f8;display:none;overflow:auto}.reports-overlay.open{display:block}
+.reports-shell{max-width:1450px;margin:auto;padding:80px 24px 36px}.reports-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.reports-head h2{margin:0;color:#10213a}.reports-actions{display:flex;gap:8px}
+.reports-filter{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr)) auto;gap:10px;align-items:end;margin-bottom:14px}.reports-filter label{display:block;font-size:10px;font-weight:800;color:#60738a;margin-bottom:5px}
+.report-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:14px}.report-kpi{background:#fff;border:1px solid #e2e9f1;border-radius:15px;padding:15px;box-shadow:0 8px 25px rgba(25,52,86,.05)}.report-kpi small{display:block;color:#708196;font-size:10px}.report-kpi b{display:block;font-size:22px;color:#142b49;margin-top:5px}
+.reports-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}.report-row{display:grid;grid-template-columns:1.3fr .55fr .55fr .55fr;gap:8px;padding:9px 5px;border-top:1px solid #edf1f5;align-items:center;font-size:11px}.report-row.head{font-weight:900;color:#718096;border-top:0}.report-bar-row{display:grid;grid-template-columns:80px 1fr 50px;gap:8px;align-items:center;margin:9px 0;font-size:10px}.report-bar-track{height:8px;background:#edf2f7;border-radius:999px;overflow:hidden}.report-bar-fill{height:100%;background:linear-gradient(90deg,#1379ff,#39a8ff);border-radius:999px}.report-status-line{display:flex;justify-content:space-between;align-items:center;padding:10px 4px;border-top:1px solid #edf1f5}.report-status-line:first-child{border-top:0}
+@media(min-width:801px){.reports-overlay{left:224px}}
+@media(max-width:800px){.reports-shell{padding:72px 8px 22px}.reports-head{align-items:flex-start;flex-direction:column}.reports-filter{grid-template-columns:1fr 1fr}.reports-filter .btn{grid-column:1/-1}.report-kpis{grid-template-columns:1fr 1fr}.reports-grid{grid-template-columns:1fr}.report-row{grid-template-columns:1fr 1fr}.report-row.head{display:none}}
+@media print{.desktop-side,.mobile-appbar,.reports-head .reports-actions,.reports-filter{display:none!important}.reports-overlay{position:static!important;display:block!important;background:#fff!important}.reports-shell{padding:0!important}.reports-grid{break-inside:avoid}}
+</style>
+
 </head><body>
 
 <aside class="desktop-side" aria-label="Ana navigasyon">
@@ -641,6 +653,7 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
   <button class="ds-btn" type="button" onclick="appNavigate('customers')"><span class="ds-icon">◎</span>Müşteriler</button>
 <button class="ds-btn" type="button" onclick="appNavigate('crm')"><span class="ds-icon">◉</span>Görüşmeler</button>
 <button class="ds-btn" type="button" onclick="appNavigate('catalog')"><span class="ds-icon">◇</span>Ürün Kataloğu</button>
+  <button class="ds-btn" type="button" onclick="appNavigate('reports')"><span class="ds-icon">▤</span>Raporlama</button>
   <button class="ds-btn" type="button" onclick="appNavigate('stock')"><span class="ds-icon">▦</span>Stok Kontrolü</button>
   <button class="ds-btn" type="button" onclick="appNavigate('settings')"><span class="ds-icon">⚙</span>Ayarlar</button>
  </nav>
@@ -673,6 +686,7 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
 <button class="mobile-nav-item" type="button" onclick="mobileNavigate('customers')"><span>♙</span>Müşteriler</button>
 <button class="mobile-nav-item" type="button" onclick="mobileNavigate('crm')"><span>◉</span>Görüşmeler</button>
 <button class="mobile-nav-item" type="button" onclick="mobileNavigate('catalog')"><span>▦</span>Ürün Kataloğu</button>
+<button class="mobile-nav-item" type="button" onclick="mobileNavigate('reports')"><span>▤</span>Raporlama</button>
 <button class="mobile-nav-item" type="button" onclick="mobileNavigate('stock')"><span>▥</span>Stok Kontrolü</button>
 <button class="mobile-nav-item" type="button" onclick="mobileNavigate('calendar')"><span>▣</span>Takvim</button>
 <button class="mobile-nav-item" type="button" onclick="mobileNavigate('settings')"><span>⚙</span>Ayarlar</button></div></div>
@@ -739,6 +753,44 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
  <div class="chart-box"><div class="chart-title"><h3>Teklif Aktivitesi</h3><small>Son 6 ay</small></div><div id="dashBarChart" class="bar-chart"></div></div>
  <div class="chart-box"><div class="chart-title"><h3>Teklif Durumları</h3><small>Genel dağılım</small></div><div class="donut-wrap"><div id="dashDonut" class="donut" style="--g:0%;--y:0%;--r:0%"></div><div id="dashLegend" class="legend"></div></div></div>
 </div>
+</section>
+
+
+<section id="reportsOverlay" class="reports-overlay">
+ <div class="reports-shell">
+  <div class="reports-head">
+   <div><h2>Raporlama & Analiz</h2><small>Satış, görüşme, teklif, ürün ve ekip performansını tek ekranda inceleyin.</small></div>
+   <div class="reports-actions"><button class="btn light" onclick="exportReportsCsv()">Excel / CSV</button><button class="btn primary" onclick="window.print()">PDF / Yazdır</button></div>
+  </div>
+  <div class="reports-filter dash-panel">
+   <div><label>Başlangıç</label><input id="reportStart" type="date"></div>
+   <div><label>Bitiş</label><input id="reportEnd" type="date"></div>
+   <div><label>Satış Temsilcisi</label><select id="reportRep"><option value="">Tümü</option></select></div>
+   <div><label>Durum</label><select id="reportStatus"><option value="">Tümü</option><option value="gorusuluyor">Takip Ediliyor</option><option value="onaylandi">Onaylandı</option><option value="kaybedildi">Olumsuz / Kaçtı</option></select></div>
+   <button class="btn primary" onclick="loadReports()">Raporu Güncelle</button>
+  </div>
+  <div class="report-kpis">
+   <div class="report-kpi"><small>Görüşme</small><b id="rpInteractions">0</b></div>
+   <div class="report-kpi"><small>Onaylanan Görüşme</small><b id="rpApproved">0</b></div>
+   <div class="report-kpi"><small>Dönüşüm</small><b id="rpConversion">%0</b></div>
+   <div class="report-kpi"><small>Teklif / Proforma</small><b id="rpProformas">0</b></div>
+   <div class="report-kpi"><small>Onaylanan Proforma</small><b id="rpApprovedPf">0</b></div>
+   <div class="report-kpi"><small>Müşteri</small><b id="rpCustomers">0</b></div>
+  </div>
+  <div class="reports-grid">
+   <div class="dash-panel"><div class="chart-title"><h3>Aylık Satış Aktivitesi</h3><small>Görüşme ve proforma adedi</small></div><div id="rpMonthly" class="report-bars"></div></div>
+   <div class="dash-panel"><div class="chart-title"><h3>Durum Dağılımı</h3><small>CRM görüşmeleri</small></div><div id="rpStatusChart"></div></div>
+  </div>
+  <div class="reports-grid">
+   <div class="dash-panel"><div class="chart-title"><h3>Satış Temsilcisi Performansı</h3><small>Görüşme, onay ve dönüşüm</small></div><div id="rpReps"></div></div>
+   <div class="dash-panel"><div class="chart-title"><h3>En Çok Görüşülen Ürünler</h3><small>Müşteri ilgisi</small></div><div id="rpProducts"></div></div>
+  </div>
+  <div class="reports-grid">
+   <div class="dash-panel"><div class="chart-title"><h3>İl Bazında Görüşmeler</h3><small>Satış aktivitesi</small></div><div id="rpCities"></div></div>
+   <div class="dash-panel"><div class="chart-title"><h3>Müşteri Kaynakları</h3><small>Lead kanalları</small></div><div id="rpSources"></div></div>
+  </div>
+  <div class="dash-panel" style="margin-top:14px"><div class="chart-title"><h3>Proforma Performansı</h3><small>Para birimi ve durum bazında toplamlar</small></div><div id="rpProformaTotals"></div></div>
+ </div>
 </section>
 
 <div id="crmOverlay" class="crm-overlay">
@@ -1026,7 +1078,7 @@ function saveDraft(){render();const data={};fields.forEach(id=>data[id]=val(id))
 function resetForm(){if(!confirm('Form temizlensin mi?'))return;localStorage.removeItem('eraProformaDraft');localStorage.removeItem('eraAutoDraft');location.reload()}
 
 function closeAllAppLayers(){
-  const ids=['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay','crmOverlay','calendarOverlay'];
+  const ids=['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay','crmOverlay','calendarOverlay','reportsOverlay'];
   ids.forEach(id=>{
     const el=document.getElementById(id);
     if(el){el.classList.remove('open');el.style.display='';}
@@ -1067,6 +1119,7 @@ function appNavigate(action){
     if(action==='settings'){openSettings();loadProeraPrefs();return}
     if(action==='crm')return openCrm()
     if(action==='calendar')return openCalendar()
+    if(action==='reports')return openReports()
   }));
 }
 function mobileNavigate(action){
@@ -1281,6 +1334,49 @@ async function loadDashboardOperations(){
 async function renderSalesRepPerformanceFromDashboard(){
  const {data}=await sb.from('customer_interactions').select('sales_rep,status').eq('company_id',currentCompanyId).limit(500);
  renderSalesRepPerformance(data||[]);
+}
+
+
+let reportCache={interactions:[],proformas:[],customers:[]};
+function reportIso(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function initReportDates(){
+ const e=document.getElementById('reportEnd'),s=document.getElementById('reportStart');if(!e||!s)return;
+ if(!e.value)e.value=reportIso(new Date());if(!s.value){const d=new Date();d.setMonth(d.getMonth()-5);d.setDate(1);s.value=reportIso(d)}
+}
+async function openReports(){closeAllProeraViews();document.getElementById('reportsOverlay')?.classList.add('open');initReportDates();await loadReports()}
+function countMap(items,fn){const m={};items.forEach(x=>{const k=fn(x)||'Belirtilmedi';m[k]=(m[k]||0)+1});return m}
+function reportRows(map,target,max=10){
+ const el=document.getElementById(target);if(!el)return;const a=Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,max),mx=Math.max(1,...a.map(x=>x[1]));
+ el.innerHTML=a.map(([k,v])=>`<div class="report-bar-row"><b>${esc(k)}</b><div class="report-bar-track"><div class="report-bar-fill" style="width:${Math.round(v/mx*100)}%"></div></div><b>${v}</b></div>`).join('')||'<div class="muted">Veri bulunamadı.</div>'
+}
+async function loadReports(){
+ if(!sb||!currentCompanyId)return;initReportDates();
+ const start=document.getElementById('reportStart').value,end=document.getElementById('reportEnd').value,rep=document.getElementById('reportRep').value,status=document.getElementById('reportStatus').value;
+ const [ir,pr,cr]=await Promise.all([
+  sb.from('customer_interactions').select('*').eq('company_id',currentCompanyId).gte('interaction_date',start).lte('interaction_date',end).order('interaction_date'),
+  sb.from('proformas').select('id,proforma_number,proforma_date,customer_name,currency,grand_total,status,bidder,items').eq('company_id',currentCompanyId).gte('proforma_date',start).lte('proforma_date',end).order('proforma_date'),
+  sb.from('customers').select('id,name').eq('company_id',currentCompanyId)
+ ]);
+ let interactions=ir.data||[],proformas=pr.data||[],customers=cr.data||[];
+ const reps=[...new Set(interactions.map(x=>x.sales_rep).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'tr'));
+ const rs=document.getElementById('reportRep'),keep=rs.value;rs.innerHTML='<option value="">Tümü</option>'+reps.map(x=>`<option>${esc(x)}</option>`).join('');rs.value=reps.includes(keep)?keep:'';
+ if(rep)interactions=interactions.filter(x=>x.sales_rep===rep);if(status)interactions=interactions.filter(x=>x.status===status);
+ reportCache={interactions,proformas,customers};
+ const approved=interactions.filter(x=>x.status==='onaylandi').length,approvedPf=proformas.filter(x=>statusLabel(x.status)==='Onaylandı').length;
+ document.getElementById('rpInteractions').textContent=interactions.length;document.getElementById('rpApproved').textContent=approved;document.getElementById('rpConversion').textContent='%'+(interactions.length?Math.round(approved/interactions.length*100):0);document.getElementById('rpProformas').textContent=proformas.length;document.getElementById('rpApprovedPf').textContent=approvedPf;document.getElementById('rpCustomers').textContent=customers.length;
+ const repMap={};interactions.forEach(x=>{const n=x.sales_rep||'Belirtilmedi';repMap[n]??={total:0,ok:0,lost:0};repMap[n].total++;if(x.status==='onaylandi')repMap[n].ok++;if(x.status==='kaybedildi')repMap[n].lost++});
+ const re=document.getElementById('rpReps');re.innerHTML='<div class="report-row head"><span>Temsilci</span><span>Görüşme</span><span>Onay</span><span>Dönüşüm</span></div>'+Object.entries(repMap).sort((a,b)=>b[1].total-a[1].total).map(([n,r])=>`<div class="report-row"><b>${esc(n)}</b><span>${r.total}</span><span>${r.ok}</span><b>%${Math.round(r.ok/r.total*100)}</b></div>`).join('');
+ const products={};interactions.forEach(x=>{const a=(x.product_names&&x.product_names.length)?x.product_names:[x.product_name];a.filter(Boolean).forEach(n=>products[n]=(products[n]||0)+1)});reportRows(products,'rpProducts');reportRows(countMap(interactions,x=>x.city),'rpCities');reportRows(countMap(interactions,x=>x.lead_source),'rpSources');
+ const sm=countMap(interactions,x=>x.status==='onaylandi'?'Onaylandı':x.status==='kaybedildi'?'Olumsuz / Kaçtı':'Takip Ediliyor');document.getElementById('rpStatusChart').innerHTML=Object.entries(sm).map(([k,v])=>`<div class="report-status-line"><b>${esc(k)}</b><span>${v} • %${interactions.length?Math.round(v/interactions.length*100):0}</span></div>`).join('');
+ const months={};for(let d=new Date(start+'T12:00:00'),e=new Date(end+'T12:00:00');d<=e;d.setMonth(d.getMonth()+1)){const k=d.toISOString().slice(0,7);months[k]={i:0,p:0}}interactions.forEach(x=>{const k=(x.interaction_date||'').slice(0,7);if(months[k])months[k].i++});proformas.forEach(x=>{const k=(x.proforma_date||'').slice(0,7);if(months[k])months[k].p++});
+ const mx=Math.max(1,...Object.values(months).flatMap(x=>[x.i,x.p]));document.getElementById('rpMonthly').innerHTML=Object.entries(months).map(([k,v])=>`<div class="report-bar-row"><b>${new Date(k+'-01T12:00:00').toLocaleDateString('tr-TR',{month:'short',year:'2-digit'})}</b><div><div class="report-bar-track" title="Görüşme ${v.i}"><div class="report-bar-fill" style="width:${Math.round(v.i/mx*100)}%"></div></div><div class="report-bar-track" style="margin-top:3px" title="Proforma ${v.p}"><div class="report-bar-fill" style="width:${Math.round(v.p/mx*100)}%"></div></div></div><b>${v.i}/${v.p}</b></div>`).join('');
+ const totals={};proformas.forEach(x=>{const c=x.currency||'-';totals[c]??={count:0,total:0,ok:0};totals[c].count++;totals[c].total+=+x.grand_total||0;if(statusLabel(x.status)==='Onaylandı')totals[c].ok++});document.getElementById('rpProformaTotals').innerHTML='<div class="report-row head"><span>Para Birimi</span><span>Adet</span><span>Onaylanan</span><span>Toplam</span></div>'+Object.entries(totals).map(([c,r])=>`<div class="report-row"><b>${esc(c)}</b><span>${r.count}</span><span>${r.ok}</span><b>${money(r.total)} ${esc(c)}</b></div>`).join('');
+}
+function exportReportsCsv(){
+ const {interactions,proformas}=reportCache;const rows=[['TÜR','TARİH','MÜŞTERİ/FİRMA','TEMSİLCİ','ÜRÜN','İL','TELEFON','DURUM','TUTAR','PARA BİRİMİ']];
+ interactions.forEach(x=>rows.push(['Görüşme',x.interaction_date,x.company_name||x.contact_name||'',x.sales_rep||'',((x.product_names||[]).join(', ')||x.product_name||''),x.city||'',x.phone||'',x.status||'',x.estimated_value||'',x.estimated_currency||'']));
+ proformas.forEach(x=>rows.push(['Proforma',x.proforma_date,x.customer_name||'',x.bidder||'',(x.items||[]).map(i=>i.description||i.desc||'').join(', '),'','',statusLabel(x.status),x.grand_total||'',x.currency||'']));
+ const csv='\ufeff'+rows.map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(';')).join('\n'),blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`proera-rapor-${reportIso(new Date())}.csv`;a.click();URL.revokeObjectURL(a.href)
 }
 
 </script></body></html>
