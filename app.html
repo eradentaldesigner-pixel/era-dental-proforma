@@ -1083,6 +1083,28 @@ function applyProeraPrefs(){let p={};try{p=JSON.parse(localStorage.getItem(PREF_
 window.addEventListener('load',()=>setTimeout(()=>{applyProeraPrefs();if(currentUser)appNavigate('home')},700));
 
 
+async function loadDashboard(){
+  if(!sb||!currentUser)return;
+  const recentBox=document.getElementById('dashRecent'), stockBox=document.getElementById('dashStock');
+  const now=new Date(), first=new Date(now.getFullYear(),now.getMonth(),1).toISOString().slice(0,10);
+  const [pr,cu,po]=await Promise.all([
+    sb.from('proformas').select('id,proforma_number,proforma_date,customer_name,currency,grand_total,status,created_at').order('created_at',{ascending:false}).limit(50),
+    sb.from('customers').select('id',{count:'exact',head:true}),
+    sb.from('products').select('id,name,product_code,stock_quantity,stock_low_threshold,stock_good_threshold').order('stock_quantity',{ascending:true}).limit(100)
+  ]);
+  const rows=pr.data||[], month=rows.filter(x=>(x.proforma_date||'')>=first), approved=rows.filter(x=>statusLabel(x.status)==='Onaylandı'), waiting=rows.filter(x=>statusLabel(x.status)==='Onaya Gönderildi');
+  const totals={}; month.forEach(x=>{const c=x.currency||'';totals[c]=(totals[c]||0)+(+x.grand_total||0)});
+  document.getElementById('dashMonthCount').textContent=month.length;
+  document.getElementById('dashMonthTotal').textContent=Object.entries(totals).map(([c,v])=>money(v)+' '+c).join(' · ')||'0';
+  document.getElementById('dashApproved').textContent=approved.length;document.getElementById('dashWaiting').textContent=waiting.length;
+  document.getElementById('dashCustomers').textContent=cu.count||0;
+  const products=po.data||[], low=products.filter(x=>(+x.stock_quantity||0)<=(+x.stock_low_threshold||5));
+  renderSmartDashboard(rows,products);loadDashboardCrm();loadDashboardOperations();renderSalesRepPerformanceFromDashboard();
+  document.getElementById('dashLowStock').textContent=low.length;
+      const company=document.getElementById('profileCompany')?.textContent||'';
+  document.getElementById('dashCompany').textContent=(company&&company!=='Firma'?company+' • ':'')+'Çalışma alanınızın güncel özeti.';
+}
+
 function proformaTone(status){
   const s=(statusLabel(status)||'').toLocaleLowerCase('tr-TR');
   if(s.includes('onaylandı'))return ['green','Onaylandı'];
@@ -1091,7 +1113,7 @@ function proformaTone(status){
   return ['gray',statusLabel(status)||'Taslak'];
 }
 function stockTone(p){
-  const q=+p.stock_quantity||0, low=+(p.stock_low_threshold??5), warn=Math.max(low+1,Math.ceil(low*2));
+  const q=+p.stock_quantity||0, low=+(p.stock_low_threshold??5), good=+(p.stock_good_threshold??Math.max(low+1,Math.ceil(low*2)));
   if(q<=low)return ['red','Kritik'];
   if(q<good)return ['yellow','Azalıyor'];
   return ['green','Normal'];
