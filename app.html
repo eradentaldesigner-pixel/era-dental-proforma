@@ -308,6 +308,92 @@ input,textarea,select{border:1px solid rgba(15,23,42,.12)!important;border-radiu
 @media print{.mobile-appbar,.mobile-drawer-shell,#mobileNavToggle{display:none!important}}
 
 </style>
+
+<style id="v14314-mobile-scroll-performance">
+/* V14.3.14 — Mobile Scroll & Performance Fix */
+@media (max-width: 800px){
+  html{
+    height:auto!important;
+    min-height:100%!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+    -webkit-text-size-adjust:100%;
+    scroll-behavior:auto!important;
+  }
+  body{
+    height:auto!important;
+    min-height:100vh!important;
+    overflow-x:hidden!important;
+    overflow-y:auto;
+    touch-action:pan-y;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:auto;
+  }
+
+  /* Mobile browsers can stutter badly while repainting blur during scroll. */
+  .top,.panel,.auth-card,.onboard-card,
+  .catalog-modal,.stock-modal,.settings-modal,.archive-modal,.customer-modal,
+  .notify-panel,.mobile-drawer,.mobile-nav,.mobile-header{
+    -webkit-backdrop-filter:none!important;
+    backdrop-filter:none!important;
+  }
+
+  /* Reduce expensive large repaint regions on mobile only. */
+  .panel,.paper,.section,.item,.customer-card,
+  .catalog-modal,.stock-modal,.settings-modal,.archive-modal,.customer-modal{
+    box-shadow:0 5px 18px rgba(15,23,42,.07)!important;
+  }
+
+  /* Main editor must participate in normal document scrolling. */
+  .wrap{
+    overflow:visible!important;
+    height:auto!important;
+    min-height:0!important;
+  }
+  .panel{
+    position:relative!important;
+    top:auto!important;
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+  .paper{
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+
+  /* Long modal content scrolls inside the modal, without trapping the page gesture. */
+  .archive-overlay,.settings-overlay,.catalog-overlay,.stock-overlay,.customer-overlay{
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+  }
+  .archive-modal,.settings-modal,.catalog-modal,.stock-modal,.customer-modal,
+  .archive-body,.settings-body,.catalog-body,.stock-body,.customer-body,
+  .notify-panel,.mobile-drawer{
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior:contain;
+    touch-action:pan-y;
+  }
+
+  /* Avoid animated layout/paint work while finger-scrolling. */
+  .btn,.item,.section,.customer-card,.notify-item{
+    transition:none!important;
+  }
+  .btn:hover,.top-actions>.btn:hover,.notify-bell:hover{
+    transform:none!important;
+  }
+
+  /* Keep form controls from hijacking vertical pan gestures. */
+  input,select,textarea,button,a{
+    touch-action:manipulation;
+  }
+  textarea{
+    touch-action:pan-y;
+  }
+}
+</style>
+
 </head><body><input type="checkbox" id="mobileNavToggle" aria-hidden="true">
 <div class="mobile-appbar" aria-label="Mobil üst menü">
   <label class="m-icon" for="mobileNavToggle" aria-label="Menüyü aç"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></label>
