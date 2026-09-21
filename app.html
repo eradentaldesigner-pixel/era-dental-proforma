@@ -575,12 +575,40 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
 .product-picker{border:1px solid #d9e2ec;border-radius:11px;background:#fff;padding:8px}.product-picker-options{max-height:180px;overflow:auto;margin-top:6px}.product-option{display:flex!important;align-items:center;gap:9px;padding:8px!important;margin:0!important;border-radius:8px;cursor:pointer}.product-option:hover{background:#f0f6ff}.product-option input{width:auto!important;margin:0!important}.city-autocomplete{position:relative}.city-suggestions{display:none;position:absolute;left:0;right:0;top:100%;z-index:11000;background:#fff;border:1px solid #dce5ef;border-radius:10px;box-shadow:0 12px 30px rgba(15,35,62,.16);max-height:190px;overflow:auto}.city-suggestions.open{display:block}.city-suggestion{padding:9px 11px;cursor:pointer}.city-suggestion:hover{background:#eef6ff}
 </style><style id="v1443-sales-pipeline">
 .rep-row{display:grid;grid-template-columns:1.2fr .7fr .7fr .7fr .7fr;gap:8px;padding:10px 7px;border-top:1px solid #edf1f5;align-items:center;font-size:11px}.rep-row.head{color:#718096;font-weight:800;border-top:0}.pipeline-value{font-weight:900;color:#17345c}.crm-meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}.crm-meta span{font-size:9px;padding:3px 6px;background:#eef4fa;border-radius:999px;color:#52667e}@media(max-width:800px){.rep-row{grid-template-columns:1fr 1fr}.rep-row.head{display:none}}
-</style></head><body>
+</style>
+<style id="v1450-calendar-nav">
+/* Navigation stays reachable while workspace overlays are open */
+@media(min-width:801px){
+ .desktop-side{z-index:10150!important}
+ .crm-overlay,.calendar-overlay{left:224px!important}
+}
+@media(max-width:800px){
+ body:has(.crm-overlay.open) .mobile-modal-menu,
+ body:has(.calendar-overlay.open) .mobile-modal-menu{display:block!important}
+ .crm-head,.calendar-head{padding-left:64px!important}
+}
+.calendar-overlay{position:fixed;inset:0;z-index:10040;background:#eef3f8;display:none;overflow:auto}
+.calendar-overlay.open{display:block}
+.calendar-shell{max-width:1400px;margin:auto;padding:82px 24px 30px}
+.calendar-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}.calendar-head h2{margin:0;color:#10213a}
+.calendar-toolbar{display:flex;align-items:center;gap:8px}.calendar-toolbar b{min-width:150px;text-align:center}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);background:#dce5ef;gap:1px;border:1px solid #dce5ef;border-radius:16px;overflow:hidden}
+.cal-dow{background:#f6f9fc;padding:9px;text-align:center;font-size:11px;font-weight:900;color:#66788d}
+.cal-day{background:#fff;min-height:118px;padding:8px;cursor:pointer;transition:.15s}.cal-day:hover{background:#f7fbff}.cal-day.muted{background:#f7f9fb;color:#a0aaba}.cal-day.today{box-shadow:inset 0 0 0 2px #1478ff}
+.cal-num{font-size:11px;font-weight:900;margin-bottom:5px}.cal-event{display:block;margin:4px 0;padding:5px 6px;border-radius:7px;background:#e7f1ff;color:#075fc4;font-size:9px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-event.install{background:#e6f8ef;color:#087443}.cal-event.meeting{background:#fff0c7;color:#865c00}.cal-event.service{background:#ffe5e5;color:#a91d25}
+.calendar-modal{position:fixed;inset:0;z-index:10300;background:rgba(5,18,39,.58);display:none;align-items:center;justify-content:center;padding:16px}.calendar-modal.open{display:flex}
+.calendar-card{width:min(650px,95vw);background:#fff;border-radius:20px;padding:20px;box-shadow:0 30px 80px rgba(0,0,0,.28)}.calendar-form{display:grid;grid-template-columns:1fr 1fr;gap:10px}.calendar-form .full{grid-column:1/-1}
+@media(max-width:800px){.calendar-overlay{inset:0}.calendar-shell{padding:72px 8px 20px}.calendar-grid{border-radius:10px}.cal-day{min-height:78px;padding:4px}.cal-dow{padding:6px 2px;font-size:9px}.cal-event{font-size:8px;padding:3px}.calendar-form{grid-template-columns:1fr}.calendar-form .full{grid-column:auto}.calendar-head{align-items:flex-start;flex-direction:column}.calendar-toolbar{width:100%;justify-content:space-between}}
+</style>
+
+</head><body>
 
 <aside class="desktop-side" aria-label="Ana navigasyon">
  <div class="ds-brand"><img src="proera-silver-p.png" alt="Proera"><span>Proera</span></div>
  <nav class="ds-nav">
   <button class="ds-btn" type="button" onclick="appNavigate('home')"><span class="ds-icon">⌂</span>Ana Sayfa</button>
+<button class="ds-btn" type="button" onclick="appNavigate('calendar')"><span class="ds-icon">▦</span>Takvim</button>
   <button class="ds-btn primary" type="button" onclick="appNavigate('new')"><span class="ds-icon">＋</span>Yeni Proforma</button>
   <button class="ds-btn" type="button" onclick="appNavigate('archive')"><span class="ds-icon">▣</span>Proforma Arşivi</button>
   <button class="ds-btn" type="button" onclick="appNavigate('customers')"><span class="ds-icon">◎</span>Müşteriler</button>
@@ -703,6 +731,31 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
   <div class="guide-progress"><i id="guideProgress"></i></div>
   <div id="guideStep" class="guide-step"></div>
   <div class="guide-actions"><button class="btn light" onclick="guidePrev()">← Geri</button><button class="btn primary" onclick="guideNext()">Devam →</button></div>
+ </div>
+</div>
+
+<section id="calendarOverlay" class="calendar-overlay">
+ <div class="calendar-shell">
+  <div class="calendar-head"><div><h2>Ekip Takvimi</h2><small>Kurulum, ziyaret, toplantı ve servis planlarını ekipçe takip edin.</small></div><button class="btn primary" onclick="newCalendarEvent()">＋ Yeni Plan</button></div>
+  <div class="dash-panel">
+   <div class="calendar-toolbar"><button class="btn light" onclick="changeCalendarMonth(-1)">‹</button><b id="calendarMonthLabel"></b><button class="btn light" onclick="changeCalendarMonth(1)">›</button><button class="btn light" onclick="calendarToday()">Bugün</button></div>
+   <div id="calendarGrid" class="calendar-grid"></div>
+  </div>
+ </div>
+</section>
+<div id="calendarModal" class="calendar-modal">
+ <div class="calendar-card">
+  <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">Plan / Etkinlik</h3><button class="btn light" onclick="closeCalendarModal()">✕</button></div>
+  <input id="calId" type="hidden">
+  <div class="calendar-form" style="margin-top:14px">
+   <div class="full"><label>Başlık</label><input id="calTitle" placeholder="Örn: Klinik kurulum"></div>
+   <div><label>Tür</label><select id="calType"><option>Kurulum</option><option>Müşteri Ziyareti</option><option>Toplantı</option><option>Servis</option><option>Eğitim</option><option>Diğer</option></select></div>
+   <div><label>Tarih</label><input id="calDate" type="date"></div>
+   <div><label>Başlangıç</label><input id="calStart" type="time"></div><div><label>Bitiş</label><input id="calEnd" type="time"></div>
+   <div><label>Personel</label><input id="calPersonnel" placeholder="Örn: Mert"></div><div><label>Yer</label><input id="calLocation" placeholder="Klinik / şehir / adres"></div>
+   <div class="full"><label>Not</label><textarea id="calNotes" rows="3"></textarea></div>
+  </div>
+  <div class="actions"><button class="btn primary" onclick="saveCalendarEvent()">Kaydet</button><button id="calDelete" class="btn light" onclick="deleteCalendarEvent()" style="display:none">Sil</button></div>
  </div>
 </div>
 <div id="authGate" class="auth-shell"><div class="auth-card"><div class="auth-mark">P</div><h1 class="auth-title">Proera</h1><div class="muted">Teklif ve proformalarınızı profesyonelce hazırlayın, müşterilerinizi ve ürünlerinizi tek çalışma alanında yönetin.</div><button class="google-btn" onclick="loginGoogle()">G&nbsp;&nbsp; Google ile Devam Et</button><div class="auth-sep">veya e-posta ile</div><div class="auth-tabs"><button id="tabLogin" class="active" onclick="setAuthMode('login')">Giriş</button><button id="tabSignup" onclick="setAuthMode('signup')">Üyelik</button></div><div id="nameArea" style="display:none"><label>Ad Soyad</label><input id="authName" autocomplete="name" placeholder="Ad Soyad"></div><label>E-posta</label><input id="authEmail" type="email" autocomplete="email" placeholder="ornek@firma.com"><div id="passwordArea"><label style="margin-top:10px">Şifre</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="En az 8 karakter"></div><div id="confirmPasswordArea" style="display:none"><label style="margin-top:10px">Şifre Tekrar</label><input id="authPassword2" type="password" autocomplete="new-password" placeholder="Şifrenizi tekrar yazın"></div><div id="newPasswordArea" style="display:none"><label style="margin-top:10px">Yeni Şifre</label><input id="authNewPassword" type="password" autocomplete="new-password" placeholder="En az 8 karakter"><label style="margin-top:10px">Yeni Şifre Tekrar</label><input id="authNewPassword2" type="password" autocomplete="new-password" placeholder="Şifrenizi tekrar yazın"></div><div class="actions" id="authActions"><button class="btn primary" onclick="loginUser()">Giriş Yap</button><button class="btn light" onclick="resetPassword()">Şifremi Unuttum</button></div><div id="authMsg" class="muted" style="margin-top:12px"></div></div></div><div id="onboardOverlay" class="onboard-overlay"><div class="onboard-card"><div class="auth-mark">✦</div><h2 style="font-size:26px;margin:14px 0 6px">Firmanızı oluşturalım</h2><div class="muted" style="margin-bottom:18px">Bu bilgiler yalnızca sizin çalışma alanınızda kullanılacak. Daha sonra Ayarlar'dan değiştirebilirsiniz.</div><div class="onboard-grid"><div class="full"><label>Firma / Marka Adı *</label><input id="onboardCompany" placeholder="Örn: ABC Teknoloji"></div><div><label>Yetkili Adı</label><input id="onboardPerson" placeholder="Ad Soyad"></div><div><label>Telefon</label><input id="onboardPhone" placeholder="Telefon"></div></div><div class="actions" style="justify-content:flex-end"><button class="btn primary" onclick="createWorkspace()">Çalışma Alanını Oluştur →</button></div><div id="onboardMsg" class="muted" style="margin-top:10px"></div></div></div><header class="top"><div class="brand"><img id="headerLogo" class="logo-preview" style="display:none;vertical-align:middle;margin:0 10px 0 0;max-height:42px" alt="Logo"><span id="headerCompanyName">PROERA</span> <span>BUSINESS</span></div><div class="top-actions"><div class="profile-pill"><div class="profile-avatar" id="profileAvatar">P</div><div><b id="profileCompany">Firma</b><div id="profileEmail" style="opacity:.65;font-size:10px"></div></div></div><span id="syncStatus" style="font-size:12px;margin-right:5px">● Bulut</span><button class="btn light" style="padding:7px 10px" onclick="openArchive()">📁 Proforma Arşivi</button><button class="btn light" style="padding:7px 10px" onclick="openCatalog('manage')">📦 Ürün Kataloğu</button><div class="notify-wrap" id="notifyWrap"><button class="btn light notify-bell" type="button" onclick="toggleNotifications(event)" title="Stok Bildirimleri">🔔<span id="notifyCount" class="notify-count">0</span></button><div id="notifyPanel" class="notify-panel"><div class="notify-head"><span>Stok Bildirimleri</span><button class="notify-readall" onclick="markAllNotificationsRead(event)">Tümünü okundu yap</button></div><div id="notifyList" class="notify-empty">Bildirim yok.</div></div></div><button class="btn light" style="padding:7px 10px" onclick="openStockControl()">📊 Stok Kontrolü</button><button class="btn light" style="padding:7px 10px" onclick="openSettings()">⚙️ Ayarlar</button><button class="btn light" style="padding:7px 10px" onclick="logoutUser()">Çıkış</button></div></header><div id="settingsOverlay" class="settings-overlay"><div class="settings-modal"><div class="settings-head"><div><h2 style="margin:0">⚙️ Ayarlar Merkezi</h2><div class="muted">Sabit şirket bilgileri burada merkezi olarak yönetilir.</div></div><button class="btn light" onclick="closeSettings()">✕ Kapat</button></div><div class="settings-body"><div class="settings-card"><h3>Firma Profili</h3><div class="hint">Bu bilgiler yalnızca sizin firmanıza aittir ve proformanın Satıcı bölümünde kullanılır.</div><div class="company-profile-grid"><div><label>Kısa Firma / Marka Adı</label><input id="companyDisplayName" placeholder="Firma adı"></div><div><label>Resmi Ünvan</label><input id="companyLegalName" placeholder="Resmi şirket ünvanı"></div><div class="full"><label>Adres</label><textarea id="companyAddress" placeholder="Firma adresi"></textarea></div><div><label>Vergi Dairesi</label><input id="companyTaxOffice"></div><div><label>Vergi No</label><input id="companyTaxNumber"></div><div><label>Telefon</label><input id="companyPhone"></div><div><label>E-posta</label><input id="companyEmail" type="email"></div><div class="full"><label>Web Sitesi</label><input id="companyWebsite" placeholder="www.firma.com"></div></div></div><div class="settings-card"><h3>Şirket Logosu</h3><div class="hint">Logo tüm bilgisayarlarda ve proformalarda otomatik kullanılır.</div><div class="settings-logo-row"><div class="settings-logo-box"><img id="logoPreview" class="logo-preview" alt="Şirket logosu"></div><div style="flex:1"><input id="logo" type="file" accept="image/png,image/jpeg,image/webp"><div class="muted" style="margin-top:6px">PNG / JPG / WEBP önerilir.</div></div></div></div><div class="settings-card"><h3>Kurumsal Tasarım</h3><div class="hint">Proforma başlıkları, tablo ve toplam alanlarında kullanılacak renk.</div><div class="grid"><div><label>Kurumsal Renk</label><input id="corpColor" type="color" value="#111827" style="height:42px;padding:4px"></div><div><label>Renk Kodu</label><input id="corpHex" value="#111827" placeholder="#111827"></div></div></div>
@@ -932,7 +985,7 @@ function saveDraft(){render();const data={};fields.forEach(id=>data[id]=val(id))
 function resetForm(){if(!confirm('Form temizlensin mi?'))return;localStorage.removeItem('eraProformaDraft');localStorage.removeItem('eraAutoDraft');location.reload()}
 
 function closeAllAppLayers(){
-  const ids=['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay','crmOverlay'];
+  const ids=['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay','crmOverlay','calendarOverlay'];
   ids.forEach(id=>{
     const el=document.getElementById(id);
     if(el){el.classList.remove('open');el.style.display='';}
@@ -955,7 +1008,7 @@ function desktopNavigate(action){
 
 function closeAllProeraViews(){
   document.getElementById('dashboardOverlay')?.classList.remove('open');
-  ['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay','crmOverlay'].forEach(id=>{
+  ['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay','crmOverlay','calendarOverlay'].forEach(id=>{
     const el=document.getElementById(id); if(!el)return;
     el.classList.remove('open'); el.style.display='';
   });
@@ -972,6 +1025,7 @@ function appNavigate(action){
     if(action==='stock')return openStockControl();
     if(action==='settings'){openSettings();loadProeraPrefs();return}
     if(action==='crm')return openCrm()
+    if(action==='calendar')return openCalendar()
   }));
 }
 function mobileNavigate(action){const t=document.getElementById('mobileNavToggle');if(t)t.checked=false;setTimeout(()=>appNavigate(action),80)}
@@ -1137,5 +1191,32 @@ async function loadDashboardCrmV2(){
  const rows=data||[];renderSalesRepPerformance(rows);
  const box=document.getElementById('dashCrm');if(box)box.innerHTML=rows.slice(0,6).map(x=>{const[t,l]=crmTone(x.status);const products=((x.product_names&&x.product_names.length)?x.product_names.join(', '):x.product_name)||'Ürün belirtilmedi';return `<div class="dash-crm-row"><span><b>${esc(x.contact_name||x.company_name||'-')}</b><br><small>${esc(products)}${x.sales_rep?' • 👤 '+esc(x.sales_rep):''}</small></span><span class="status-pill tone-${t}">${l}</span></div>`}).join('')||'<div class="muted">Henüz görüşme kaydı yok.</div>';
 }
+
+
+let calendarCursor=new Date(),calendarEvents=[];
+function isoLocal(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+async function openCalendar(){closeAllProeraViews();document.getElementById('calendarOverlay')?.classList.add('open');calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth(),1);await loadCalendar()}
+async function loadCalendar(){
+ const start=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth(),1),end=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+1,0);
+ const {data,error}=await sb.from('calendar_events').select('*').gte('event_date',isoLocal(new Date(start.getFullYear(),start.getMonth(),1-start.getDay()))).lte('event_date',isoLocal(new Date(end.getFullYear(),end.getMonth(),7-end.getDay()))).order('event_date').order('start_time');
+ if(error){console.warn(error);return}calendarEvents=data||[];renderCalendar()
+}
+function renderCalendar(){
+ const label=document.getElementById('calendarMonthLabel');if(label)label.textContent=calendarCursor.toLocaleDateString('tr-TR',{month:'long',year:'numeric'});
+ const grid=document.getElementById('calendarGrid');if(!grid)return;
+ const names=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];let out=names.map(n=>`<div class="cal-dow">${n}</div>`).join('');
+ const first=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth(),1),start=new Date(first);start.setDate(first.getDate()-first.getDay());
+ const today=isoLocal(new Date());
+ for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const iso=isoLocal(d),ev=calendarEvents.filter(x=>x.event_date===iso),muted=d.getMonth()!==calendarCursor.getMonth(),isToday=iso===today;
+   out+=`<div class="cal-day ${muted?'muted':''} ${isToday?'today':''}" onclick="newCalendarEvent('${iso}')"><div class="cal-num">${d.getDate()}</div>${ev.map(x=>{const c=x.event_type==='Kurulum'?'install':x.event_type==='Servis'?'service':x.event_type==='Toplantı'?'meeting':'';return `<span class="cal-event ${c}" onclick="event.stopPropagation();editCalendarEvent(${x.id})" title="${esc(x.location||'')}">${x.start_time?esc(String(x.start_time).slice(0,5))+' ':''}${esc(x.personnel||'')} · ${esc(x.title)}</span>`}).join('')}</div>`}
+ grid.innerHTML=out;
+}
+function changeCalendarMonth(n){calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+n,1);loadCalendar()}
+function calendarToday(){calendarCursor=new Date();loadCalendar()}
+function newCalendarEvent(date){['calId','calTitle','calStart','calEnd','calPersonnel','calLocation','calNotes'].forEach(id=>document.getElementById(id).value='');document.getElementById('calType').value='Kurulum';document.getElementById('calDate').value=date||isoLocal(new Date());document.getElementById('calDelete').style.display='none';document.getElementById('calendarModal').classList.add('open')}
+function editCalendarEvent(id){const x=calendarEvents.find(v=>+v.id===+id);if(!x)return;document.getElementById('calId').value=x.id;document.getElementById('calTitle').value=x.title||'';document.getElementById('calType').value=x.event_type||'Kurulum';document.getElementById('calDate').value=x.event_date||'';document.getElementById('calStart').value=String(x.start_time||'').slice(0,5);document.getElementById('calEnd').value=String(x.end_time||'').slice(0,5);document.getElementById('calPersonnel').value=x.personnel||'';document.getElementById('calLocation').value=x.location||'';document.getElementById('calNotes').value=x.notes||'';document.getElementById('calDelete').style.display='inline-flex';document.getElementById('calendarModal').classList.add('open')}
+function closeCalendarModal(){document.getElementById('calendarModal').classList.remove('open')}
+async function saveCalendarEvent(){const id=document.getElementById('calId').value,title=document.getElementById('calTitle').value.trim();if(!title){alert('Başlık yazın.');return}const payload={company_id:currentCompanyId,title,event_type:document.getElementById('calType').value,event_date:document.getElementById('calDate').value,start_time:document.getElementById('calStart').value||null,end_time:document.getElementById('calEnd').value||null,personnel:document.getElementById('calPersonnel').value.trim(),location:document.getElementById('calLocation').value.trim(),notes:document.getElementById('calNotes').value.trim(),updated_at:new Date().toISOString()};const r=id?await sb.from('calendar_events').update(payload).eq('id',id):await sb.from('calendar_events').insert(payload);if(r.error){alert('Plan kaydedilemedi: '+r.error.message);return}closeCalendarModal();await loadCalendar()}
+async function deleteCalendarEvent(){const id=document.getElementById('calId').value;if(!id||!confirm('Bu plan silinsin mi?'))return;const r=await sb.from('calendar_events').delete().eq('id',id);if(r.error){alert(r.error.message);return}closeCalendarModal();await loadCalendar()}
 
 </script></body></html>
