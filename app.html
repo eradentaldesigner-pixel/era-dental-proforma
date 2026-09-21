@@ -1100,27 +1100,29 @@ function desktopNavigate(action){
 
 
 function closeAllProeraViews(){
-  document.getElementById('dashboardOverlay')?.classList.remove('open');
-  ['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay','crmOverlay','calendarOverlay'].forEach(id=>{
-    const el=document.getElementById(id); if(!el)return;
-    el.classList.remove('open'); el.style.display='';
-  });
-  document.body.style.overflow='';
+ document.getElementById('dashboardOverlay')?.classList.remove('open');
+ ['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay','crmOverlay','calendarOverlay','reportsOverlay'].forEach(id=>{
+  const el=document.getElementById(id);if(!el)return;el.classList.remove('open');el.style.display='';
+ });
+ document.getElementById('calendarModal')?.classList.remove('open');
+ document.body.style.overflow='';
 }
 function appNavigate(action){
-  closeAllProeraViews();
-  requestAnimationFrame(()=>requestAnimationFrame(async()=>{
-    if(action==='home'){document.getElementById('dashboardOverlay')?.classList.add('open');await loadDashboard();return}
-    if(action==='new'){window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>document.getElementById('buyerName')?.focus(),250);return}
-    if(action==='archive')return openArchive();
-    if(action==='customers')return openCustomers();
-    if(action==='catalog')return openCatalog('manage');
-    if(action==='stock')return openStockControl();
-    if(action==='settings'){openSettings();loadProeraPrefs();return}
-    if(action==='crm')return openCrm()
-    if(action==='calendar')return openCalendar()
-    if(action==='reports')return openReports()
-  }));
+ closeAllProeraViews();
+ requestAnimationFrame(()=>requestAnimationFrame(async()=>{
+  try{
+   if(action==='home'){document.getElementById('dashboardOverlay')?.classList.add('open');await loadDashboard();await loadDashboardCrm();await loadDashboardOperations();await renderSalesRepPerformanceFromDashboard();return}
+   if(action==='new'){window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>document.getElementById('buyerName')?.focus(),250);return}
+   if(action==='archive')return openArchive();
+   if(action==='customers')return openCustomers();
+   if(action==='crm')return openCrm();
+   if(action==='catalog')return openCatalog('manage');
+   if(action==='stock')return openStockControl();
+   if(action==='reports')return openReports();
+   if(action==='calendar')return openCalendar();
+   if(action==='settings'){openSettings();loadProeraPrefs();return}
+  }catch(e){console.error('Navigation error:',action,e);alert('Bu bölüm açılırken bir hata oluştu.')}
+ }));
 }
 function mobileNavigate(action){
  const nav=document.getElementById('mobileNav');if(nav)nav.classList.remove('open');
