@@ -1076,7 +1076,15 @@ function updateServicePriceSummary(){const p=servicePriceValues(),el=document.ge
 window._serviceRequests=[];let serviceProducts=[],serviceSelectedProducts=[],servicePreviewUrls=[];
 function serviceLocalDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function clearServiceForm(){['svcSubject','svcContact','svcPhone','svcCompanyName','svcAssigned','svcDescription','svcResolution','svcProductSearch'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});svcPriority.value='normal';svcStatus.value='bekliyor';svcDate.value=serviceLocalDate();svcNotified.checked=false;svcNotifiedAt.value='';svcNotifiedAt.disabled=true;[1,2,3,4].forEach(i=>{const e=document.getElementById('svcPhoto'+i);if(e)e.value='' });svcLaborPrice.value='0';svcPartsPrice.value='0';svcDiscount.value='0';svcVatRate.value='20';svcCurrency.value='TRY';updateServicePriceSummary();serviceSelectedProducts=[];servicePreviewUrls.forEach(URL.revokeObjectURL);servicePreviewUrls=[];renderSelectedServiceProducts();previewServicePhotos();showServiceHistory()}
-function renderServiceSuggestions(){const box=svcSuggestions,q=(svcProductSearch.value||'').trim().toLocaleLowerCase('tr-TR');if(q.length<2){box.classList.remove('open');box.innerHTML='';return}const rows=serviceProducts.filter(x=>!serviceSelectedProducts.some(y=>String(y.id)===String(x.id))&&((x.name||'').toLocaleLowerCase('tr-TR').includes(q)||(x.product_code||'').toLocaleLowerCase('tr-TR').includes(q))).slice(0,8);box.innerHTML=rows.map(x=>`<div class="svc-suggestion" onclick="addServiceProduct('${x.id}')"><span><b>${esc(x.name)}</b><small>${esc(x.product_code||'')}</small></span><small>Stok: ${+x.stock_quantity||0}</small></div>`).join('')||'<div class="svc-suggestion muted">Eşleşen ürün yok.</div>';box.classList.add('open')}
+function renderServiceSuggestions(){
+ const box=document.getElementById('svcSuggestions'),input=document.getElementById('svcProductSearch');
+ if(!box||!input)return;
+ const q=(input.value||'').trim().toLocaleLowerCase('tr-TR');
+ if(q.length<2){box.classList.remove('open');box.innerHTML='';return}
+ const rows=(serviceProducts||[]).filter(x=>!serviceSelectedProducts.some(y=>String(y.id)===String(x.id))&&((x.name||'').toLocaleLowerCase('tr-TR').includes(q)||(x.product_code||'').toLocaleLowerCase('tr-TR').includes(q))).slice(0,8);
+ box.innerHTML=rows.map(x=>`<div class="svc-suggestion" onclick="addServiceProduct('${x.id}')"><span><b>${esc(x.name)}</b><small>${esc(x.product_code||'')}</small></span><small>Stok: ${+x.stock_quantity||0}</small></div>`).join('')||'<div class="svc-suggestion muted">Eşleşen ürün yok.</div>';
+ box.classList.add('open');
+}
 function addServiceProduct(id){const p=serviceProducts.find(x=>String(x.id)===String(id));if(p&&!serviceSelectedProducts.some(x=>String(x.id)===String(id)))serviceSelectedProducts.push({...p,serial:''});svcProductSearch.value='';svcSuggestions.classList.remove('open');renderSelectedServiceProducts();showServiceHistory()}
 function removeServiceProduct(id){serviceSelectedProducts=serviceSelectedProducts.filter(x=>String(x.id)!==String(id));renderSelectedServiceProducts();showServiceHistory()}
 function setServiceSerial(id,v){const p=serviceSelectedProducts.find(x=>String(x.id)===String(id));if(p)p.serial=v.trim();showServiceHistory()}
@@ -1102,7 +1110,30 @@ async function uploadServicePhotos(){
  }
  return urls
 }
-async function openServiceRequests(){setActiveSection('service');closeAllProeraViews();serviceOverlay.style.display='block';serviceOverlay.classList.add('open');showServiceView('new');await loadServicePdfLogo();if(!svcDate.value)svcDate.value=serviceLocalDate();const pr=await sb.from('products').select('id,name,product_code,stock_quantity').eq('company_id',currentCompanyId).eq('active',true).order('name');serviceProducts=pr.data||[];renderSelectedServiceProducts();await loadServiceRequests()}
+function showServiceView(view){
+ const isArchive=view==='archive';
+ const nv=document.getElementById('svcNewView');
+ const av=document.getElementById('svcArchiveView');
+ if(nv)nv.style.display=isArchive?'none':'block';
+ if(av)av.style.display=isArchive?'block':'none';
+ document.getElementById('svcNewTab')?.classList.toggle('active',!isArchive);
+ document.getElementById('svcArchiveTab')?.classList.toggle('active',isArchive);
+ if(isArchive && currentCompanyId) loadServiceRequests();
+}
+async function openServiceRequests(){
+ setActiveSection('service');closeAllProeraViews();
+ const overlay=document.getElementById('serviceOverlay');
+ if(!overlay)return alert('Teknik Servis ekranı bulunamadı.');
+ overlay.style.display='block';overlay.classList.add('open');
+ showServiceView('new');
+ try{await loadServicePdfLogo()}catch(e){console.error('Servis logosu:',e)}
+ const dateEl=document.getElementById('svcDate');if(dateEl&&!dateEl.value)dateEl.value=serviceLocalDate();
+ const pr=await sb.from('products').select('id,name,product_code,stock_quantity').eq('company_id',currentCompanyId).eq('active',true).order('name');
+ if(pr.error){console.error('Servis ürünleri:',pr.error);serviceProducts=[];alert('Ürün kataloğu yüklenemedi: '+pr.error.message)}
+ else serviceProducts=pr.data||[];
+ renderSelectedServiceProducts();
+ await loadServiceRequests();
+}
 function closeServiceRequests(){serviceOverlay.style.display='none';serviceOverlay.classList.remove('open');svcSuggestions.classList.remove('open')}
 async function saveServiceRequest(){const subject=svcSubject.value.trim(),company=svcCompanyName.value.trim(),assigned=svcAssigned.value.trim();if(!subject||!company||!assigned){alert('Servis konusu, firma ve ilgilenen personel zorunludur.');return}if(!currentUser||!currentCompanyId){alert('Çalışma alanı hazır değil.');return}let photos=[];try{photos=await uploadServicePhotos()}catch(e){alert('Fotoğraf yüklenemedi: '+e.message);return}const payload={company_id:currentCompanyId,subject,customer_name:company,contact_name:svcContact.value.trim(),phone:svcPhone.value.trim(),assigned_to:assigned,service_date:svcDate.value||serviceLocalDate(),priority:svcPriority.value,status:svcStatus.value,description:svcDescription.value.trim(),resolution:svcResolution.value.trim(),product_id:serviceSelectedProducts[0]?.id||null,product_name:serviceSelectedProducts[0]?.name||null,product_ids:serviceSelectedProducts.map(x=>x.id),product_names:serviceSelectedProducts.map(x=>x.name),serial_numbers:serviceSelectedProducts.map(x=>({product_id:x.id,product_name:x.name,serial:x.serial||''})),photo_urls:photos,notified_customer:svcNotified.checked,notified_at:svcNotified.checked?(svcNotifiedAt.value||serviceLocalDate()):null,labor_price:servicePriceValues().labor,parts_price:servicePriceValues().parts,service_discount:servicePriceValues().discount,service_vat_rate:servicePriceValues().vat,service_currency:servicePriceValues().currency,created_by:currentUser.id,created_by_name:currentUser.user_metadata?.full_name||currentUser.email,updated_at:new Date().toISOString()};const {error}=await sb.from('service_requests').insert(payload).select().single();if(error){alert('Servis kaydı kaydedilemedi: '+error.message);return}clearServiceForm();await loadServiceRequests();await loadDashboardService();await refreshNavBadges();showServiceView('archive');alert('Teknik servis formu kaydedildi ve arşive eklendi.')}
 async function loadServiceRequests(){const {data,error}=await sb.from('service_requests').select('*').eq('company_id',currentCompanyId).order('service_date',{ascending:false}).order('created_at',{ascending:false}).limit(300);if(error){serviceList.innerHTML='<div class="muted">Talepler yüklenemedi: '+esc(error.message)+'</div>';return}window._serviceRequests=data||[];const ac=document.getElementById('svcArchiveCount');if(ac)ac.textContent=`(${window._serviceRequests.length})`;renderServiceRequests();showServiceHistory()}
