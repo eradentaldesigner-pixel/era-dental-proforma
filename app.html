@@ -394,6 +394,30 @@ input,textarea,select{border:1px solid rgba(15,23,42,.12)!important;border-radiu
 }
 </style>
 
+
+<style id="v14315-mobile-layer-fix">
+@media(max-width:800px){
+  .mobile-appbar{z-index:9700!important}
+  .mobile-drawer-shell{z-index:9800!important}
+  .settings-overlay,.catalog-overlay,.stock-overlay,.archive-overlay{z-index:10020!important}
+  .customer-overlay{z-index:10020!important}
+  .mobile-notify-shell{z-index:10050!important}
+
+  .settings-overlay,.catalog-overlay,.stock-overlay,.archive-overlay,.customer-overlay{
+    overflow-y:auto!important;
+    touch-action:pan-y;
+    -webkit-overflow-scrolling:touch;
+  }
+  .settings-modal,.catalog-modal,.stock-modal,.archive-modal,.customer-modal{
+    position:relative!important;
+    z-index:1!important;
+    margin:0 auto!important;
+  }
+  .settings-overlay{padding:10px!important}
+  .settings-modal{min-height:min-content!important}
+}
+</style>
+
 </head><body><input type="checkbox" id="mobileNavToggle" aria-hidden="true">
 <div class="mobile-appbar" aria-label="Mobil üst menü">
   <label class="m-icon" for="mobileNavToggle" aria-label="Menüyü aç"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></label>
@@ -409,11 +433,11 @@ input,textarea,select{border:1px solid rgba(15,23,42,.12)!important;border-radiu
     <nav class="md-menu">
       <button class="active" type="button" onclick="document.getElementById('mobileNavToggle').checked=false"><span class="mi"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>Ana Sayfa</button>
       <button type="button" onclick="document.getElementById('mobileNavToggle').checked=false;resetForm()"><span class="mi"><svg viewBox="0 0 24 24"><path d="M6 2h8l4 4v16H6zM14 2v5h5M9 12h6M9 16h6"/></svg></span>Yeni Proforma</button>
-      <button type="button" onclick="document.getElementById('mobileNavToggle').checked=false;openArchive()"><span class="mi"><svg viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v11H3z"/></svg></span>Proforma Arşivi</button>
-      <button type="button" onclick="document.getElementById('mobileNavToggle').checked=false;openCatalog('manage')"><span class="mi"><svg viewBox="0 0 24 24"><path d="m12 3 8 4-8 4-8-4zM4 7v10l8 4 8-4V7M12 11v10"/></svg></span>Ürün Kataloğu</button>
-      <button type="button" onclick="document.getElementById('mobileNavToggle').checked=false;openStockControl()"><span class="mi"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Stok Kontrolü</button>
-      <button type="button" onclick="openMobileCustomers()"><span class="mi"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Müşteriler</button>
-      <button type="button" onclick="document.getElementById('mobileNavToggle').checked=false;openSettings()"><span class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.16.36.37.7.6 1 .28.34.67.55 1.1.6h.1v4h-.1c-.43.05-.82.26-1.1.6-.23.3-.44.64-.6 1z"/></svg></span>Ayarlar</button>
+      <button type="button" onclick="closeMobileNavThen(openArchive)"><span class="mi"><svg viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v11H3z"/></svg></span>Proforma Arşivi</button>
+      <button type="button" onclick="closeMobileNavThen(()=>openCatalog('manage'))"><span class="mi"><svg viewBox="0 0 24 24"><path d="m12 3 8 4-8 4-8-4zM4 7v10l8 4 8-4V7M12 11v10"/></svg></span>Ürün Kataloğu</button>
+      <button type="button" onclick="closeMobileNavThen(openStockControl)"><span class="mi"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Stok Kontrolü</button>
+      <button type="button" onclick="closeMobileNavThen(openCustomers)"><span class="mi"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Müşteriler</button>
+      <button type="button" onclick="closeMobileNavThen(openSettings)"><span class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.16.36.37.7.6 1 .28.34.67.55 1.1.6h.1v4h-.1c-.43.05-.82.26-1.1.6-.23.3-.44.64-.6 1z"/></svg></span>Ayarlar</button>
       <div class="md-sep"></div>
       <button type="button" onclick="document.getElementById('mobileNavToggle').checked=false;logoutUser()"><span class="mi"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3M14 3h6a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-6"/></svg></span>Çıkış Yap</button>
     </nav>
@@ -470,6 +494,11 @@ async function checkLowStock(){if(!currentUser)return;const [{data:notes,error},
 function toggleNotifications(e){if(e)e.stopPropagation();document.getElementById('notifyPanel')?.classList.toggle('open')}
 function toggleMobileNotifications(e){if(e)e.stopPropagation();document.getElementById('mobileNotifyShell')?.classList.toggle('open');checkLowStock()}
 function closeMobileNotifications(){document.getElementById('mobileNotifyShell')?.classList.remove('open')}
+function closeMobileNavThen(fn){
+  const t=document.getElementById('mobileNavToggle');
+  if(t)t.checked=false;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{if(typeof fn==='function')fn()}));
+}
 function openMobileCustomers(){document.getElementById('mobileNavToggle').checked=false;openCustomers()}
 async function markNotificationRead(id,cycle){if(!currentUser)return;await sb.from('stock_notification_reads').upsert({user_id:currentUser.id,product_id:Number(id),cycle:Number(cycle),read_at:new Date().toISOString()},{onConflict:'user_id,product_id,cycle'});await checkLowStock()}
 async function markAllNotificationsRead(e){if(e)e.stopPropagation();if(!currentUser)return;const unread=(window._stockNotifications||[]).filter(x=>!x.read);if(unread.length)await sb.from('stock_notification_reads').upsert(unread.map(x=>({user_id:currentUser.id,product_id:x.product_id,cycle:x.cycle,read_at:new Date().toISOString()})),{onConflict:'user_id,product_id,cycle'});await checkLowStock()}
