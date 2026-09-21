@@ -418,7 +418,48 @@ input,textarea,select{border:1px solid rgba(15,23,42,.12)!important;border-radiu
 }
 </style>
 
-</head><body><input type="checkbox" id="mobileNavToggle" aria-hidden="true">
+
+<style id="v14317-desktop-sidebar">
+@media(min-width:801px){
+ body{padding-left:224px!important}
+ .top{left:244px!important;width:calc(100% - 264px)!important}
+ .desktop-side{
+   display:flex!important;position:fixed;left:0;top:0;bottom:0;width:224px;z-index:9600;
+   background:linear-gradient(180deg,#071d3c 0%,#06274e 58%,#04182f 100%);
+   color:#fff;flex-direction:column;padding:22px 13px 16px;box-sizing:border-box;
+   box-shadow:10px 0 32px rgba(5,25,52,.10)
+ }
+ .ds-brand{display:flex;align-items:center;gap:10px;padding:2px 9px 22px;font-size:21px;font-weight:900}
+ .ds-brand img{width:34px;height:34px;object-fit:contain}
+ .ds-nav{display:flex;flex-direction:column;gap:5px}
+ .ds-btn{width:100%;border:0;background:transparent;color:#d9e7f7;text-align:left;padding:11px 12px;border-radius:10px;
+   font:700 12px/1.2 inherit;cursor:pointer;display:flex;align-items:center;gap:11px;transition:.16s}
+ .ds-btn:hover{background:rgba(255,255,255,.08);color:#fff}.ds-btn.primary{background:#0878ff;color:#fff}
+ .ds-icon{width:20px;text-align:center;font-size:16px}
+ .ds-spacer{flex:1}.ds-profile{border-top:1px solid rgba(255,255,255,.14);padding:14px 9px 0;color:#c8d7e9;font-size:11px}
+ .ds-profile b{display:block;color:#fff;font-size:12px;margin-bottom:3px}
+ .wrap{max-width:none!important}
+}
+@media(max-width:800px){.desktop-side{display:none!important}}
+</style>
+
+</head><body>
+
+<aside class="desktop-side" aria-label="Ana navigasyon">
+ <div class="ds-brand"><img src="proera-silver-p.png" alt="Proera"><span>Proera</span></div>
+ <nav class="ds-nav">
+  <button class="ds-btn" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'})"><span class="ds-icon">⌂</span>Ana Sayfa</button>
+  <button class="ds-btn primary" type="button" onclick="window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>document.getElementById('buyerName')?.focus(),300)"><span class="ds-icon">▤</span>Yeni Proforma</button>
+  <button class="ds-btn" type="button" onclick="openArchive()"><span class="ds-icon">▰</span>Proforma Arşivi</button>
+  <button class="ds-btn" type="button" onclick="openCustomers()"><span class="ds-icon">♟</span>Müşteriler</button>
+  <button class="ds-btn" type="button" onclick="openCatalog('manage')"><span class="ds-icon">◇</span>Ürün Kataloğu</button>
+  <button class="ds-btn" type="button" onclick="openStockControl()"><span class="ds-icon">▥</span>Stok Kontrolü</button>
+  <button class="ds-btn" type="button" onclick="openSettings()"><span class="ds-icon">⚙</span>Ayarlar</button>
+ </nav>
+ <div class="ds-spacer"></div>
+ <div class="ds-profile"><b id="desktopSideCompany">Çalışma Alanı</b><span>Teklif & Proforma Yönetimi</span></div>
+</aside>
+<input type="checkbox" id="mobileNavToggle" aria-hidden="true">
 <div class="mobile-appbar" aria-label="Mobil üst menü">
   <label class="m-icon" for="mobileNavToggle" aria-label="Menüyü aç"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></label>
   <div class="m-brand"><img src="proera-silver-p.png" alt="Proera"><span>Proera</span></div>
