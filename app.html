@@ -607,6 +607,14 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
 .schedule-row{display:grid;grid-template-columns:70px 1.1fr 1fr 1fr;gap:9px;padding:10px 6px;border-top:1px solid #edf1f5;align-items:center;font-size:11px}.schedule-time{font-weight:900;color:#0b64c0}.schedule-person{font-weight:900;color:#17345c}.schedule-type{display:inline-flex;width:max-content;padding:4px 7px;border-radius:999px;background:#e8f2ff;color:#075fc4;font-weight:800;font-size:9px}.sales-flow-row{display:grid;grid-template-columns:1.1fr 1.4fr .8fr .8fr;gap:8px;padding:10px 6px;border-top:1px solid #edf1f5;font-size:11px;align-items:center}.sales-flow-row small{color:#718096}.calendar-save-state{font-size:11px;color:#087443;font-weight:800;margin-right:auto}@media(max-width:800px){.schedule-row,.sales-flow-row{grid-template-columns:1fr 1fr}.schedule-row>span:nth-child(3),.schedule-row>span:nth-child(4){font-size:10px}}
 </style>
 
+
+<style id="v1452-dashboard-contact-details">
+.dash-crm-rich{display:grid;grid-template-columns:1.15fr 1.35fr 1.15fr .7fr auto;gap:12px;align-items:center;padding:12px 6px;border-top:1px solid #edf1f5;font-size:11px}
+.dash-crm-rich:first-child{border-top:0}.dash-crm-rich small{display:block;color:#718096;margin-top:3px}
+.dash-crm-main b,.dash-crm-product b{color:#17345c}.dash-crm-contact{display:flex;flex-direction:column;gap:5px;color:#52667e}.dash-crm-date b{display:block;margin-top:3px}
+@media(max-width:800px){.dash-crm-rich{grid-template-columns:1fr auto;gap:8px}.dash-crm-product,.dash-crm-contact,.dash-crm-date{grid-column:1/-1}.dash-crm-contact{flex-direction:row;flex-wrap:wrap;gap:10px}.dash-crm-rich .status-pill{grid-column:2;grid-row:1}}
+</style>
+
 </head><body>
 
 <aside class="desktop-side" aria-label="Ana navigasyon">
@@ -1115,7 +1123,7 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 
 
 let crmData=[],crmProducts=[];
-function crmTone(s){return s==='onaylandi'?['green','Onaylandı']:s==='kaybedildi'?['red','Olumsuz / Kaçtı']:['yellow','Görüşülüyor']}
+function crmTone(s){return s==='onaylandi'?['green','Onaylandı']:s==='kaybedildi'?['red','Olumsuz / Kaçtı']:['yellow','Takip Ediliyor']}
 async function openCrm(){initTurkeyCities();
  closeAllProeraViews();document.getElementById('crmOverlay')?.classList.add('open');document.body.style.overflow='hidden';
  const [ir,pr]=await Promise.all([sb.from('customer_interactions').select('*').order('interaction_date',{ascending:false}),sb.from('products').select('id,name,product_code').eq('active',true).order('name')]);
@@ -1198,9 +1206,21 @@ function renderSalesRepPerformance(rows){
  box.innerHTML='<div class="rep-row head"><span>Temsilci</span><span>Görüşme</span><span>Onay</span><span>Takip</span><span>Dönüşüm</span></div>'+arr.map(([n,r])=>`<div class="rep-row"><b>${esc(n)}</b><span>${r.total}</span><span class="status-pill tone-green">${r.ok}</span><span class="status-pill tone-yellow">${r.wait}</span><b>%${r.total?Math.round(r.ok/r.total*100):0}</b></div>`).join('');
 }
 async function loadDashboardCrmV2(){
- const {data}=await sb.from('customer_interactions').select('*').order('interaction_date',{ascending:false}).limit(100);
+ const {data}=await sb.from('customer_interactions').select('*').eq('company_id',currentCompanyId).order('interaction_date',{ascending:false}).limit(100);
  const rows=data||[];renderSalesRepPerformance(rows);
- const box=document.getElementById('dashCrm');if(box)box.innerHTML=rows.slice(0,6).map(x=>{const[t,l]=crmTone(x.status);const products=((x.product_names&&x.product_names.length)?x.product_names.join(', '):x.product_name)||'Ürün belirtilmedi';return `<div class="dash-crm-row"><span><b>${esc(x.contact_name||x.company_name||'-')}</b><br><small>${esc(products)}${x.sales_rep?' • 👤 '+esc(x.sales_rep):''}</small></span><span class="status-pill tone-${t}">${l}</span></div>`}).join('')||'<div class="muted">Henüz görüşme kaydı yok.</div>';
+ const box=document.getElementById('dashCrm');
+ if(box)box.innerHTML=rows.slice(0,6).map(x=>{
+   const[t,l0]=crmTone(x.status), l=x.status==='gorusuluyor'?'Takip Ediliyor':l0;
+   const products=((x.product_names&&x.product_names.length)?x.product_names.join(', '):x.product_name)||'Ürün belirtilmedi';
+   const d=x.interaction_date?new Date(x.interaction_date+'T12:00:00').toLocaleDateString('tr-TR'):'-';
+   return `<div class="dash-crm-rich">
+    <div class="dash-crm-main"><b>${esc(x.contact_name||x.company_name||'-')}</b><small>${x.company_name&&x.contact_name?esc(x.company_name):''}</small></div>
+    <div class="dash-crm-product"><b>${esc(products)}</b><small>👤 ${esc(x.sales_rep||'Görüşen kişi belirtilmedi')}</small></div>
+    <div class="dash-crm-contact"><span>📍 ${esc(x.city||'İl belirtilmedi')}</span><span>☎ ${esc(x.phone||'Telefon yok')}</span></div>
+    <div class="dash-crm-date"><small>Görüşme tarihi</small><b>${esc(d)}</b></div>
+    <span class="status-pill tone-${t}">${esc(l)}</span>
+   </div>`
+ }).join('')||'<div class="muted">Henüz görüşme kaydı yok.</div>';
 }
 
 
