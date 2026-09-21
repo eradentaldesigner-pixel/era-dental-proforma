@@ -1371,8 +1371,15 @@ function animateActiveView(){
  requestAnimationFrame(()=>{const candidates=['dashboardOverlay','archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay','crmOverlay','calendarOverlay','reportsOverlay','serviceOverlay'];const el=candidates.map(id=>document.getElementById(id)).find(x=>x&&(x.classList.contains('open')||getComputedStyle(x).display!=='none'));const target=el||document.querySelector('main.wrap');if(!target)return;target.classList.remove('proera-view-enter');void target.offsetWidth;target.classList.add('proera-view-enter');setTimeout(()=>target.classList.remove('proera-view-enter'),380)})}
 let calV2Cursor=new Date(),calV2Events=[];
 function calV2ISO(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
-async function openCalendarV2(){closeAllProeraViews();setActiveSection('calendar');calendarV2Overlay.classList.add('open');await loadCalV2()}
-function closeCalendarV2(){calendarV2Overlay.classList.remove('open')}
+async function openCalendarV2(){
+ closeAllProeraViews();
+ setActiveSection('calendar');
+ const overlay=document.getElementById('calendarV2Overlay');
+ if(!overlay){console.error('calendarV2Overlay bulunamadı');return}
+ overlay.classList.add('open');
+ await loadCalV2();
+}
+function closeCalendarV2(){document.getElementById('calendarV2Overlay')?.classList.remove('open')}
 function calV2Today(){calV2Cursor=new Date();loadCalV2()}
 function calV2Shift(n){calV2Cursor=new Date(calV2Cursor.getFullYear(),calV2Cursor.getMonth()+n,1);loadCalV2()}
 async function loadCalV2(){
@@ -1383,19 +1390,19 @@ async function loadCalV2(){
 }
 function renderCalV2(){
  const months=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'],y=calV2Cursor.getFullYear(),m=calV2Cursor.getMonth();
- calV2Title.textContent=`${months[m]} ${y}`;calV2MiniTitle.textContent=`${months[m]} ${y}`;
+ document.getElementById('calV2Title').textContent=`${months[m]} ${y}`;document.getElementById('calV2MiniTitle').textContent=`${months[m]} ${y}`;
  const first=new Date(y,m,1),offset=(first.getDay()+6)%7,start=new Date(y,m,1-offset),today=calV2ISO(new Date());
  let h='';
  for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const iso=calV2ISO(d),ev=calV2Events.filter(x=>x.event_date===iso);
  h+=`<div class="calv2-day ${d.getMonth()!==m?'other':''}" onclick="openCalV2Editor('${iso}')"><div class="calv2-daynum ${iso===today?'today':''}">${d.getDate()}</div>${ev.slice(0,5).map(x=>`<div class="calv2-event" data-type="${esc(x.event_type||'diger')}" onclick="event.stopPropagation();editCalV2Event(${x.id})"><i class="calv2-dot"></i><span>${x.start_time?esc(x.start_time.slice(0,5))+' ':''}${esc(x.title)}</span></div>`).join('')}${ev.length>5?`<small>+${ev.length-5} daha</small>`:''}</div>`}
- calV2Grid.innerHTML=h;
+ document.getElementById('calV2Grid').innerHTML=h;
  let mh='<b>P</b><b>S</b><b>Ç</b><b>P</b><b>C</b><b>C</b><b>P</b>';
- for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);mh+=`<span class="${calV2ISO(d)===today?'today':''}">${d.getDate()}</span>`}calV2Mini.innerHTML=mh;
+ for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);mh+=`<span class="${calV2ISO(d)===today?'today':''}">${d.getDate()}</span>`}document.getElementById('calV2Mini').innerHTML=mh;
 }
 function openCalV2Editor(date=''){
- calV2Id.value='';calV2EventTitle.value='';calV2Date.value=date||calV2ISO(new Date());calV2Type.value='kurulum';calV2Start.value='';calV2End.value='';calV2Customer.value='';calV2Personnel.value='';calV2Location.value='';calV2Notes.value='';calV2Delete.style.display='none';calV2Modal.classList.add('open')
+ calV2Id.value='';calV2EventTitle.value='';calV2Date.value=date||calV2ISO(new Date());calV2Type.value='kurulum';calV2Start.value='';calV2End.value='';calV2Customer.value='';calV2Personnel.value='';calV2Location.value='';calV2Notes.value='';calV2Delete.style.display='none';document.getElementById('calV2Modal').classList.add('open')
 }
-function closeCalV2Editor(){calV2Modal.classList.remove('open')}
+function closeCalV2Editor(){document.getElementById('calV2Modal')?.classList.remove('open')}
 function editCalV2Event(id){const x=calV2Events.find(e=>e.id===id);if(!x)return;openCalV2Editor(x.event_date);calV2Id.value=x.id;calV2EventTitle.value=x.title||'';calV2Type.value=x.event_type||'diger';calV2Start.value=(x.start_time||'').slice(0,5);calV2End.value=(x.end_time||'').slice(0,5);calV2Customer.value=x.customer_name||'';calV2Personnel.value=x.personnel||'';calV2Location.value=x.location||'';calV2Notes.value=x.notes||'';calV2Delete.style.display='block'}
 async function saveCalV2Event(e){e.preventDefault();const payload={company_id:currentCompanyId,title:calV2EventTitle.value.trim(),event_date:calV2Date.value,event_type:calV2Type.value,start_time:calV2Start.value||null,end_time:calV2End.value||null,customer_name:calV2Customer.value.trim()||null,personnel:calV2Personnel.value.trim()||null,location:calV2Location.value.trim()||null,notes:calV2Notes.value.trim()||null,created_by:currentUser?.id||null};let q=calV2Id.value?sb.from('calendar_events').update(payload).eq('id',calV2Id.value).eq('company_id',currentCompanyId):sb.from('calendar_events').insert(payload);const {error}=await q;if(error){alert('Etkinlik kaydedilemedi: '+error.message);return}closeCalV2Editor();calV2Cursor=new Date(calV2Date.value+'T12:00:00');await loadCalV2()}
 async function deleteCalV2Event(){if(!calV2Id.value||!confirm('Etkinlik silinsin mi?'))return;const {error}=await sb.from('calendar_events').delete().eq('id',calV2Id.value).eq('company_id',currentCompanyId);if(error){alert(error.message);return}closeCalV2Editor();await loadCalV2()}
