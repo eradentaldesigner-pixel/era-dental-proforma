@@ -1,0 +1,1 @@
+-- Applied in production: role-aware RLS, soft-delete columns, private tenant-scoped service storage.

@@ -12,3 +12,10 @@ Still requires a dedicated migration/test cycle before enabling:
 - Soft-delete/trash retention for business records.
 - CAPTCHA/MFA/leaked-password protection in Supabase Auth.
 - Automated tenant-isolation penetration tests.
+
+V19.1 implemented:
+- service-photos and service-assets are private.
+- Tenant-scoped Storage RLS based on company_id path prefix.
+- Signed URLs for service photos/logo.
+- Role-aware RLS matrix (owner/admin/sales/service/accounting/viewer).
+- Soft delete + restore UI for CRM and Technical Service.
