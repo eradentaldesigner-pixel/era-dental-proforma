@@ -615,6 +615,20 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
 @media(max-width:800px){.dash-crm-rich{grid-template-columns:1fr auto;gap:8px}.dash-crm-product,.dash-crm-contact,.dash-crm-date{grid-column:1/-1}.dash-crm-contact{flex-direction:row;flex-wrap:wrap;gap:10px}.dash-crm-rich .status-pill{grid-column:2;grid-row:1}}
 </style>
 
+
+<style id="v1455-mobile-desktop-sync">
+.mobile-nav-sync{display:flex;flex-direction:column;gap:5px;padding:8px}
+.mobile-nav-item{width:100%;border:0;background:transparent;color:#dce8f7;border-radius:10px;padding:11px 12px;display:flex;align-items:center;gap:10px;text-align:left;font:inherit;font-size:13px;font-weight:750;cursor:pointer}
+.mobile-nav-item span{width:22px;text-align:center;font-size:15px}.mobile-nav-item:hover,.mobile-nav-item:active{background:rgba(255,255,255,.09);color:#fff}
+@media(max-width:800px){
+ .dash-grid{grid-template-columns:1fr!important}
+ #dashTodaySchedule,#dashUpcomingSchedule,#dashSalesFlow,#dashCrm,#dashSalesReps{width:100%;overflow:hidden}
+ .crm-overlay,.calendar-overlay{left:0!important}
+ .crm-shell,.calendar-shell{width:100%;max-width:none}
+ .dash-crm-rich{width:100%;box-sizing:border-box}
+}
+</style>
+
 </head><body>
 
 <aside class="desktop-side" aria-label="Ana navigasyon">
@@ -646,14 +660,22 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
     <div class="md-slogan">Teklifleri Bugün Yönetin,<br><b>Yarın Büyüyün.</b></div>
     <div class="md-account"><div class="md-avatar">P</div><div><b>Proera Hesabı</b><small>Firma çalışma alanı</small></div></div>
     <nav class="md-menu">
-      <button class="active" type="button" onclick="mobileNavigate('home')"><span class="mi"><svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>Ana Sayfa</button>
+      
       <button type="button" onclick="document.getElementById('mobileNavToggle').checked=false;resetForm()"><span class="mi"><svg viewBox="0 0 24 24"><path d="M6 2h8l4 4v16H6zM14 2v5h5M9 12h6M9 16h6"/></svg></span>Yeni Proforma</button>
       <button type="button" onclick="closeMobileNavThen(openArchive)"><span class="mi"><svg viewBox="0 0 24 24"><path d="M3 6h7l2 2h9v11H3z"/></svg></span>Proforma Arşivi</button>
       <button type="button" onclick="closeMobileNavThen(()=>openCatalog('manage'))"><span class="mi"><svg viewBox="0 0 24 24"><path d="m12 3 8 4-8 4-8-4zM4 7v10l8 4 8-4V7M12 11v10"/></svg></span>Ürün Kataloğu</button>
       <button type="button" onclick="closeMobileNavThen(openStockControl)"><span class="mi"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Stok Kontrolü</button>
       <button type="button" onclick="closeMobileNavThen(openCustomers)"><span class="mi"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Müşteriler</button>
       <button type="button" onclick="closeMobileNavThen(openSettings)"><span class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.16.36.37.7.6 1 .28.34.67.55 1.1.6h.1v4h-.1c-.43.05-.82.26-1.1.6-.23.3-.44.64-.6 1z"/></svg></span>Ayarlar</button>
-      <div class="md-sep"></div>
+      <div class="md-sep"><div class="mobile-nav-sync"><button class="mobile-nav-item" type="button" onclick="mobileNavigate('home')"><span>⌂</span>Ana Sayfa</button>
+<button class="mobile-nav-item" type="button" onclick="mobileNavigate('new')"><span>＋</span>Yeni Proforma</button>
+<button class="mobile-nav-item" type="button" onclick="mobileNavigate('archive')"><span>▤</span>Proforma Arşivi</button>
+<button class="mobile-nav-item" type="button" onclick="mobileNavigate('customers')"><span>♙</span>Müşteriler</button>
+<button class="mobile-nav-item" type="button" onclick="mobileNavigate('crm')"><span>◉</span>Görüşmeler</button>
+<button class="mobile-nav-item" type="button" onclick="mobileNavigate('catalog')"><span>▦</span>Ürün Kataloğu</button>
+<button class="mobile-nav-item" type="button" onclick="mobileNavigate('stock')"><span>▥</span>Stok Kontrolü</button>
+<button class="mobile-nav-item" type="button" onclick="mobileNavigate('calendar')"><span>▣</span>Takvim</button>
+<button class="mobile-nav-item" type="button" onclick="mobileNavigate('settings')"><span>⚙</span>Ayarlar</button></div></div>
       <button type="button" onclick="document.getElementById('mobileNavToggle').checked=false;logoutUser()"><span class="mi"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3M14 3h6a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-6"/></svg></span>Çıkış Yap</button>
     </nav>
     <div class="md-foot">Proera v14.3.12<br>Teklifleri Bugün Yönetin, Yarın Büyüyün.</div>
@@ -1047,28 +1069,9 @@ function appNavigate(action){
     if(action==='calendar')return openCalendar()
   }));
 }
-function mobileNavigate(action){const t=document.getElementById('mobileNavToggle');if(t)t.checked=false;setTimeout(()=>appNavigate(action),80)}
-function openMobileNavFromLayer(){closeAllProeraViews();const t=document.getElementById('mobileNavToggle');if(t)t.checked=true}
-async function loadDashboard(){
-  if(!sb||!currentUser)return;
-  const recentBox=document.getElementById('dashRecent'), stockBox=document.getElementById('dashStock');
-  const now=new Date(), first=new Date(now.getFullYear(),now.getMonth(),1).toISOString().slice(0,10);
-  const [pr,cu,po]=await Promise.all([
-    sb.from('proformas').select('id,proforma_number,proforma_date,customer_name,currency,grand_total,status,created_at').order('created_at',{ascending:false}).limit(50),
-    sb.from('customers').select('id',{count:'exact',head:true}),
-    sb.from('products').select('id,name,product_code,stock_quantity,stock_low_threshold,stock_good_threshold').order('stock_quantity',{ascending:true}).limit(100)
-  ]);
-  const rows=pr.data||[], month=rows.filter(x=>(x.proforma_date||'')>=first), approved=rows.filter(x=>statusLabel(x.status)==='Onaylandı'), waiting=rows.filter(x=>statusLabel(x.status)==='Onaya Gönderildi');
-  const totals={}; month.forEach(x=>{const c=x.currency||'';totals[c]=(totals[c]||0)+(+x.grand_total||0)});
-  document.getElementById('dashMonthCount').textContent=month.length;
-  document.getElementById('dashMonthTotal').textContent=Object.entries(totals).map(([c,v])=>money(v)+' '+c).join(' · ')||'0';
-  document.getElementById('dashApproved').textContent=approved.length;document.getElementById('dashWaiting').textContent=waiting.length;
-  document.getElementById('dashCustomers').textContent=cu.count||0;
-  const products=po.data||[], low=products.filter(x=>(+x.stock_quantity||0)<=(+x.stock_low_threshold||5));
-  renderSmartDashboard(rows,products);loadDashboardCrm();loadDashboardOperations();renderSalesRepPerformanceFromDashboard();
-  document.getElementById('dashLowStock').textContent=low.length;
-      const company=document.getElementById('profileCompany')?.textContent||'';
-  document.getElementById('dashCompany').textContent=(company&&company!=='Firma'?company+' • ':'')+'Çalışma alanınızın güncel özeti.';
+function mobileNavigate(action){
+ const nav=document.getElementById('mobileNav');if(nav)nav.classList.remove('open');
+ setTimeout(()=>appNavigate(action),80);
 }
 const PREF_KEY='proera_ui_prefs_v1';
 function loadProeraPrefs(){let p={};try{p=JSON.parse(localStorage.getItem(PREF_KEY)||'{}')}catch(e){};const set=(id,v)=>{const e=document.getElementById(id);if(e&&v!==undefined)e.type==='checkbox'?e.checked=!!v:e.value=v};set('prefAccent',p.accent||'#111827');set('prefFontSize',p.fontSize||'normal');set('prefTableStyle',p.tableStyle||'clean');set('prefPdfPrefix',p.pdfPrefix||'');set('prefShowLogo',p.showLogo!==false);set('prefShowBanks',p.showBanks!==false);set('prefShowPayment',p.showPayment!==false);set('prefShowNotes',p.showNotes!==false);set('prefShowValidity',p.showValidity!==false);set('prefShowBidder',p.showBidder!==false);previewPrefs()}
