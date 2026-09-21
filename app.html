@@ -563,6 +563,14 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
 @media(max-width:800px){.crm-overlay,.guide-overlay{padding:0;align-items:stretch}.crm-modal{width:100%;max-height:none;height:100%;border-radius:0}.crm-grid{grid-template-columns:1fr}.crm-grid .wide,.crm-grid .full{grid-column:auto}.crm-report{grid-template-columns:1fr 1fr}.crm-row{grid-template-columns:1fr 1fr}.crm-actions{grid-column:1/-1}.guide-card{margin:auto;border-radius:20px}.crm-head{padding-left:64px}}
 </style>
 
+
+<style id="v1441-crm-reminders">
+#ciProduct{min-height:125px;padding:7px}#ciProduct option{padding:6px;border-radius:6px}
+.reminder-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;background:#e8f2ff;color:#075fc4;font-size:10px;font-weight:900;border:1px solid #a9cffd}
+.reminder-badge.due{background:#fff0b8;color:#805700;border-color:#e9bd39;animation:strongYellow 1.8s ease-in-out infinite}
+.reminder-badge.today{background:#ffdede;color:#a91d25;border-color:#ef858a;animation:strongRed 1.6s ease-in-out infinite}
+</style>
+
 </head><body>
 
 <aside class="desktop-side" aria-label="Ana navigasyon">
@@ -653,7 +661,7 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
  </div>
 
 
-<div class="dash-panel" style="margin-top:14px"><div class="chart-title"><h3>Satış Takibi / Son Görüşmeler</h3><button class="btn light" onclick="appNavigate('crm')">Tümünü Gör</button></div><div id="dashCrm" class="dash-crm"><div class="muted">Yükleniyor…</div></div></div>
+<div class="dash-panel" style="margin-top:14px"><div class="chart-title"><h3>Satış Takibi / Son Görüşmeler</h3></div><div id="dashCrm" class="dash-crm"><div class="muted">Yükleniyor…</div></div></div>
 <div class="dash-chart-grid">
  <div class="chart-box"><div class="chart-title"><h3>Teklif Aktivitesi</h3><small>Son 6 ay</small></div><div id="dashBarChart" class="bar-chart"></div></div>
  <div class="chart-box"><div class="chart-title"><h3>Teklif Durumları</h3><small>Genel dağılım</small></div><div class="donut-wrap"><div id="dashDonut" class="donut" style="--g:0%;--y:0%;--r:0%"></div><div id="dashLegend" class="legend"></div></div></div>
@@ -669,9 +677,9 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
     <input id="ciId" type="hidden">
     <div class="crm-grid">
      <div><label>Ad Soyad</label><input id="ciContact"></div><div><label>Firma</label><input id="ciCompany"></div><div><label>Telefon</label><input id="ciPhone"></div>
-     <div><label>İl</label><input id="ciCity" placeholder="İstanbul"></div><div><label>Görüşme Tarihi</label><input id="ciDate" type="date"></div>
+     <div><label>İl</label><input id="ciCity" list="turkeyCities" autocomplete="off" placeholder="İl yazmaya başlayın…"><datalist id="turkeyCities"></datalist></div><div><label>Görüşme Tarihi</label><input id="ciDate" type="date" readonly title="Görüşmenin kaydedildiği gün otomatik atanır"></div>
      <div><label>Durum</label><select id="ciStatus"><option value="gorusuluyor">Görüşülüyor / Takipte</option><option value="onaylandi">Onaylandı</option><option value="kaybedildi">Olumsuz / Kaçtı</option></select></div>
-     <div class="wide"><label>Görüşülen Ürün</label><select id="ciProduct"></select></div><div><label>Sonraki Takip</label><input id="ciFollow" type="date"></div>
+     <div class="wide"><label>Görüşülen Ürünler</label><select id="ciProduct" multiple size="5" title="Ctrl/Cmd ile birden fazla ürün seçebilirsiniz"></select><small>Birden fazla ürün seçebilirsiniz.</small></div><div><label>Hatırlatma Tarihi</label><input id="ciReminder" type="date"><small>Bu tarihte ve 1 gün önce bildirim gösterilir.</small></div><div><label>Sonraki Takip</label><input id="ciFollow" type="date"></div>
      <div class="full"><label>Görüşme Notu</label><textarea id="ciNotes" rows="4" placeholder="Müşteriyle ne konuşuldu, talebi, fiyat beklentisi, sonraki adım..."></textarea></div>
     </div>
     <div class="actions"><button class="btn primary" onclick="saveInteraction()">Kaydet</button><button class="btn light" onclick="document.getElementById('crmForm').classList.remove('open')">Vazgeç</button></div>
@@ -1035,7 +1043,7 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 
 let crmData=[],crmProducts=[];
 function crmTone(s){return s==='onaylandi'?['green','Onaylandı']:s==='kaybedildi'?['red','Olumsuz / Kaçtı']:['yellow','Görüşülüyor']}
-async function openCrm(){
+async function openCrm(){initTurkeyCities();
  closeAllProeraViews();document.getElementById('crmOverlay')?.classList.add('open');document.body.style.overflow='hidden';
  const [ir,pr]=await Promise.all([sb.from('customer_interactions').select('*').order('interaction_date',{ascending:false}),sb.from('products').select('id,name,product_code').eq('active',true).order('name')]);
  crmData=ir.data||[];crmProducts=pr.data||[];
@@ -1043,18 +1051,18 @@ async function openCrm(){
  const m=document.getElementById('crmMonth');if(m&&!m.value)m.value=new Date().toISOString().slice(0,7);renderCrm();
 }
 function closeCrm(){document.getElementById('crmOverlay')?.classList.remove('open');document.body.style.overflow=''}
-function newInteraction(){const f=document.getElementById('crmForm');f.classList.add('open');['ciId','ciContact','ciCompany','ciPhone','ciCity','ciFollow','ciNotes'].forEach(id=>document.getElementById(id).value='');document.getElementById('ciDate').value=new Date().toISOString().slice(0,10);document.getElementById('ciStatus').value='gorusuluyor';document.getElementById('ciProduct').value=''}
+function newInteraction(){const f=document.getElementById('crmForm');f.classList.add('open');['ciId','ciContact','ciCompany','ciPhone','ciCity','ciFollow','ciReminder','ciNotes'].forEach(id=>document.getElementById(id).value='');document.getElementById('ciDate').value=crmLocalDate();document.getElementById('ciStatus').value='gorusuluyor';document.getElementById('ciProduct').value=''}
 function renderCrm(){
  const q=(document.getElementById('crmSearch')?.value||'').toLocaleLowerCase('tr-TR'),month=document.getElementById('crmMonth')?.value||'';
  const rows=crmData.filter(x=>(!month||(x.interaction_date||'').startsWith(month))&&[x.contact_name,x.company_name,x.phone,x.city,x.product_name,x.notes].some(v=>String(v||'').toLocaleLowerCase('tr-TR').includes(q)));
  const a=rows.filter(x=>x.status==='onaylandi').length,w=rows.filter(x=>x.status==='gorusuluyor').length,l=rows.filter(x=>x.status==='kaybedildi').length,rate=rows.length?Math.round(a/rows.length*100):0;
  document.getElementById('crmReport').innerHTML=`<div class="crm-metric"><small>Görüşme</small><b>${rows.length}</b></div><div class="crm-metric"><small>Onaylandı</small><b>${a}</b></div><div class="crm-metric"><small>Takipte</small><b>${w}</b></div><div class="crm-metric"><small>Kaçtı</small><b>${l}</b></div><div class="crm-metric"><small>Dönüşüm</small><b>%${rate}</b></div>`;
- document.getElementById('crmList').innerHTML=rows.map(x=>{const[t,lbl]=crmTone(x.status);return `<div class="crm-row"><div><b>${esc(x.contact_name||x.company_name||'Görüşme')}</b><small>${esc(x.company_name||'')} ${x.phone?'• '+esc(x.phone):''}</small></div><div><b>${esc(x.product_name||'Ürün belirtilmedi')}</b><small>${esc(x.city||'')} • ${esc(x.interaction_date||'')}</small></div><div><span class="status-pill tone-${t}">${lbl}</span><small>${x.next_follow_up?'Takip: '+esc(x.next_follow_up):''}</small></div><div><small>${esc((x.notes||'').slice(0,100))}</small></div><div class="crm-actions"><button class="btn light" onclick="editInteraction(${x.id})">Düzenle</button><button class="btn light" onclick="deleteInteraction(${x.id})">Sil</button></div></div>`}).join('')||'<div class="customer-empty">Bu dönem için görüşme kaydı bulunamadı.</div>';
+ document.getElementById('crmList').innerHTML=rows.map(x=>{const[t,lbl]=crmTone(x.status);return `<div class="crm-row"><div><b>${esc(x.contact_name||x.company_name||'Görüşme')}</b><small>${esc(x.company_name||'')} ${x.phone?'• '+esc(x.phone):''}</small></div><div><b>${esc(((x.product_names&&x.product_names.length)?x.product_names.join(', '):x.product_name)||'Ürün belirtilmedi')}</b><small>${esc(x.city||'')} • ${esc(x.interaction_date||'')}</small></div><div><span class="status-pill tone-${t}">${lbl}</span>${x.reminder_date?`<span class="reminder-badge ${reminderTone(x.reminder_date)}">🔔 ${esc(x.reminder_date)}</span>`:''}<small>${x.next_follow_up?'Takip: '+esc(x.next_follow_up):''}</small></div><div><small>${esc((x.notes||'').slice(0,100))}</small></div><div class="crm-actions"><button class="btn light" onclick="editInteraction(${x.id})">Düzenle</button><button class="btn light" onclick="deleteInteraction(${x.id})">Sil</button></div></div>`}).join('')||'<div class="customer-empty">Bu dönem için görüşme kaydı bulunamadı.</div>';
 }
-function editInteraction(id){const x=crmData.find(v=>+v.id===+id);if(!x)return;document.getElementById('crmForm').classList.add('open');document.getElementById('ciId').value=x.id;document.getElementById('ciContact').value=x.contact_name||'';document.getElementById('ciCompany').value=x.company_name||'';document.getElementById('ciPhone').value=x.phone||'';document.getElementById('ciCity').value=x.city||'';document.getElementById('ciDate').value=x.interaction_date||'';document.getElementById('ciStatus').value=x.status||'gorusuluyor';document.getElementById('ciProduct').value=x.product_id||'';document.getElementById('ciFollow').value=x.next_follow_up||'';document.getElementById('ciNotes').value=x.notes||''}
-async function saveInteraction(){const pid=document.getElementById('ciProduct').value,prod=crmProducts.find(x=>+x.id===+pid),id=document.getElementById('ciId').value;const payload={company_id:currentCompanyId,contact_name:document.getElementById('ciContact').value.trim(),company_name:document.getElementById('ciCompany').value.trim(),phone:document.getElementById('ciPhone').value.trim(),city:document.getElementById('ciCity').value.trim(),interaction_date:document.getElementById('ciDate').value||new Date().toISOString().slice(0,10),product_id:pid?+pid:null,product_name:prod?.name||null,notes:document.getElementById('ciNotes').value.trim(),next_follow_up:document.getElementById('ciFollow').value||null,status:document.getElementById('ciStatus').value,updated_at:new Date().toISOString()};const r=id?await sb.from('customer_interactions').update(payload).eq('id',id):await sb.from('customer_interactions').insert(payload);if(r.error){alert('Görüşme kaydedilemedi: '+r.error.message);return}document.getElementById('crmForm').classList.remove('open');await openCrm()}
+function editInteraction(id){const x=crmData.find(v=>+v.id===+id);if(!x)return;document.getElementById('crmForm').classList.add('open');document.getElementById('ciId').value=x.id;document.getElementById('ciContact').value=x.contact_name||'';document.getElementById('ciCompany').value=x.company_name||'';document.getElementById('ciPhone').value=x.phone||'';document.getElementById('ciCity').value=x.city||'';document.getElementById('ciDate').value=x.interaction_date||'';document.getElementById('ciStatus').value=x.status||'gorusuluyor';[...document.getElementById('ciProduct').options].forEach(o=>o.selected=(x.product_ids||[x.product_id]).map(String).includes(String(o.value)));document.getElementById('ciReminder').value=x.reminder_date||'';document.getElementById('ciFollow').value=x.next_follow_up||'';document.getElementById('ciNotes').value=x.notes||''}
+async function saveInteraction(){const selected=selectedCrmProducts(),id=document.getElementById('ciId').value;const payload={company_id:currentCompanyId,contact_name:document.getElementById('ciContact').value.trim(),company_name:document.getElementById('ciCompany').value.trim(),phone:document.getElementById('ciPhone').value.trim(),city:document.getElementById('ciCity').value.trim(),interaction_date:document.getElementById('ciDate').value||crmLocalDate(),product_id:selected[0]?.id||null,product_name:selected[0]?.name||null,product_ids:selected.map(x=>x.id),product_names:selected.map(x=>x.name),notes:document.getElementById('ciNotes').value.trim(),reminder_date:document.getElementById('ciReminder').value||null,next_follow_up:document.getElementById('ciFollow').value||null,status:document.getElementById('ciStatus').value,updated_at:new Date().toISOString()};const r=id?await sb.from('customer_interactions').update(payload).eq('id',id):await sb.from('customer_interactions').insert(payload);if(r.error){alert('Görüşme kaydedilemedi: '+r.error.message);return}document.getElementById('crmForm').classList.remove('open');await openCrm()}
 async function deleteInteraction(id){if(!confirm('Bu görüşme kaydı silinsin mi?'))return;const r=await sb.from('customer_interactions').delete().eq('id',id);if(r.error){alert(r.error.message);return}crmData=crmData.filter(x=>+x.id!==+id);renderCrm()}
-async function loadDashboardCrm(){const box=document.getElementById('dashCrm');if(!box)return;const {data}=await sb.from('customer_interactions').select('*').order('interaction_date',{ascending:false}).limit(6);const rows=data||[];box.innerHTML=rows.map(x=>{const[t,l]=crmTone(x.status);return `<div class="dash-crm-row"><span><b>${esc(x.contact_name||x.company_name||'-')}</b><br><small>${esc(x.product_name||'Ürün belirtilmedi')}</small></span><span class="status-pill tone-${t}">${l}</span></div>`}).join('')||'<div class="muted">Henüz görüşme kaydı yok.</div>'}
+async function loadDashboardCrm(){const box=document.getElementById('dashCrm');if(!box)return;const {data}=await sb.from('customer_interactions').select('*').order('interaction_date',{ascending:false}).limit(6);const rows=data||[];box.innerHTML=rows.map(x=>{const[t,l]=crmTone(x.status);return `<div class="dash-crm-row"><span><b>${esc(x.contact_name||x.company_name||'-')}</b><br><small>${esc(((x.product_names&&x.product_names.length)?x.product_names.join(', '):x.product_name)||'Ürün belirtilmedi')}</small></span><span class="status-pill tone-${t}">${l}</span></div>`}).join('')||'<div class="muted">Henüz görüşme kaydı yok.</div>'}
 const GUIDE_KEY='proera_onboarding_guide_v1';let guideIndex=0;
 const guideSteps=[
  ['Hoş geldiniz 👋','Proera; müşterilerinizi, ürünlerinizi, stoklarınızı, görüşmelerinizi ve proformalarınızı tek çalışma alanında yönetir.'],
@@ -1072,4 +1080,22 @@ function guidePrev(){if(guideIndex>0){guideIndex--;renderGuide()}}
 function finishGuide(){localStorage.setItem(GUIDE_KEY,'done');document.getElementById('guideOverlay')?.classList.remove('open')}
 
 setTimeout(()=>{if(currentUser&&!localStorage.getItem(GUIDE_KEY))showGuide()},1800);
+
+const TURKEY_CITIES=['Adana','Adıyaman','Afyonkarahisar','Ağrı','Amasya','Ankara','Antalya','Artvin','Aydın','Balıkesir','Bilecik','Bingöl','Bitlis','Bolu','Burdur','Bursa','Çanakkale','Çankırı','Çorum','Denizli','Diyarbakır','Edirne','Elazığ','Erzincan','Erzurum','Eskişehir','Gaziantep','Giresun','Gümüşhane','Hakkâri','Hatay','Isparta','Mersin','İstanbul','İzmir','Kars','Kastamonu','Kayseri','Kırklareli','Kırşehir','Kocaeli','Konya','Kütahya','Malatya','Manisa','Kahramanmaraş','Mardin','Muğla','Muş','Nevşehir','Niğde','Ordu','Rize','Sakarya','Samsun','Siirt','Sinop','Sivas','Tekirdağ','Tokat','Trabzon','Tunceli','Şanlıurfa','Uşak','Van','Yozgat','Zonguldak','Aksaray','Bayburt','Karaman','Kırıkkale','Batman','Şırnak','Bartın','Ardahan','Iğdır','Yalova','Karabük','Kilis','Osmaniye','Düzce'];
+function initTurkeyCities(){const d=document.getElementById('turkeyCities');if(d&&!d.children.length)d.innerHTML=TURKEY_CITIES.map(x=>`<option value="${x}">`).join('')}
+function selectedCrmProducts(){const s=document.getElementById('ciProduct');return [...(s?.selectedOptions||[])].map(o=>crmProducts.find(p=>String(p.id)===String(o.value))).filter(Boolean)}
+function crmLocalDate(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function reminderTone(date){if(!date)return '';const today=crmLocalDate(),tom=new Date();tom.setDate(tom.getDate()+1);const tomorrow=`${tom.getFullYear()}-${String(tom.getMonth()+1).padStart(2,'0')}-${String(tom.getDate()).padStart(2,'0')}`;return date===today?'today':date===tomorrow?'due':''}
+async function loadCrmReminders(){
+ if(!sb||!currentUser)return;
+ const today=crmLocalDate(),tom=new Date();tom.setDate(tom.getDate()+1);const tomorrow=`${tom.getFullYear()}-${String(tom.getMonth()+1).padStart(2,'0')}-${String(tom.getDate()).padStart(2,'0')}`;
+ const {data}=await sb.from('customer_interactions').select('id,contact_name,company_name,reminder_date,product_names,status').in('reminder_date',[today,tomorrow]).neq('status','kaybedildi').order('reminder_date');
+ const rows=data||[];if(!rows.length)return;
+ const box=document.getElementById('notificationList')||document.getElementById('notifyList');if(!box)return;
+ const cards=rows.map(x=>`<div class="notify-item"><b>${x.reminder_date===today?'Bugün':'Yarın'} görüşme hatırlatması</b><div>${esc(x.contact_name||x.company_name||'Müşteri')}</div><small>${esc((x.product_names||[]).join(', '))}</small></div>`).join('');
+ box.insertAdjacentHTML('afterbegin',cards);
+}
+
+setTimeout(()=>{initTurkeyCities();loadCrmReminders()},2200);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadCrmReminders()});
 </script></body></html>
