@@ -496,17 +496,55 @@ input,textarea,select{border:1px solid rgba(15,23,42,.12)!important;border-radiu
 }
 </style>
 
+
+<style id="v14320-smart-dashboard-polish">
+:root{--proera-blue:#1478ff;--proera-navy:#071d3d;--proera-green:#16a66a;--proera-yellow:#e5a600;--proera-red:#e5484d}
+body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif!important;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+@keyframes softPulseGreen{0%,100%{box-shadow:0 0 0 0 rgba(22,166,106,.08)}50%{box-shadow:0 0 0 5px rgba(22,166,106,.13)}}
+@keyframes softPulseYellow{0%,100%{box-shadow:0 0 0 0 rgba(229,166,0,.08)}50%{box-shadow:0 0 0 5px rgba(229,166,0,.15)}}
+@keyframes softPulseRed{0%,100%{box-shadow:0 0 0 0 rgba(229,72,77,.08)}50%{box-shadow:0 0 0 5px rgba(229,72,77,.15)}}
+.status-pill,.stock-pill{display:inline-flex;align-items:center;gap:6px;width:max-content;padding:5px 9px;border-radius:999px;font-size:10px;font-weight:900;white-space:nowrap}
+.status-pill:before,.stock-pill:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.tone-green{color:#08794b;background:#eaf9f1;animation:softPulseGreen 2.4s ease-in-out infinite}
+.tone-yellow{color:#9b6a00;background:#fff7dc;animation:softPulseYellow 2.4s ease-in-out infinite}
+.tone-red{color:#b4232a;background:#fff0f0;animation:softPulseRed 2.4s ease-in-out infinite}
+.tone-gray{color:#667085;background:#f2f4f7}
+.dash-panel{box-shadow:0 8px 28px rgba(19,45,80,.055)!important}
+.dash-card{position:relative;overflow:hidden;transition:transform .18s ease,box-shadow .18s ease}.dash-card:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(15,42,78,.09)}
+.dash-card:after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,#1478ff,#60a5fa)}
+.dash-card:nth-child(3):after{background:#16a66a}.dash-card:nth-child(4):after{background:#e5a600}.dash-card:nth-child(6):after{background:#e5484d}
+.dash-list-row{grid-template-columns:1fr 1.35fr .8fr .85fr!important;border-radius:10px;padding:11px 8px!important;transition:background .15s}.dash-list-row:hover{background:#f7faff}
+.stock-mini{align-items:center;gap:10px}.stock-mini .stock-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.stock-mini .stock-pill{margin-left:auto}
+.dash-chart-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin-top:14px}
+.chart-box{background:#fff;border:1px solid #e1e9f2;border-radius:18px;padding:18px;box-shadow:0 8px 28px rgba(19,45,80,.055)}
+.chart-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}.chart-title h3{margin:0}.chart-title small{color:#718096}
+.bar-chart{height:170px;display:flex;align-items:flex-end;gap:10px;border-bottom:1px solid #dfe7f0;padding:0 4px}
+.bar-col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;gap:6px}.bar{width:min(32px,70%);min-height:3px;border-radius:8px 8px 2px 2px;background:linear-gradient(180deg,#2c8cff,#1267d8);transition:height .35s ease}.bar-col small{font-size:9px;color:#7a899b}
+.donut-wrap{display:flex;align-items:center;gap:20px;min-height:170px}.donut{width:128px;height:128px;border-radius:50%;background:conic-gradient(#16a66a 0 var(--g),#e5a600 var(--g) calc(var(--g) + var(--y)),#e5484d calc(var(--g) + var(--y)) calc(var(--g) + var(--y) + var(--r)),#dbe4ee 0);position:relative}.donut:after{content:"";position:absolute;inset:24px;background:#fff;border-radius:50%}.legend{font-size:11px;line-height:2}.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px}
+.ds-btn{font-size:12.5px!important;letter-spacing:.005em}.ds-icon{display:grid!important;place-items:center;width:22px!important;height:22px;border-radius:7px;background:rgba(255,255,255,.07);font-size:13px!important}.ds-btn.primary .ds-icon{background:rgba(255,255,255,.16)}
+.top{box-shadow:0 8px 30px rgba(15,35,62,.06)!important;border:1px solid rgba(216,226,238,.85)!important}
+.btn{font-weight:800!important;letter-spacing:.005em}.settings-card h3,.dash-panel h3,.chart-box h3{letter-spacing:-.015em}
+.auth-card{box-shadow:0 28px 70px rgba(5,28,60,.16)!important}.auth-card h1,.onboard-card h2{letter-spacing:-.035em}
+.notify-item{border-radius:12px!important}
+@media(max-width:800px){
+ .dash-chart-grid{grid-template-columns:1fr}.chart-box{padding:14px}.donut-wrap{justify-content:center}
+ .dash-list-row{grid-template-columns:1fr 1fr!important}.dash-card:hover{transform:none}
+ .status-pill,.stock-pill{font-size:9px;padding:4px 7px}
+}
+@media(prefers-reduced-motion:reduce){.tone-green,.tone-yellow,.tone-red{animation:none!important}.dash-card,.bar{transition:none!important}}
+</style>
+
 </head><body>
 
 <aside class="desktop-side" aria-label="Ana navigasyon">
  <div class="ds-brand"><img src="proera-silver-p.png" alt="Proera"><span>Proera</span></div>
  <nav class="ds-nav">
   <button class="ds-btn" type="button" onclick="appNavigate('home')"><span class="ds-icon">⌂</span>Ana Sayfa</button>
-  <button class="ds-btn primary" type="button" onclick="appNavigate('new')"><span class="ds-icon">▤</span>Yeni Proforma</button>
-  <button class="ds-btn" type="button" onclick="appNavigate('archive')"><span class="ds-icon">▰</span>Proforma Arşivi</button>
-  <button class="ds-btn" type="button" onclick="appNavigate('customers')"><span class="ds-icon">♟</span>Müşteriler</button>
+  <button class="ds-btn primary" type="button" onclick="appNavigate('new')"><span class="ds-icon">＋</span>Yeni Proforma</button>
+  <button class="ds-btn" type="button" onclick="appNavigate('archive')"><span class="ds-icon">▣</span>Proforma Arşivi</button>
+  <button class="ds-btn" type="button" onclick="appNavigate('customers')"><span class="ds-icon">◎</span>Müşteriler</button>
   <button class="ds-btn" type="button" onclick="appNavigate('catalog')"><span class="ds-icon">◇</span>Ürün Kataloğu</button>
-  <button class="ds-btn" type="button" onclick="appNavigate('stock')"><span class="ds-icon">▥</span>Stok Kontrolü</button>
+  <button class="ds-btn" type="button" onclick="appNavigate('stock')"><span class="ds-icon">▦</span>Stok Kontrolü</button>
   <button class="ds-btn" type="button" onclick="appNavigate('settings')"><span class="ds-icon">⚙</span>Ayarlar</button>
  </nav>
  <div class="ds-spacer"></div>
@@ -582,6 +620,11 @@ input,textarea,select{border:1px solid rgba(15,23,42,.12)!important;border-radiu
    </div>
   </div>
  </div>
+
+<div class="dash-chart-grid">
+ <div class="chart-box"><div class="chart-title"><h3>Teklif Aktivitesi</h3><small>Son 6 ay</small></div><div id="dashBarChart" class="bar-chart"></div></div>
+ <div class="chart-box"><div class="chart-title"><h3>Teklif Durumları</h3><small>Genel dağılım</small></div><div class="donut-wrap"><div id="dashDonut" class="donut" style="--g:0%;--y:0%;--r:0%"></div><div id="dashLegend" class="legend"></div></div></div>
+</div>
 </section>
 <div id="authGate" class="auth-shell"><div class="auth-card"><div class="auth-mark">P</div><h1 class="auth-title">Proera</h1><div class="muted">Teklif ve proformalarınızı profesyonelce hazırlayın, müşterilerinizi ve ürünlerinizi tek çalışma alanında yönetin.</div><button class="google-btn" onclick="loginGoogle()">G&nbsp;&nbsp; Google ile Devam Et</button><div class="auth-sep">veya e-posta ile</div><div class="auth-tabs"><button id="tabLogin" class="active" onclick="setAuthMode('login')">Giriş</button><button id="tabSignup" onclick="setAuthMode('signup')">Üyelik</button></div><div id="nameArea" style="display:none"><label>Ad Soyad</label><input id="authName" autocomplete="name" placeholder="Ad Soyad"></div><label>E-posta</label><input id="authEmail" type="email" autocomplete="email" placeholder="ornek@firma.com"><div id="passwordArea"><label style="margin-top:10px">Şifre</label><input id="authPassword" type="password" autocomplete="current-password" placeholder="En az 8 karakter"></div><div id="confirmPasswordArea" style="display:none"><label style="margin-top:10px">Şifre Tekrar</label><input id="authPassword2" type="password" autocomplete="new-password" placeholder="Şifrenizi tekrar yazın"></div><div id="newPasswordArea" style="display:none"><label style="margin-top:10px">Yeni Şifre</label><input id="authNewPassword" type="password" autocomplete="new-password" placeholder="En az 8 karakter"><label style="margin-top:10px">Yeni Şifre Tekrar</label><input id="authNewPassword2" type="password" autocomplete="new-password" placeholder="Şifrenizi tekrar yazın"></div><div class="actions" id="authActions"><button class="btn primary" onclick="loginUser()">Giriş Yap</button><button class="btn light" onclick="resetPassword()">Şifremi Unuttum</button></div><div id="authMsg" class="muted" style="margin-top:12px"></div></div></div><div id="onboardOverlay" class="onboard-overlay"><div class="onboard-card"><div class="auth-mark">✦</div><h2 style="font-size:26px;margin:14px 0 6px">Firmanızı oluşturalım</h2><div class="muted" style="margin-bottom:18px">Bu bilgiler yalnızca sizin çalışma alanınızda kullanılacak. Daha sonra Ayarlar'dan değiştirebilirsiniz.</div><div class="onboard-grid"><div class="full"><label>Firma / Marka Adı *</label><input id="onboardCompany" placeholder="Örn: ABC Teknoloji"></div><div><label>Yetkili Adı</label><input id="onboardPerson" placeholder="Ad Soyad"></div><div><label>Telefon</label><input id="onboardPhone" placeholder="Telefon"></div></div><div class="actions" style="justify-content:flex-end"><button class="btn primary" onclick="createWorkspace()">Çalışma Alanını Oluştur →</button></div><div id="onboardMsg" class="muted" style="margin-top:10px"></div></div></div><header class="top"><div class="brand"><img id="headerLogo" class="logo-preview" style="display:none;vertical-align:middle;margin:0 10px 0 0;max-height:42px" alt="Logo"><span id="headerCompanyName">PROERA</span> <span>BUSINESS</span></div><div class="top-actions"><div class="profile-pill"><div class="profile-avatar" id="profileAvatar">P</div><div><b id="profileCompany">Firma</b><div id="profileEmail" style="opacity:.65;font-size:10px"></div></div></div><span id="syncStatus" style="font-size:12px;margin-right:5px">● Bulut</span><button class="btn light" style="padding:7px 10px" onclick="openArchive()">📁 Proforma Arşivi</button><button class="btn light" style="padding:7px 10px" onclick="openCatalog('manage')">📦 Ürün Kataloğu</button><div class="notify-wrap" id="notifyWrap"><button class="btn light notify-bell" type="button" onclick="toggleNotifications(event)" title="Stok Bildirimleri">🔔<span id="notifyCount" class="notify-count">0</span></button><div id="notifyPanel" class="notify-panel"><div class="notify-head"><span>Stok Bildirimleri</span><button class="notify-readall" onclick="markAllNotificationsRead(event)">Tümünü okundu yap</button></div><div id="notifyList" class="notify-empty">Bildirim yok.</div></div></div><button class="btn light" style="padding:7px 10px" onclick="openStockControl()">📊 Stok Kontrolü</button><button class="btn light" style="padding:7px 10px" onclick="openSettings()">⚙️ Ayarlar</button><button class="btn light" style="padding:7px 10px" onclick="logoutUser()">Çıkış</button></div></header><div id="settingsOverlay" class="settings-overlay"><div class="settings-modal"><div class="settings-head"><div><h2 style="margin:0">⚙️ Ayarlar Merkezi</h2><div class="muted">Sabit şirket bilgileri burada merkezi olarak yönetilir.</div></div><button class="btn light" onclick="closeSettings()">✕ Kapat</button></div><div class="settings-body"><div class="settings-card"><h3>Firma Profili</h3><div class="hint">Bu bilgiler yalnızca sizin firmanıza aittir ve proformanın Satıcı bölümünde kullanılır.</div><div class="company-profile-grid"><div><label>Kısa Firma / Marka Adı</label><input id="companyDisplayName" placeholder="Firma adı"></div><div><label>Resmi Ünvan</label><input id="companyLegalName" placeholder="Resmi şirket ünvanı"></div><div class="full"><label>Adres</label><textarea id="companyAddress" placeholder="Firma adresi"></textarea></div><div><label>Vergi Dairesi</label><input id="companyTaxOffice"></div><div><label>Vergi No</label><input id="companyTaxNumber"></div><div><label>Telefon</label><input id="companyPhone"></div><div><label>E-posta</label><input id="companyEmail" type="email"></div><div class="full"><label>Web Sitesi</label><input id="companyWebsite" placeholder="www.firma.com"></div></div></div><div class="settings-card"><h3>Şirket Logosu</h3><div class="hint">Logo tüm bilgisayarlarda ve proformalarda otomatik kullanılır.</div><div class="settings-logo-row"><div class="settings-logo-box"><img id="logoPreview" class="logo-preview" alt="Şirket logosu"></div><div style="flex:1"><input id="logo" type="file" accept="image/png,image/jpeg,image/webp"><div class="muted" style="margin-top:6px">PNG / JPG / WEBP önerilir.</div></div></div></div><div class="settings-card"><h3>Kurumsal Tasarım</h3><div class="hint">Proforma başlıkları, tablo ve toplam alanlarında kullanılacak renk.</div><div class="grid"><div><label>Kurumsal Renk</label><input id="corpColor" type="color" value="#111827" style="height:42px;padding:4px"></div><div><label>Renk Kodu</label><input id="corpHex" value="#111827" placeholder="#111827"></div></div></div>
 <div class="settings-card">
@@ -869,10 +912,9 @@ async function loadDashboard(){
   document.getElementById('dashApproved').textContent=approved.length;document.getElementById('dashWaiting').textContent=waiting.length;
   document.getElementById('dashCustomers').textContent=cu.count||0;
   const products=po.data||[], low=products.filter(x=>(+x.stock_quantity||0)<=(+x.low_stock_threshold||5));
+  renderSmartDashboard(rows,products);
   document.getElementById('dashLowStock').textContent=low.length;
-  if(recentBox)recentBox.innerHTML=rows.slice(0,7).map(x=>`<div class="dash-list-row"><span><b>${esc(x.proforma_number||'-')}</b></span><span>${esc(x.customer_name||'-')}</span><span>${esc(statusLabel(x.status))}</span><span>${money(+x.grand_total||0)} ${esc(x.currency||'')}</span></div>`).join('')||'<div class="muted">Henüz proforma yok.</div>';
-  if(stockBox)stockBox.innerHTML=low.slice(0,5).map(x=>`<div class="stock-mini"><span>${esc(x.product_code||'')} ${esc(x.name||'Ürün')}</span><b>${+x.stock_quantity||0}</b></div>`).join('')||'<div class="muted">Kritik stok bulunmuyor.</div>';
-  const company=document.getElementById('profileCompany')?.textContent||'';
+      const company=document.getElementById('profileCompany')?.textContent||'';
   document.getElementById('dashCompany').textContent=(company&&company!=='Firma'?company+' • ':'')+'Çalışma alanınızın güncel özeti.';
 }
 const PREF_KEY='proera_ui_prefs_v1';
@@ -883,5 +925,47 @@ function saveProeraPrefs(){localStorage.setItem(PREF_KEY,JSON.stringify(getProer
 function resetProeraPrefs(){localStorage.removeItem(PREF_KEY);loadProeraPrefs();applyProeraPrefs()}
 function applyProeraPrefs(){let p={};try{p=JSON.parse(localStorage.getItem(PREF_KEY)||'{}')}catch(e){};document.documentElement.style.setProperty('--app-accent',p.accent||'#5B5BD6');document.body.dataset.proeraFont=p.fontSize||'normal';document.body.dataset.proeraTable=p.tableStyle||'clean'}
 window.addEventListener('load',()=>setTimeout(()=>{applyProeraPrefs();if(currentUser)appNavigate('home')},700));
+
+
+function proformaTone(status){
+  const s=(statusLabel(status)||'').toLocaleLowerCase('tr-TR');
+  if(s.includes('onaylandı'))return ['green','Onaylandı'];
+  if(s.includes('ret')||s.includes('redd'))return ['red',statusLabel(status)||'Reddedildi'];
+  if(s.includes('gönder')||s.includes('bek')||s.includes('görüş'))return ['yellow',statusLabel(status)||'Bekliyor'];
+  return ['gray',statusLabel(status)||'Taslak'];
+}
+function stockTone(p){
+  const q=+p.stock_quantity||0, low=+(p.low_stock_threshold??5), warn=Math.max(low+1,Math.ceil(low*2));
+  if(q<=low)return ['red','Kritik'];
+  if(q<=warn)return ['yellow','Azalıyor'];
+  return ['green','Normal'];
+}
+function renderSmartDashboard(rows,products){
+  const recentBox=document.getElementById('dashRecent'),stockBox=document.getElementById('dashStock');
+  if(recentBox)recentBox.innerHTML=rows.slice(0,7).map(x=>{const [tone,label]=proformaTone(x.status);return `<div class="dash-list-row"><span><b>${esc(x.proforma_number||'-')}</b></span><span>${esc(x.customer_name||'-')}</span><span class="status-pill tone-${tone}">${esc(label)}</span><span>${money(+x.grand_total||0)} ${esc(x.currency||'')}</span></div>`}).join('')||'<div class="muted">Henüz proforma yok.</div>';
+  const sorted=[...products].sort((a,b)=>(+a.stock_quantity||0)-(+b.stock_quantity||0));
+  if(stockBox)stockBox.innerHTML=sorted.slice(0,7).map(x=>{const [tone,label]=stockTone(x);return `<div class="stock-mini"><span class="stock-name">${esc(x.product_code||'')} ${esc(x.name||'Ürün')}</span><span class="stock-pill tone-${tone}">${label} · ${+x.stock_quantity||0}</span></div>`}).join('')||'<div class="muted">Stok kaydı bulunmuyor.</div>';
+  renderDashboardCharts(rows);
+}
+function renderDashboardCharts(rows){
+  const months=[],now=new Date();
+  for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({y:d.getFullYear(),m:d.getMonth(),label:d.toLocaleDateString('tr-TR',{month:'short'}),n:0})}
+  rows.forEach(x=>{const d=new Date(x.proforma_date||x.created_at);const hit=months.find(m=>m.y===d.getFullYear()&&m.m===d.getMonth());if(hit)hit.n++});
+  const max=Math.max(1,...months.map(m=>m.n)),box=document.getElementById('dashBarChart');
+  if(box)box.innerHTML=months.map(m=>`<div class="bar-col"><div class="bar" title="${m.n} teklif" style="height:${Math.max(3,(m.n/max)*135)}px"></div><small>${m.label}<br>${m.n}</small></div>`).join('');
+  let g=0,y=0,r=0,o=0;rows.forEach(x=>{const t=proformaTone(x.status)[0];if(t==='green')g++;else if(t==='yellow')y++;else if(t==='red')r++;else o++});
+  const total=Math.max(1,g+y+r+o),pct=n=>(n/total*100);
+  const donut=document.getElementById('dashDonut');if(donut){donut.style.setProperty('--g',pct(g)+'%');donut.style.setProperty('--y',pct(y)+'%');donut.style.setProperty('--r',pct(r)+'%')}
+  const leg=document.getElementById('dashLegend');if(leg)leg.innerHTML=`<div><i style="background:#16a66a"></i>Onaylandı: <b>${g}</b></div><div><i style="background:#e5a600"></i>Bekleyen: <b>${y}</b></div><div><i style="background:#e5484d"></i>Reddedildi: <b>${r}</b></div><div><i style="background:#dbe4ee"></i>Diğer: <b>${o}</b></div>`;
+}
+async function refreshDailyStockNotifications(){
+  if(!sb||!currentUser)return;
+  /* Backend cron remains the source of daily alerts. This refresh makes today's alerts visible immediately in the UI. */
+  try{
+    if(typeof loadNotifications==='function')await loadNotifications();
+    if(document.getElementById('dashboardOverlay')?.classList.contains('open'))await loadDashboard();
+  }catch(e){console.warn('Stock notification refresh:',e)}
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshDailyStockNotifications()});
 
 </script></body></html>
