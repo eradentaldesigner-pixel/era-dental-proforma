@@ -708,6 +708,38 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
 @media screen and (max-width:1100px){#crmOverlay .crm-workspace{grid-template-columns:1fr}#crmOverlay .crm-detail{position:static}}
 @media screen and (max-width:700px){#crmOverlay .crm-report{grid-template-columns:repeat(2,minmax(0,1fr))!important}#crmOverlay .crm-filters{flex-wrap:wrap}#crmOverlay .crm-filters #crmMonth,#crmOverlay .crm-filters select{max-width:none!important;width:calc(50% - 5px)!important}#crmOverlay .crm-head h2{font-size:25px!important}}
 
+</style><style id="musteriler-adim-2">
+/* Müşteriler: a searchable table and persistent selected-customer detail panel. */
+@media screen{
+ #customerOverlay{background:#f2f7ff!important}
+ #customerOverlay .customer-modal{max-width:1500px!important}
+ #customerOverlay .customer-head h2{font-size:32px!important;letter-spacing:-.04em!important;color:#192f50!important}
+ #customerOverlay .customer-head .muted{font-size:14px!important;color:#657891!important}
+ #customerOverlay .customer-toolbar{background:#fff!important;border:1px solid #dce7f5!important;border-radius:14px!important;padding:14px!important;gap:12px!important;margin-bottom:16px!important}
+ #customerOverlay .customer-toolbar input{height:44px!important;border-radius:9px!important;border:1px solid #dae5f4!important}
+ #customerOverlay .customer-toolbar .btn.primary,#customerOverlay .customer-detail .btn.primary{background:#116de9!important;border-color:#116de9!important;color:white!important}
+ #customerOverlay .customer-workspace{display:grid;grid-template-columns:minmax(0,1fr) 355px;gap:16px;align-items:start}
+ #customerOverlay .customer-body{overflow:visible!important}
+ #customerOverlay #customerManagerList{display:block!important;min-width:0;overflow:auto;background:#fff;border:1px solid #dce7f5;border-radius:14px;box-shadow:0 5px 18px #122f5909}
+ #customerOverlay .customer-table{width:100%;border-collapse:collapse;min-width:760px;font-size:13px}
+ #customerOverlay .customer-table th{text-align:left;padding:16px 14px;background:#f8fbff;border-bottom:1px solid #dce7f5;color:#647b95;font-size:11px}
+ #customerOverlay .customer-table td{padding:16px 14px;border-bottom:1px solid #e9eef6;color:#263c5a;vertical-align:middle}
+ #customerOverlay .customer-table tr[data-customer-id]{cursor:pointer}
+ #customerOverlay .customer-table tr[data-customer-id]:hover,#customerOverlay .customer-table tr.selected{background:#eef5ff}
+ #customerOverlay .customer-table td:first-child b{display:block;color:#192f50}
+ #customerOverlay .customer-table small{display:block;color:#8192a7;margin-top:3px}
+ #customerOverlay .customer-detail{border:1px solid #dce7f5;border-radius:14px;background:#fff;padding:20px;box-shadow:0 5px 18px #122f5909;position:sticky;top:16px;min-height:300px}
+ #customerOverlay .customer-detail h3{font-size:19px;color:#193451;margin:0 0 5px}
+ #customerOverlay .customer-detail p{font-size:12px;color:#70829a;margin:0 0 18px}
+ #customerOverlay .customer-detail section{padding:12px 0;border-top:1px solid #eaf0f8;font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+ #customerOverlay .customer-detail section small{display:block;color:#71849b;margin-bottom:3px}
+ #customerOverlay .customer-detail .actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px}
+ #customerOverlay .customer-detail .actions .btn{font-size:11px}
+ #customerOverlay .customer-total{padding:10px 4px 17px;color:#5a708d;font-size:12px;font-weight:700}
+}
+@media screen and (max-width:1100px){#customerOverlay .customer-workspace{grid-template-columns:1fr}#customerOverlay .customer-detail{position:static}}
+@media screen and (max-width:700px){#customerOverlay .customer-head h2{font-size:25px!important}#customerOverlay .customer-toolbar{flex-wrap:wrap!important}#customerOverlay .customer-toolbar input{width:100%!important}}
+
 </style></head><body>
 
 <div id="inviteGate" class="onboard-overlay" style="display:none"><div class="onboard-card"><h2>Davet bağlantısı</h2><p id="inviteGateMessage"></p><button class="btn primary" onclick="location.href=new URL('app.html',location.href).href">Ana sayfaya dön</button></div></div>
@@ -1638,6 +1670,39 @@ const uiHeaders={customerOverlay:'Müşteriler',crmOverlay:'Görüşmeler',catal
  search.removeAttribute('oninput');month.removeAttribute('onchange');
  search.addEventListener('input',redraw);month.addEventListener('change',redraw);
  const header=crm.querySelector('.crm-head h2');if(header)header.textContent='Görüşmeler';
+ redraw();
+})();
+
+// Müşteriler uses existing Supabase data and existing detail/edit operations.
+(function(){
+ const overlay=document.getElementById('customerOverlay'),list=document.getElementById('customerManagerList');
+ if(!overlay||!list)return;
+ const body=list.parentElement,workspace=document.createElement('div');workspace.className='customer-workspace';
+ body.before(workspace);workspace.append(body);
+ const details=document.createElement('aside');details.id='customerDetailInline';details.className='customer-detail';details.setAttribute('aria-label','Seçilen müşteri');workspace.append(details);
+ const total=document.createElement('div');total.className='customer-total';overlay.querySelector('.customer-toolbar')?.before(total);
+ let selected=null;
+ const filtered=()=>{
+   const q=(document.getElementById('customerQuery')?.value||'').trim().toLocaleLowerCase('tr-TR');
+   return customerManagerData.filter(c=>!q||[c.name,c.tax_office,c.tax_number,c.phone,c.email,c.address].some(v=>String(v||'').toLocaleLowerCase('tr-TR').includes(q)));
+ };
+ function show(c){
+   if(!c){details.innerHTML='<h3>Müşteri ayrıntıları</h3><p>Bilgilerini görmek için listeden bir müşteri seçin.</p>';return}
+   details.innerHTML=`<h3>${esc(c.name||'Müşteri')}</h3><p>Firma iletişim ve vergi bilgileri</p><section><small>Telefon</small>${esc(c.phone||'Belirtilmedi')}</section><section><small>E-posta</small>${esc(c.email||'Belirtilmedi')}</section><section><small>Vergi dairesi / numarası</small>${esc(c.tax_office||'—')} · ${esc(c.tax_number||'—')}</section><section><small>Adres</small>${esc(c.address||'Belirtilmedi')}</section><div class="actions"><button type="button" class="btn light" data-action="detail">Görüşme ve kayıtları</button><button type="button" class="btn light" data-action="edit">Düzenle</button>${hasAppAction('new')?'<button type="button" class="btn primary" data-action="quote">Yeni proforma</button>':''}<button type="button" class="btn light" data-action="delete">Sil</button></div>`;
+   details.querySelector('[data-action=detail]').onclick=()=>uiCustomerDetail(c.id);
+   details.querySelector('[data-action=edit]').onclick=()=>editCustomerManager(c.id);
+   details.querySelector('[data-action=quote]')?.addEventListener('click',()=>customerToProforma(c.id));
+   details.querySelector('[data-action=delete]').onclick=()=>deleteCustomerManager(c.id);
+ }
+ function redraw(){
+   const rows=filtered();total.textContent=rows.length+' müşteri gösteriliyor';
+   if(selected!==null&&!rows.some(c=>String(c.id)===String(selected)))selected=null;
+   list.innerHTML=rows.length?`<table class="customer-table"><thead><tr><th>Firma / Müşteri</th><th>Telefon</th><th>E-posta</th><th>Vergi bilgileri</th><th></th></tr></thead><tbody>${rows.map(c=>`<tr data-customer-id="${esc(c.id)}" class="${String(c.id)===String(selected)?'selected':''}"><td><b>${esc(c.name||'Müşteri')}</b><small>${esc((c.address||'').slice(0,65))}</small></td><td>${esc(c.phone||'—')}</td><td>${esc(c.email||'—')}</td><td>${esc(c.tax_office||'—')}<small>${esc(c.tax_number||'')}</small></td><td>Detay →</td></tr>`).join('')}</tbody></table>`:'<div class="customer-empty">Bu aramayla eşleşen müşteri bulunamadı.</div>';
+   list.querySelectorAll('[data-customer-id]').forEach(tr=>tr.onclick=()=>{selected=tr.dataset.customerId;show(rows.find(c=>String(c.id)===selected));list.querySelectorAll('tr.selected').forEach(x=>x.classList.remove('selected'));tr.classList.add('selected')});
+   show(rows.find(c=>String(c.id)===String(selected))||null);
+ }
+ renderCustomerManager=redraw;
+ const header=overlay.querySelector('.customer-head h2');if(header)header.textContent='Müşteriler';
  redraw();
 })();
 
