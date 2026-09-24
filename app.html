@@ -666,7 +666,63 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
 @media screen and (max-width:700px){.stock-stats{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px}.stock-stat{padding:12px!important}.stock-stat span{font-size:11px}.stock-stat b{font-size:23px}}
 
 [hidden]{display:none!important}@media screen and (max-width:700px){.wrap.ui-editing>.paper-scroll{display:none!important}.wrap.ui-preview>.paper-scroll{display:block!important}}
-</style><style>.team-manager-link[hidden]{display:none!important}.team-overlay{display:none;position:fixed;inset:0 0 0 224px;z-index:10030;overflow:auto;background:#edf3fa;padding:30px}.team-card{max-width:930px;margin:auto;color:#142d50}.team-box{background:white;border:1px solid #dce7f5;border-radius:14px;padding:22px;margin:16px 0}.team-fields{display:grid;grid-template-columns:1fr 220px auto;gap:10px;align-items:end}.team-fields input,.team-fields select,#teamInviteLink{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px}.team-invite-row{display:flex;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid #e5edf5}.team-invite-row span{color:#64748b}.team-member-actions{display:flex;align-items:center;gap:8px}.team-member-actions select{border:1px solid #cbd5e1;border-radius:8px;padding:10px;background:white}.team-member-row>div:first-child{min-width:0;overflow-wrap:anywhere}.team-link-row{display:flex;gap:8px;margin-top:12px}@media(max-width:800px){.team-overlay{inset:64px 0 0;padding:16px}.team-fields{grid-template-columns:1fr}.team-link-row,.team-invite-row{flex-direction:column}.team-member-actions{width:100%}}</style></head><body>
+</style><style>.team-manager-link[hidden]{display:none!important}.team-overlay{display:none;position:fixed;inset:0 0 0 224px;z-index:10030;overflow:auto;background:#edf3fa;padding:30px}.team-card{max-width:930px;margin:auto;color:#142d50}.team-box{background:white;border:1px solid #dce7f5;border-radius:14px;padding:22px;margin:16px 0}.team-fields{display:grid;grid-template-columns:1fr 220px auto;gap:10px;align-items:end}.team-fields input,.team-fields select,#teamInviteLink{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px}.team-invite-row{display:flex;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid #e5edf5}.team-invite-row span{color:#64748b}.team-member-actions{display:flex;align-items:center;gap:8px}.team-member-actions select{border:1px solid #cbd5e1;border-radius:8px;padding:10px;background:white}.team-member-row>div:first-child{min-width:0;overflow-wrap:anywhere}.team-link-row{display:flex;gap:8px;margin-top:12px}@media(max-width:800px){.team-overlay{inset:64px 0 0;padding:16px}.team-fields{grid-template-columns:1fr}.team-link-row,.team-invite-row{flex-direction:column}.team-member-actions{width:100%}}</style><style id="proera-v20-interior-design">
+/* Proera inner pages: a shared visual language without touching data rules. */
+@media screen and (min-width:801px){
+  #customerOverlay,#crmOverlay,#calendarOverlay,#catalogOverlay,#stockOverlay,#archiveOverlay,#settingsOverlay{padding:34px 42px!important}
+  .team-overlay{padding:34px 42px!important}
+  .team-card{max-width:1440px!important}
+  .desktop-side{background:linear-gradient(165deg,#102440,#0c1a31 72%,#102b50)!important}
+  .ds-btn{border-radius:10px!important;min-height:42px}
+  .ds-btn:hover:not(.active){background:#ffffff12!important}
+  .wrap{grid-template-columns:minmax(450px,1fr) minmax(440px,.95fr)!important;max-width:1550px!important;margin-inline:auto!important}
+}
+@media screen{
+  body{background:#f2f7ff!important;color:#1d304a}
+  #customerOverlay,#crmOverlay,#calendarOverlay,#catalogOverlay,#stockOverlay,#archiveOverlay,#settingsOverlay,.team-overlay,.service-overlay{background:#f2f7ff!important}
+  .customer-modal,.crm-modal,.calendar-shell,.catalog-modal,.stock-modal,.archive-modal,.settings-modal,.service-page,.team-card{max-width:1450px!important}
+  .customer-head,.crm-head,.calendar-head,.catalog-head,.stock-head,.archive-head,.settings-head,.service-page-head,.ui-title{padding-bottom:20px!important}
+  .customer-head h2,.crm-head h2,.calendar-head h2,.catalog-head h2,.stock-head h2,.archive-head h2,.settings-head h2,.service-page-head h1,.team-card h2{font-size:30px!important;letter-spacing:-.035em;color:#192d49!important}
+  .customer-head .muted,.crm-head small,.calendar-head small,.service-page-head p,.ui-title p{color:#637790!important;font-size:13px!important}
+  .customer-toolbar,.crm-body>div:has(>#crmSearch),.catalog-toolbar,.stock-toolbar,.archive-search,.service-toolbar{background:#fff!important;border:1px solid #dbe6f3!important;border-radius:14px!important;padding:14px!important;box-shadow:0 3px 14px #0b396008}
+  .customer-card,.crm-row,.service-record,.team-box,.settings-card,.stock-stat,.archive-stat,.crm-metric,.dash-panel,.catalog-row,.ui-entry{box-shadow:0 5px 18px #12396309!important;border-color:#dce7f4!important}
+  input,select,textarea{accent-color:#116fe9}
+  input:focus,select:focus,textarea:focus{outline:2px solid #67a6ff!important;outline-offset:1px}
+  .btn.primary{background:#116fe9!important;color:#fff!important;border-color:#116fe9!important;box-shadow:0 4px 10px #116fe929}
+  .btn.primary:hover{background:#085ed4!important}
+  .customer-list{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .customer-card{border-radius:16px!important}
+  #uiDrawer{z-index:13000!important}
+  .ui-drawer-card{width:min(510px,100%)!important;background:#fff!important;padding:28px!important}
+  .ui-drawer-head{background:#fff!important}
+  .ui-detail-grid>div{background:#f3f7ff!important}
+  .crm-report{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important}
+  .crm-metric{border-radius:14px!important;padding:18px!important}
+  .crm-metric b{font-size:27px!important;color:#173b71!important}
+  .ui-switch{background:#e9f0fa!important}
+  .ui-switch button[aria-pressed=true]{color:#095ed5!important}
+  #catalogList.ui-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .stock-table th,.stock-table td,.archive-table th,.archive-table td{padding:14px 12px!important}
+  .stock-table tbody tr:hover,.archive-table tbody tr:hover{background:#f2f7ff!important}
+  .service-record{border-radius:15px!important}
+  .calendar-grid:not(.ui-agenda) .cal-event{border-radius:7px!important}
+  .team-member-row,.team-invite-row{padding-block:15px!important}
+  .team-box{border-radius:16px!important}
+  .settings-card,.catalog-form-card{border-radius:16px!important}
+  .ui-page-helper{font-size:12px;color:#627892;margin:0 0 17px;line-height:1.55}
+  .ui-page-helper b{color:#28466e}
+  .ui-agenda-strip{background:#fff;border:1px solid #dce7f4;border-radius:15px;padding:20px;margin-top:17px}
+  .ui-agenda-strip h3{margin:0 0 12px;font-size:16px;color:#1b355a}
+  .ui-agenda-strip button{display:flex;gap:10px;align-items:center;width:100%;border:0;background:#f5f8fe;border-radius:9px;padding:11px;text-align:left;margin:6px 0;color:#203f6d;cursor:pointer}
+  .ui-agenda-strip button:hover{background:#e8f1ff}
+  .ui-role-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .ui-role-grid article{padding:13px;border:1px solid #dce7f4;border-radius:10px;background:#f8fbff;font-size:12px;line-height:1.5}
+  .ui-role-grid b{display:block;color:#0c61d6;margin-bottom:4px}
+}
+@media screen and (max-width:950px){.crm-report{grid-template-columns:repeat(2,minmax(0,1fr))!important}.customer-list,#catalogList.ui-cards{grid-template-columns:1fr!important}.ui-role-grid{grid-template-columns:1fr!important}}
+@media screen and (max-width:700px){#customerOverlay,#crmOverlay,#calendarOverlay,#catalogOverlay,#stockOverlay,#archiveOverlay,#settingsOverlay{padding:18px 12px!important}.ui-drawer-card{padding:16px!important}.crm-report{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+</style></head><body>
 
 <div id="inviteGate" class="onboard-overlay" style="display:none"><div class="onboard-card"><h2>Davet bağlantısı</h2><p id="inviteGateMessage"></p><button class="btn primary" onclick="location.href=new URL('app.html',location.href).href">Ana sayfaya dön</button></div></div>
 <div id="teamOverlay" class="team-overlay"><div class="team-card"><div class="ui-title"><div><h2>Ekip ve Roller</h2><p>Çalışanlar davet edilen e-posta adresiyle giriş yaparak şirkete katılır.</p></div><button class="btn light" onclick="closeTeam()">Kapat</button></div><div class="team-box"><h3>Çalışan daveti</h3><div class="team-fields"><label>E-posta<input id="teamEmail" type="email" placeholder="calisan@firma.com"></label><label>Rol<select id="teamRole"></select></label><button class="btn primary" onclick="sendTeamInvitation()">Davet oluştur</button></div><p id="teamMessage" role="status" class="muted"></p><div class="team-link-row"><input id="teamInviteLink" readonly aria-label="Davet bağlantısı"><button class="btn light" onclick="copyTeamInvitation()">Bağlantıyı kopyala</button></div></div><div class="team-box"><h3>Davetler</h3><div id="teamInvitations">Yükleniyor…</div></div><div class="team-box"><h3>Şirket çalışanları</h3><p class="muted">Sahip dışındaki çalışanların rolünü değiştirebilir veya şirket üyeliğini kaldırabilirsiniz.</p><div id="teamMembers" aria-live="polite">Yükleniyor…</div></div></div></div>
@@ -1552,6 +1608,49 @@ overlayClosers.crmForm=()=>uiById('crmForm').classList.remove('open');overlayClo
 for(const id of ['crmForm','customerForm']){uiById(id).setAttribute('role','dialog');uiById(id).setAttribute('aria-modal','true');uiById(id).setAttribute('aria-label',id==='crmForm'?'Görüşme formu':'Müşteri formu')}
 activeDialog=function(){return Object.keys(overlayClosers).map(uiById).filter(el=>el&&el.getClientRects().length).sort((a,b)=>Number(getComputedStyle(b).zIndex)-Number(getComputedStyle(a).zIndex))[0]};
 const uiHeaders={customerOverlay:'Müşteriler',crmOverlay:'Görüşmeler',catalogOverlay:'Ürün Kataloğu',stockOverlay:'Stok Kontrolü',settingsOverlay:'Firma Ayarları'};Object.entries(uiHeaders).forEach(([id,title])=>{const h=uiById(id).querySelector('h2');if(h)h.textContent=title});
+
+// Presentation upgrades; existing Supabase queries and role checks stay in control.
+(function(){
+  const $=id=>document.getElementById(id);
+  const safe=x=>esc(String(x??''));
+  const addHelp=(parent,text)=>{if(!parent)return;const p=document.createElement('p');p.className='ui-page-helper';p.textContent=text;parent.append(p)};
+  addHelp(document.querySelector('.customer-head>div'),'Bir müşteriye tıklayarak görüşmelerine, proformalarına ve servis geçmişine ulaşın.');
+  addHelp(document.querySelector('.catalog-head>div'),'Ürün kartları ve liste arasında geçiş yapabilir, marka ve stok durumuna göre filtreleyebilirsiniz.');
+  addHelp(document.querySelector('.stock-head>div'),'Stok hareketlerini ürünün Geçmiş düğmesinden inceleyin. Serviste kullanım işlemi stoktan düşer.');
+  addHelp(document.querySelector('.service-page-head>div'),'Servis formuna girmeden önce kayıt özetini inceleyebilirsiniz.');
+  const roleBox=document.createElement('section');roleBox.className='team-box';roleBox.innerHTML='<h3>Rol yetkileri</h3><p class="muted">Erişim izinleri şirketteki role göre veritabanında uygulanır.</p><div class="ui-role-grid"><article><b>Yönetici ve Müdür</b>Ekibi ve operasyonları yönetir. Yönetici rolü davet ve çalışan yönetimine erişir.</article><article><b>Satış / Pazarlama</b>Müşteriler, görüşmeler, proformalar ve ürünlerle çalışır.</article><article><b>Teknik Servis</b>Servis kayıtları, stok görünümü ve servis için stok kullanımı.</article><article><b>Çağrı Merkezi</b>Müşteri görüşmeleri ve takvim.</article><article><b>Görüntüleyici</b>Yetkili olduğu kayıtlara yalnızca okuma erişimi.</article><article><b>Şirket Sahibi</b>Şirket ve çalışan yönetimi dahil tüm yetkiler.</article></div>';
+  $('teamOverlay')?.querySelector('.team-card')?.append(roleBox);
+
+  // Agenda shows only already fetched events; clicking opens the existing editor.
+  const agenda=document.createElement('div');agenda.className='ui-agenda-strip';agenda.innerHTML='<h3>Bugünün programı</h3><div id="uiTodayItems"></div>';
+  $('calendarOverlay')?.querySelector('.calendar-shell')?.append(agenda);
+  const renderAgenda=()=>{
+    const today=isoLocal(new Date()),rows=(calendarEvents||[]).filter(x=>calendarDate(x.event_date)===today).sort((a,b)=>String(a.start_time||'').localeCompare(String(b.start_time||'')));
+    const box=$('uiTodayItems');if(!box)return;
+    box.innerHTML=rows.length?rows.map(x=>`<button type="button" data-today-id="${safe(x.id)}"><b>${safe(String(x.start_time||'Tüm gün').slice(0,5))}</b><span>${safe(x.title||'Etkinlik')}${x.personnel?' · '+safe(x.personnel):''}</span></button>`).join(''):'<p class="muted">Bugün için kayıtlı etkinlik yok.</p>';
+    box.querySelectorAll('button').forEach(b=>b.onclick=()=>editCalendarEvent(b.dataset.todayId));
+  };
+  const originalCalendarRender=renderCalendar;
+  renderCalendar=function(){originalCalendarRender();renderAgenda()};
+  const originalCalendarOpen=openCalendar;
+  openCalendar=async function(){await originalCalendarOpen();renderAgenda()};
+
+  // The quick summary uses the same serviceRows already loaded for the page.
+  const originalServiceRender=renderServiceList;
+  renderServiceList=function(){
+    originalServiceRender();
+    $('serviceList')?.querySelectorAll('.service-record').forEach((card,i)=>{
+      const row=serviceRows[i];if(!row)return;
+      const button=document.createElement('button');button.className='btn light';button.type='button';button.textContent='Özet';
+      button.onclick=()=>{
+        uiOpenDrawer(row.service_number||'Servis kaydı');
+        $('uiDrawerBody').innerHTML=`<div class="ui-detail-grid"><div><small>Müşteri</small><b>${safe(row.customer_name)}</b></div><div><small>Cihaz</small><b>${safe(row.device_name)}</b></div><div><small>Seri numarası</small><b>${safe(row.serial_number||'Belirtilmedi')}</b></div><div><small>Servis sorumlusu</small><b>${safe(row.assigned_to||'Atanmadı')}</b></div><div><small>Kabul tarihi</small><b>${safe(serviceDate(row.received_date))}</b></div><div><small>Durum</small><b>${safe(serviceState(row.status).label)}</b></div></div><article class="ui-entry"><b>Arıza / Talep</b><p>${safe(row.reported_issue||'Belirtilmedi')}</p></article><button class="btn primary" id="uiOpenServiceForm" type="button">Servis formunu aç</button>`;
+        $('uiOpenServiceForm').onclick=()=>{uiCloseDrawer();editServiceRecord(row.id)};
+      };
+      card.querySelector('.service-record-bottom')?.prepend(button);
+    });
+  };
+})();
 
 setupLogo();document.getElementById('date').value=isoLocal(new Date());updateValidity();render();setAuthBackground(false);initCloud();if(new URLSearchParams(location.search).get('mode')==='signup')setAuthMode('signup');
 
