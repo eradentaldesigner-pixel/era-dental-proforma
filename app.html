@@ -942,12 +942,23 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
     max-width:none!important;
     min-width:0!important;
     margin:0!important;
-    padding:0!important;
+    padding:10mm!important;
     border:0!important;
     box-shadow:none!important;
     zoom:1!important;
   }
-  @page{size:A4;margin:10mm}
+  .quote-editor .paper .boxes{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:4mm!important;
+    align-items:stretch!important;
+  }
+  .quote-editor .paper .boxes>.box{
+    min-width:0!important;
+    margin:0!important;
+    overflow-wrap:anywhere!important;
+  }
+  @page{size:A4;margin:0}
 }
 
 </style></head><body>
