@@ -785,6 +785,39 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
 @media screen and (max-width:1100px){#archiveOverlay .archive-workspace{grid-template-columns:1fr}#archiveOverlay .archive-side{position:static}}
 @media screen and (max-width:700px){#archiveOverlay .archive-head h2{font-size:25px!important}#archiveOverlay .archive-search{flex-wrap:wrap!important}#archiveOverlay .archive-search input{width:100%!important;flex:auto!important}#archiveOverlay .archive-search select{flex:1!important}}
 
+</style><style id="takvim-adim-4">
+/* Takvim: month/week/day alongside a focused daily agenda. */
+@media screen{
+ #calendarOverlay{background:#f2f7ff!important}
+ #calendarOverlay .calendar-shell{max-width:1550px!important}
+ #calendarOverlay .calendar-head h2{font-size:32px!important;letter-spacing:-.04em!important;color:#183250!important}
+ #calendarOverlay .calendar-head small{font-size:14px!important;color:#647b95!important}
+ #calendarOverlay .calendar-head .btn.primary,#calendarOverlay .calendar-side .btn.primary{background:#116de9!important;border-color:#116de9!important;color:#fff!important}
+ #calendarOverlay .calendar-content{display:grid;grid-template-columns:minmax(0,1fr) 305px;gap:16px;align-items:start}
+ #calendarOverlay .calendar-content>.dash-panel{background:white!important;border:1px solid #dce7f5!important;border-radius:15px!important;padding:20px!important;box-shadow:0 5px 18px #122f5909!important;min-width:0}
+ #calendarOverlay .calendar-toolbar{display:flex!important;gap:8px!important;align-items:center!important;flex-wrap:wrap!important;margin-bottom:16px}
+ #calendarOverlay .calendar-toolbar #calendarMonthLabel{font-size:19px!important;color:#193555!important;margin-inline:auto!important;text-transform:capitalize!important}
+ #calendarOverlay #uiCalendarSwitch{margin:0 0 18px auto!important}
+ #calendarOverlay .calendar-grid:not(.ui-agenda){border:1px solid #dce7f5!important;border-radius:12px!important;overflow:hidden!important}
+ #calendarOverlay .cal-dow{background:#f3f8ff!important;font-weight:750!important;color:#4e688b!important}
+ #calendarOverlay .cal-day{min-height:110px!important;border-color:#e8eef7!important}
+ #calendarOverlay .cal-day.today{background:#ebf4ff!important}
+ #calendarOverlay .cal-event{border-radius:7px!important}
+ #calendarOverlay .calendar-side{background:white;border:1px solid #dce7f5;border-radius:15px;padding:20px;box-shadow:0 5px 18px #122f5909;position:sticky;top:16px}
+ #calendarOverlay .calendar-side h3{font-size:18px;color:#193451;margin:0 0 5px}
+ #calendarOverlay .calendar-side p{font-size:12px;color:#71849b;margin:0 0 15px}
+ #calendarOverlay .calendar-side input[type=date]{width:100%;height:42px;border:1px solid #dce7f5;border-radius:9px;padding:8px 12px;color:#223e61;background:white;margin:5px 0 17px}
+ #calendarOverlay .calendar-side .day-entry{display:block;width:100%;text-align:left;background:#f7faff;border:1px solid #e0eafa;border-left:4px solid #116de9;border-radius:9px;padding:12px;margin-bottom:9px;cursor:pointer;color:#193451}
+ #calendarOverlay .calendar-side .day-entry.service{border-left-color:#9562d9}
+ #calendarOverlay .calendar-side .day-entry.meeting{border-left-color:#26ad85}
+ #calendarOverlay .calendar-side .day-entry b{display:block;font-size:12px}
+ #calendarOverlay .calendar-side .day-entry span{font-size:12px;display:block;margin-top:4px}
+ #calendarOverlay .calendar-side .day-entry small{font-size:11px;color:#6e819c;display:block;margin-top:5px}
+ #calendarOverlay .calendar-side>.btn{width:100%;margin-top:14px}
+}
+@media screen and (max-width:1100px){#calendarOverlay .calendar-content{grid-template-columns:1fr}#calendarOverlay .calendar-side{position:static}}
+@media screen and (max-width:700px){#calendarOverlay .calendar-head h2{font-size:25px!important}#calendarOverlay .calendar-content>.dash-panel,#calendarOverlay .calendar-side{padding:14px!important}#calendarOverlay .cal-day{min-height:80px!important}}
+
 </style></head><body>
 
 <div id="inviteGate" class="onboard-overlay" style="display:none"><div class="onboard-card"><h2>Davet bağlantısı</h2><p id="inviteGateMessage"></p><button class="btn primary" onclick="location.href=new URL('app.html',location.href).href">Ana sayfaya dön</button></div></div>
@@ -1457,7 +1490,7 @@ function calendarDate(value){return String(value||'').slice(0,10)}
 let calendarLoadVersion=0;
 async function loadCalendar(){
  const version=++calendarLoadVersion,first=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth(),1),start=new Date(first);
- start.setDate(1-first.getDay());const end=new Date(start);end.setDate(start.getDate()+41);
+ start.setDate(1-((first.getDay()+6)%7));const end=new Date(start);end.setDate(start.getDate()+41);
  const state=document.getElementById('calendarLoadState');state.textContent='Etkinlikler yükleniyor…';renderCalendar();
  try{
   const {data,error}=await sb.from('calendar_events').select('*').eq('company_id',currentCompanyId).gte('event_date',isoLocal(start)).lte('event_date',isoLocal(end)).order('event_date').order('start_time');
@@ -1468,8 +1501,8 @@ async function loadCalendar(){
 }
 function renderCalendar(){
  document.getElementById('calendarMonthLabel').textContent=calendarCursor.toLocaleDateString('tr-TR',{month:'long',year:'numeric'});
- const grid=document.getElementById('calendarGrid');const names=['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];let out=names.map(n=>`<div class="cal-dow">${n}</div>`).join('');
- const first=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth(),1),start=new Date(first);start.setDate(1-first.getDay());const today=isoLocal(new Date());
+ const grid=document.getElementById('calendarGrid');const names=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];let out=names.map(n=>`<div class="cal-dow">${n}</div>`).join('');
+ const first=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth(),1),start=new Date(first);start.setDate(1-((first.getDay()+6)%7));const today=isoLocal(new Date());
  for(let i=0;i<42;i++){
   const d=new Date(start);d.setDate(start.getDate()+i);const iso=isoLocal(d),events=calendarEvents.filter(x=>calendarDate(x.event_date)===iso).sort((a,b)=>String(a.start_time||'').localeCompare(String(b.start_time||'')));
   out+=`<div class="cal-day ${d.getMonth()!==calendarCursor.getMonth()?'muted':''} ${iso===today?'today':''}" data-date="${iso}"><button type="button" class="cal-num" data-add-date="${iso}" aria-label="${iso} tarihine etkinlik ekle">${d.getDate()}<span aria-hidden="true">+</span></button><div class="cal-events">${events.map(x=>{
@@ -1638,7 +1671,7 @@ let uiCrmMode='board';const uiCrmListBase=renderCrm;renderCrm=function(){uiCrmLi
 uiById('crmList').before(uiSwitch('uiCrmSwitch',[['board','Durum Panosu'],['list','Liste']],key=>{uiCrmMode=key;renderCrm()},uiCrmMode));
 // Calendar ranges and agenda, including dates at month boundaries.
 let uiCalendarMode=matchMedia('(max-width:700px)').matches?'day':'month';
-function uiCalendarRange(){const start=new Date(calendarCursor);start.setHours(0,0,0,0);if(uiCalendarMode==='month'){start.setDate(1);start.setDate(1-start.getDay())}else if(uiCalendarMode==='week'){start.setDate(start.getDate()-((start.getDay()+6)%7))}const end=new Date(start);end.setDate(start.getDate()+(uiCalendarMode==='month'?41:uiCalendarMode==='week'?6:0));return {start,end}}
+function uiCalendarRange(){const start=new Date(calendarCursor);start.setHours(0,0,0,0);if(uiCalendarMode==='month'){start.setDate(1);start.setDate(1-((start.getDay()+6)%7))}else if(uiCalendarMode==='week'){start.setDate(start.getDate()-((start.getDay()+6)%7))}const end=new Date(start);end.setDate(start.getDate()+(uiCalendarMode==='month'?41:uiCalendarMode==='week'?6:0));return {start,end}}
 const uiCalendarMonthBase=renderCalendar;renderCalendar=function(){if(uiCalendarMode==='month'){uiCalendarMonthBase();uiById('calendarGrid').classList.remove('ui-agenda');return}const {start,end}=uiCalendarRange();uiById('calendarMonthLabel').textContent=start.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})+(uiCalendarMode==='week'?' – '+end.toLocaleDateString('tr-TR',{day:'numeric',month:'long'}):'');const grid=uiById('calendarGrid');grid.classList.add('ui-agenda');let html='';for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){const date=isoLocal(d),rows=calendarEvents.filter(x=>calendarDate(x.event_date)===date);html+=`<section class="ui-agenda-day" data-date="${date}"><h3>${d.toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'})}<button class="btn light" data-ui-add="${date}">+ Plan</button></h3>${rows.map(r=>`<button class="cal-event ${r.event_type==='Servis'?'service':r.event_type==='Kurulum'?'install':r.event_type==='Toplantı'?'meeting':''}" data-event-id="${esc(r.id)}"><span class="cal-event-time">${esc((r.start_time||'').slice(0,5)||'Tüm gün')}${r.end_time?' – '+esc(r.end_time.slice(0,5)):''} · ${esc(r.event_type||'Plan')}</span><strong>${esc(r.title)}</strong><span>${esc([r.personnel,r.location].filter(Boolean).join(' · '))}</span></button>`).join('')||'<p class="ui-note">Plan bulunmuyor. Bu güne yeni bir etkinlik ekleyebilirsiniz.</p>'}</section>`}grid.innerHTML=html;uiBind(grid,'data-ui-add',newCalendarEvent);uiBind(grid,'data-event-id',editCalendarEvent)};
 loadCalendar=async function(){const version=++calendarLoadVersion,{start,end}=uiCalendarRange(),state=uiById('calendarLoadState');state.textContent='Etkinlikler yükleniyor…';calendarEvents=[];renderCalendar();try{const r=await sb.from('calendar_events').select('*').eq('company_id',currentCompanyId).gte('event_date',isoLocal(start)).lte('event_date',isoLocal(end)).order('event_date').order('start_time');if(version!==calendarLoadVersion)return false;if(r.error)throw r.error;calendarEvents=r.data||[];renderCalendar();state.textContent=calendarEvents.length+' etkinlik';return true}catch(e){if(version===calendarLoadVersion)state.textContent='Etkinlikler yüklenemedi: '+e.message;return false}};
 openCalendar=async function(){closeAllProeraViews();uiById('calendarOverlay').classList.add('open');await loadCalendar()};changeCalendarMonth=function(n){if(uiCalendarMode==='month')calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+n,1);else calendarCursor.setDate(calendarCursor.getDate()+n*(uiCalendarMode==='week'?7:1));return loadCalendar()};
@@ -1783,6 +1816,41 @@ const uiHeaders={customerOverlay:'Müşteriler',crmOverlay:'Görüşmeler',catal
  const base=loadArchive;
  loadArchive=async function(){await base();decorate()};
  display(null);
+})();
+
+// Calendar agenda reflects the already loaded company calendar events.
+(function(){
+ const overlay=document.getElementById('calendarOverlay'),shell=overlay?.querySelector('.calendar-shell');
+ if(!shell)return;
+ const panel=shell.querySelector(':scope>.dash-panel'),layout=document.createElement('div');layout.className='calendar-content';
+ panel.before(layout);layout.append(panel);
+ const side=document.createElement('aside');side.className='calendar-side';side.innerHTML='<h3>Günlük program</h3><p>Seçilen günün etkinliklerini görüntüleyin.</p><label for="calendarSelectedDay">Tarih seçin</label><input type="date" id="calendarSelectedDay"><div id="calendarDayEntries" aria-live="polite"></div><button type="button" class="btn primary" id="calendarDayAdd">+ Bu güne plan ekle</button>';layout.append(side);
+ const picker=document.getElementById('calendarSelectedDay'),entries=document.getElementById('calendarDayEntries');
+ picker.value=isoLocal(new Date());
+ const label=overlay.querySelector('.calendar-head h2');if(label)label.textContent='Takvim';
+ function agenda(){
+   const day=picker.value;
+   const rows=(calendarEvents||[]).filter(x=>calendarDate(x.event_date)===day).sort((a,b)=>String(a.start_time||'').localeCompare(String(b.start_time||'')));
+   entries.innerHTML=rows.length?rows.map(x=>`<button type="button" class="day-entry ${x.event_type==='Servis'?'service':x.event_type==='Toplantı'?'meeting':''}" data-cal-id="${esc(x.id)}"><b>${esc((x.start_time||'').slice(0,5)||'Tüm gün')} · ${esc(x.event_type||'Plan')}</b><span>${esc(x.title||'Etkinlik')}</span><small>${esc([x.personnel,x.location].filter(Boolean).join(' · '))}</small></button>`).join(''):'<p>Bu günde kayıtlı bir etkinlik yok.</p>';
+   entries.querySelectorAll('[data-cal-id]').forEach(b=>b.onclick=()=>editCalendarEvent(b.dataset.calId));
+ }
+ picker.onchange=()=>{
+   if(!picker.value)return;
+   const d=new Date(picker.value+'T12:00:00');
+   calendarCursor=d;
+   loadCalendar();
+ };
+ document.getElementById('calendarDayAdd').onclick=()=>newCalendarEvent(picker.value||isoLocal(new Date()));
+ const baseRender=renderCalendar;
+ renderCalendar=function(){
+   baseRender();
+   if(uiCalendarMode==='month'&&picker.value.slice(0,7)!==isoLocal(calendarCursor).slice(0,7))picker.value=isoLocal(new Date(calendarCursor.getFullYear(),calendarCursor.getMonth(),1));
+   if(uiCalendarMode==='day')picker.value=isoLocal(calendarCursor);
+   agenda();
+ };
+ const baseToday=calendarToday;
+ calendarToday=function(){picker.value=isoLocal(new Date());return baseToday()};
+ agenda();
 })();
 
 setupLogo();document.getElementById('date').value=isoLocal(new Date());updateValidity();render();setAuthBackground(false);initCloud();if(new URLSearchParams(location.search).get('mode')==='signup')setAuthMode('signup');
