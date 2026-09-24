@@ -1,0 +1,13 @@
+PROERA - Çağrı Merkezi çalışan daveti düzeltmesi
+
+1. Supabase SQL Editor'de davet-kabul-duzeltmesi.sql içeriğini çalıştırın.
+   Alttaki sonuçta ozlem@eradental.com için role = call_center olmalı.
+   Başka bir rol yazıyorsa, Ekip ve Roller ekranında daveti Çağrı Merkezi rolüyle yeniden oluşturun.
+2. app.html dosyasını GitHub'daki mevcut app.html ile değiştirin; Vercel dağıtımını bekleyin.
+3. Özlem, davet bağlantısını ozlem@eradental.com hesabıyla açıp giriş yapsın.
+   Önceki hata ekranında açık kalan bağlantı varsa sayfayı yenileyebilir.
+4. Burak, Ekip ve Roller > Şirket çalışanları bölümünde Özlem'in rolünün
+   Çağrı Merkezi olduğunu kontrol etsin. Özlem iki şirkete bağlıysa
+   çalışma alanı seçicisinden Era Dental'i seçebilir.
+
+Bu dosya mevcut şirket üyeliklerini silmez veya değiştirmez.
