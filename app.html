@@ -963,7 +963,7 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
 
 </style></head><body>
 
-<div id="inviteGate" class="onboard-overlay" style="display:none"><div class="onboard-card"><h2>Davet bağlantısı</h2><p id="inviteGateMessage"></p><button class="btn primary" onclick="location.href=new URL('app.html',location.href).href">Ana sayfaya dön</button></div></div>
+<div id="inviteGate" class="onboard-overlay" style="display:none"><div class="onboard-card"><h2>Davet bağlantısı</h2><p id="inviteGateMessage"></p><button class="btn light" type="button" onclick="retryPendingInvite()">Tekrar dene</button> <button class="btn primary" type="button" onclick="leaveInvitation()">Çalışma alanıma dön</button></div></div>
 <div id="teamOverlay" class="team-overlay"><div class="team-card"><div class="ui-title"><div><h2>Ekip ve Roller</h2><p>Çalışanlar davet edilen e-posta adresiyle giriş yaparak şirkete katılır.</p></div><button class="btn light" onclick="closeTeam()">Kapat</button></div><div class="team-box"><h3>Çalışan daveti</h3><div class="team-fields"><label>E-posta<input id="teamEmail" type="email" placeholder="calisan@firma.com"></label><label>Rol<select id="teamRole"></select></label><button class="btn primary" onclick="sendTeamInvitation()">Davet oluştur</button></div><p id="teamMessage" role="status" class="muted"></p><div class="team-link-row"><input id="teamInviteLink" readonly aria-label="Davet bağlantısı"><button class="btn light" onclick="copyTeamInvitation()">Bağlantıyı kopyala</button></div></div><div class="team-box"><h3>Davetler</h3><div id="teamInvitations">Yükleniyor…</div></div><div class="team-box"><h3>Şirket çalışanları</h3><p class="muted">Sahip dışındaki çalışanların rolünü değiştirebilir veya şirket üyeliğini kaldırabilirsiniz.</p><div id="teamMembers" aria-live="polite">Yükleniyor…</div></div></div></div>
 <aside class="desktop-side" aria-label="Ana navigasyon">
  <div class="ds-brand"><img src="proera-logo.svg" alt="Proera"><span>Proera<small>Dental Business Platform</small></span></div>
@@ -1332,10 +1332,25 @@ async function createWorkspace(){
 }
 function invitedCompanyId(){const id=new URLSearchParams(location.search).get('invite');return id&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)?id:null}
 function inviteRedirectUrl(){const u=new URL('app.html',location.href);const id=invitedCompanyId();if(id)u.searchParams.set('invite',id);return u.href}
+async function leaveInvitation(){
+ const u=new URL(location.href);u.searchParams.delete('invite');
+ history.replaceState(null,'',u.href);
+ document.getElementById('inviteGate').style.display='none';
+ document.getElementById('inviteGateMessage').textContent='';
+ window._bootedWorkspace=null;
+ if(window._bootPromise)await window._bootPromise;
+ if(currentUser)await bootWorkspace();else updateAuthGate();
+}
+async function retryPendingInvite(){
+ document.getElementById('inviteGateMessage').textContent='Davet yeniden kontrol ediliyor…';
+ if(window._bootPromise)await window._bootPromise;
+ window._bootedWorkspace=null;
+ await bootWorkspace();
+}
 async function acceptPendingInvite(){
  const id=invitedCompanyId();if(!id||!currentUser)return true;
  const {data,error}=await sb.rpc('accept_company_invitation',{p_company_id:id});
- if(error){document.getElementById('onboardOverlay').style.display='none';document.getElementById('inviteGate').style.display='grid';document.getElementById('inviteGateMessage').textContent='Davet kabul edilemedi: '+error.message;return false}
+ if(error){document.getElementById('onboardOverlay').style.display='none';document.getElementById('inviteGate').style.display='grid';document.getElementById('inviteGateMessage').textContent='Davet kabul edilemedi: '+error.message+(error.message.includes('zaten bir şirkete bağlı')?' Veritabanındaki eski davet kuralı hâlâ etkin. Şirket yöneticisi davet-kabul-duzeltmesi.sql dosyasını SQL Editor’de çalıştırmalı.':'');return false}
  if(!data){document.getElementById('onboardOverlay').style.display='none';document.getElementById('inviteGate').style.display='grid';document.getElementById('inviteGateMessage').textContent='Bu e-posta adresine ait geçerli bir davet bulunamadı. Daveti gönderen kişiden yeni bağlantı isteyin.';return false}
  localStorage.setItem('proera_selected_company:'+currentUser.id,id);
  const u=new URL(location.href);u.searchParams.delete('invite');history.replaceState(null,'',u.href);
