@@ -666,8 +666,10 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
 @media screen and (max-width:700px){.stock-stats{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px}.stock-stat{padding:12px!important}.stock-stat span{font-size:11px}.stock-stat b{font-size:23px}}
 
 [hidden]{display:none!important}@media screen and (max-width:700px){.wrap.ui-editing>.paper-scroll{display:none!important}.wrap.ui-preview>.paper-scroll{display:block!important}}
-</style></head><body>
+</style><style>.team-manager-link[hidden]{display:none!important}.team-overlay{display:none;position:fixed;inset:0 0 0 224px;z-index:10030;overflow:auto;background:#edf3fa;padding:30px}.team-card{max-width:930px;margin:auto;color:#142d50}.team-box{background:white;border:1px solid #dce7f5;border-radius:14px;padding:22px;margin:16px 0}.team-fields{display:grid;grid-template-columns:1fr 220px auto;gap:10px;align-items:end}.team-fields input,.team-fields select,#teamInviteLink{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px}.team-invite-row{display:flex;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid #e5edf5}.team-invite-row span{color:#64748b}.team-link-row{display:flex;gap:8px;margin-top:12px}@media(max-width:800px){.team-overlay{inset:64px 0 0;padding:16px}.team-fields{grid-template-columns:1fr}.team-link-row,.team-invite-row{flex-direction:column}}</style></head><body>
 
+<div id="inviteGate" class="onboard-overlay" style="display:none"><div class="onboard-card"><h2>Davet bağlantısı</h2><p id="inviteGateMessage"></p><button class="btn primary" onclick="location.href=new URL('app.html',location.href).href">Ana sayfaya dön</button></div></div>
+<div id="teamOverlay" class="team-overlay"><div class="team-card"><div class="ui-title"><div><h2>Ekip ve Roller</h2><p>Çalışanlar davet edilen e-posta adresiyle giriş yaparak şirkete katılır.</p></div><button class="btn light" onclick="closeTeam()">Kapat</button></div><div class="team-box"><h3>Çalışan daveti</h3><div class="team-fields"><label>E-posta<input id="teamEmail" type="email" placeholder="calisan@firma.com"></label><label>Rol<select id="teamRole"></select></label><button class="btn primary" onclick="sendTeamInvitation()">Davet oluştur</button></div><p id="teamMessage" role="status" class="muted"></p><div class="team-link-row"><input id="teamInviteLink" readonly aria-label="Davet bağlantısı"><button class="btn light" onclick="copyTeamInvitation()">Bağlantıyı kopyala</button></div></div><div class="team-box"><h3>Davetler</h3><div id="teamInvitations">Yükleniyor…</div></div></div></div>
 <aside class="desktop-side" aria-label="Ana navigasyon">
  <div class="ds-brand"><img src="proera-logo.svg" alt="Proera"><span>Proera<small>Dental Business Platform</small></span></div>
  <nav class="ds-nav">
@@ -684,6 +686,7 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
  <div class="nav-group">TEKNİK SERVİS</div>
  <button class="ds-btn" onclick="appNavigate('service')"><span class="ds-icon">⚒</span>Servis Kayıtları</button>
  <div class="nav-group">AYARLAR</div>
+ <button class="ds-btn team-manager-link" onclick="appNavigate('team')"><span class="ds-icon">♧</span>Ekip ve Roller</button>
  <button class="ds-btn" onclick="appNavigate('settings')"><span class="ds-icon">⚙</span>Firma Ayarları</button>
  </nav>
  <button class="ds-btn" type="button" onclick="openGuide()">Başlangıç Rehberi</button><div class="ds-spacer"></div><button class="ds-btn" type="button" onclick="logoutUser()">Çıkış Yap</button>
@@ -708,6 +711,7 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
       <button type="button" onclick="mobileNavigate('catalog')"><span class="mi"><svg viewBox="0 0 24 24"><path d="m12 3 8 4-8 4-8-4zM4 7v10l8 4 8-4V7M12 11v10"/></svg></span>Ürün Kataloğu</button>
       <button type="button" onclick="mobileNavigate('stock')"><span class="mi"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span>Stok Kontrolü</button>
       <button type="button" onclick="mobileNavigate('customers')"><span class="mi"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Müşteriler</button>
+      <button class="team-manager-link" type="button" onclick="mobileNavigate('team')"><span class="mi">♧</span>Ekip ve Roller</button>
       <button type="button" onclick="mobileNavigate('settings')"><span class="mi"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6 1.7 1.7 0 0 0-.4 1.1V21h-4v-.1A1.7 1.7 0 0 0 8.6 19.4a1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1 1.7 1.7 0 0 0-1.1-.4H3v-4h.1A1.7 1.7 0 0 0 4.6 8.6a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6 1.7 1.7 0 0 0 .4-1.1V3h4v.1A1.7 1.7 0 0 0 15.4 4.6a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9c.16.36.37.7.6 1 .28.34.67.55 1.1.6h.1v4h-.1c-.43.05-.82.26-1.1.6-.23.3-.44.64-.6 1z"/></svg></span>Ayarlar</button>
       <button type="button" onclick="setMobileMenu(false);openGuide()">Başlangıç Rehberi</button><div class="md-sep"></div>
       <button type="button" onclick="document.getElementById('mobileNavToggle').checked=false;logoutUser()"><span class="mi"><svg viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3M14 3h6a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1h-6"/></svg></span>Çıkış Yap</button>
@@ -741,7 +745,7 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
 </div>
 <button class="mobile-modal-menu" type="button" onclick="openMobileNavFromLayer()" aria-label="Menüyü aç">☰</button>
 <section id="dashboardOverlay" class="dashboard-overlay dashboard-v2">
- <div class="dash-topbar"><label class="dash-search"><span aria-hidden="true">⌕</span><input id="dashGlobalSearch" type="search" placeholder="Servis, cihaz, müşteri, seri no…" aria-label="Servis kayıtlarında ara" onkeydown="if(event.key==='Enter')searchServicesFromDashboard()"><kbd>Enter</kbd></label><div class="dash-top-actions"><button type="button" class="dash-icon-button" aria-label="Bildirimler" onclick="toggleMobileNotifications(event)">♧</button><button type="button" class="dash-icon-button" aria-label="Başlangıç rehberi" onclick="openGuide()">?</button><button type="button" class="dash-company" onclick="appNavigate('settings')"><span class="dash-avatar">P</span><span><b id="dashWorkspaceName">Çalışma alanı</b><small>Firma ayarları</small></span><span>⌄</span></button></div></div>
+ <div class="dash-topbar"><label class="dash-search"><span aria-hidden="true">⌕</span><input id="dashGlobalSearch" type="search" placeholder="Servis, cihaz, müşteri, seri no…" aria-label="Servis kayıtlarında ara" onkeydown="if(event.key==='Enter')searchFromDashboard()"><kbd>Enter</kbd></label><div class="dash-top-actions"><button type="button" class="dash-icon-button" aria-label="Bildirimler" onclick="toggleMobileNotifications(event)">♧</button><button type="button" class="dash-icon-button" aria-label="Başlangıç rehberi" onclick="openGuide()">?</button><button type="button" class="dash-company" onclick="appNavigate('settings')"><span class="dash-avatar">P</span><span><b id="dashWorkspaceName">Çalışma alanı</b><small>Firma ayarları</small></span><span>⌄</span></button></div></div>
  <div class="dashboard-page">
   <div class="dash-hero"><div><h1 id="dashGreeting">Merhaba</h1><p id="dashCompany">Çalışma alanınızın güncel özeti.</p></div><div class="dash-hero-note"><span>İşinizin her adımı,<br><b>tek bir çalışma alanında.</b></span><img src="proera-logo.svg" alt=""></div></div>
   <div class="dash-stats">
@@ -982,14 +986,24 @@ async function createWorkspace(){
   await resolveWorkspace();
   await bootWorkspace();
 }
+function invitedCompanyId(){const id=new URLSearchParams(location.search).get('invite');return id&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)?id:null}
+function inviteRedirectUrl(){const u=new URL('app.html',location.href);const id=invitedCompanyId();if(id)u.searchParams.set('invite',id);return u.href}
+async function acceptPendingInvite(){
+ const id=invitedCompanyId();if(!id||!currentUser)return true;
+ const {data,error}=await sb.rpc('accept_company_invitation',{p_company_id:id});
+ if(error){document.getElementById('onboardOverlay').style.display='none';document.getElementById('inviteGate').style.display='grid';document.getElementById('inviteGateMessage').textContent='Davet kabul edilemedi: '+error.message;return false}
+ if(!data){document.getElementById('onboardOverlay').style.display='none';document.getElementById('inviteGate').style.display='grid';document.getElementById('inviteGateMessage').textContent='Bu e-posta adresine ait geçerli bir davet bulunamadı. Daveti gönderen kişiden yeni bağlantı isteyin.';return false}
+ const u=new URL(location.href);u.searchParams.delete('invite');history.replaceState(null,'',u.href);
+ document.getElementById('inviteGate').style.display='none';return true
+}
 async function resolveWorkspace(){if(!currentUser)return false;const {data,error}=await sb.from('company_members').select('company_id,role,companies(name)').eq('user_id',currentUser.id).limit(1).maybeSingle();if(error){console.error(error);return false}currentMembership=data||null;currentCompanyId=data?.company_id||null;if(!currentCompanyId){document.getElementById('onboardOverlay').style.display='grid';return false}document.getElementById('onboardOverlay').style.display='none';return true}
-async function bootWorkspace(){if(window._bootPromise)return window._bootPromise;window._bootPromise=(async()=>{try{if(!(await resolveWorkspace()))return;const key=currentUser.id+':'+currentCompanyId;if(window._bootedWorkspace===key)return;document.getElementById('profileEmail').textContent=currentUser.email||'';await loadCompanySettings();await loadBanksCloud();document.getElementById('desktopSideCompany').textContent=document.getElementById('profileCompany').textContent;applyProeraPrefs();const archiveId=new URLSearchParams(location.search).get('proforma');if(archiveId){await loadSavedProforma(archiveId,true)}else{applyCompanyDefaults();const restored=restoreDraft();if(!restored){await ensureProformaNo();await fetchRate();appNavigate('home')}}window._bootedWorkspace=key;document.getElementById('syncStatus').textContent='● Bağlı';checkLowStock().catch(console.error)}catch(e){document.getElementById('syncStatus').textContent='● Yükleme hatası';alert('Çalışma alanı yüklenemedi: '+e.message)}finally{window._bootPromise=null}})();return window._bootPromise}
-function updateAuthGate(){document.getElementById('authGate').style.display=currentUser?'none':'grid';setAuthBackground(!!currentUser);if(!currentUser){serviceRows=[];serviceCustomers=[];serviceEditing=null;serviceDirty=false;document.getElementById('serviceFormModal').classList.remove('open');window._bootedWorkspace=null;closeAllProeraViews();currentCompanyId=null;document.getElementById('syncStatus').textContent='● Giriş gerekli';return}bootWorkspace()}
+async function bootWorkspace(){if(window._bootPromise)return window._bootPromise;window._bootPromise=(async()=>{try{if(!(await acceptPendingInvite()))return;if(!(await resolveWorkspace()))return;const key=currentUser.id+':'+currentCompanyId;if(window._bootedWorkspace===key)return;document.getElementById('profileEmail').textContent=currentUser.email||'';await loadCompanySettings();await loadBanksCloud();document.getElementById('desktopSideCompany').textContent=document.getElementById('profileCompany').textContent;applyProeraPrefs();const archiveId=new URLSearchParams(location.search).get('proforma');if(archiveId&&hasAppAction('archive')){await loadSavedProforma(archiveId,true)}else{const landing=roleLanding();if(hasAppAction('new')){applyCompanyDefaults();const restored=restoreDraft();if(!restored){await ensureProformaNo();await fetchRate()}}appNavigate(landing)}window._bootedWorkspace=key;document.getElementById('syncStatus').textContent='● Bağlı';checkLowStock().catch(console.error)}catch(e){document.getElementById('syncStatus').textContent='● Yükleme hatası';alert('Çalışma alanı yüklenemedi: '+e.message)}finally{window._bootPromise=null}})();return window._bootPromise}
+function updateAuthGate(){document.getElementById('authGate').style.display=currentUser?'none':'grid';setAuthBackground(!!currentUser);if(!currentUser){document.querySelectorAll('.team-manager-link').forEach(el=>el.hidden=true);document.getElementById('teamOverlay').style.display='none';serviceRows=[];serviceCustomers=[];serviceEditing=null;serviceDirty=false;document.getElementById('serviceFormModal').classList.remove('open');window._bootedWorkspace=null;closeAllProeraViews();currentCompanyId=null;document.getElementById('syncStatus').textContent='● Giriş gerekli';return}bootWorkspace()}
 let authMode='login';
 function setAuthMode(mode){authMode=mode;tabLogin.classList.toggle('active',mode==='login');tabSignup.classList.toggle('active',mode==='signup');nameArea.style.display=mode==='signup'?'block':'none';passwordArea.style.display='block';confirmPasswordArea.style.display=mode==='signup'?'block':'none';newPasswordArea.style.display='none';authPassword.autocomplete=mode==='signup'?'new-password':'current-password';authActions.innerHTML=mode==='login'?'<button class="btn primary" onclick="loginUser()">Giriş Yap</button><button class="btn light" onclick="resetPassword()">Şifremi Unuttum</button>':'<button class="btn primary" onclick="signupUser()">Üyelik Oluştur</button>';authMsg.textContent=mode==='signup'?'E-posta adresinizi doğruladıktan sonra firma kurulumuna geçeceksiniz.':''}
 async function loginUser(){const email=authEmail.value.trim(),password=authPassword.value;if(!email||!password){authMsg.textContent='E-posta ve şifrenizi girin.';return}authMsg.textContent='Giriş yapılıyor…';const {error}=await sb.auth.signInWithPassword({email,password});authMsg.textContent=error?('Hata: '+error.message):'Giriş başarılı.'}
-async function signupUser(){const name=authName.value.trim(),email=authEmail.value.trim(),password=authPassword.value,password2=authPassword2.value;if(!name){authMsg.textContent='Ad Soyad alanını doldurun.';return}if(!email){authMsg.textContent='E-posta adresinizi yazın.';return}if(password.length<8){authMsg.textContent='Şifre en az 8 karakter olmalıdır.';return}if(password!==password2){authMsg.textContent='Şifreler birbiriyle aynı değil.';return}authMsg.textContent='Üyelik oluşturuluyor…';const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:name},emailRedirectTo:new URL('app.html',location.href).href}});if(error){authMsg.textContent='Hata: '+error.message;return}if(data.session){authMsg.textContent='Üyelik oluşturuldu. Firma kurulumu açılıyor…'}else{authMsg.innerHTML='<b>Üyeliğiniz oluşturuldu.</b><br>E-posta adresinize gönderilen doğrulama bağlantısına tıklayın, ardından giriş yapın.'}}
-async function loginGoogle(){authMsg.textContent='Google’a yönlendiriliyorsunuz…';const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:new URL('app.html',location.href).href,queryParams:{access_type:'offline',prompt:'consent'}}});if(error)authMsg.textContent='Google giriş hatası: '+error.message}
+async function signupUser(){const name=authName.value.trim(),email=authEmail.value.trim(),password=authPassword.value,password2=authPassword2.value;if(!name){authMsg.textContent='Ad Soyad alanını doldurun.';return}if(!email){authMsg.textContent='E-posta adresinizi yazın.';return}if(password.length<8){authMsg.textContent='Şifre en az 8 karakter olmalıdır.';return}if(password!==password2){authMsg.textContent='Şifreler birbiriyle aynı değil.';return}authMsg.textContent='Üyelik oluşturuluyor…';const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:name},emailRedirectTo:inviteRedirectUrl()}});if(error){authMsg.textContent='Hata: '+error.message;return}if(data.session){authMsg.textContent='Üyelik oluşturuldu. Firma kurulumu açılıyor…'}else{authMsg.innerHTML='<b>Üyeliğiniz oluşturuldu.</b><br>E-posta adresinize gönderilen doğrulama bağlantısına tıklayın, ardından giriş yapın.'}}
+async function loginGoogle(){authMsg.textContent='Google’a yönlendiriliyorsunuz…';const {error}=await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:inviteRedirectUrl(),queryParams:{access_type:'offline',prompt:'consent'}}});if(error)authMsg.textContent='Google giriş hatası: '+error.message}
 async function resetPassword(){const email=authEmail.value.trim();if(!email){authMsg.textContent='Önce e-posta adresinizi yazın.';return}const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:new URL('app.html',location.href).href});authMsg.textContent=error?('Hata: '+error.message):'Şifre yenileme bağlantısı e-posta adresinize gönderildi.'}
 function showPasswordRecovery(){setAuthBackground(false);document.getElementById('authGate').style.display='grid';document.querySelector('.auth-title').textContent='Yeni şifre belirleyin';document.querySelector('.auth-tabs').style.display='none';document.querySelector('.google-btn').style.display='none';document.querySelector('.auth-sep').style.display='none';nameArea.style.display='none';authEmail.style.display='none';const emailLabel=authEmail.previousElementSibling;if(emailLabel)emailLabel.style.display='none';passwordArea.style.display='none';confirmPasswordArea.style.display='none';newPasswordArea.style.display='block';authActions.innerHTML='<button class="btn primary" onclick="saveNewPassword()">Yeni Şifreyi Kaydet</button>';authMsg.textContent='Yeni şifrenizi iki kez yazın.'}
 async function saveNewPassword(){const p=authNewPassword.value,p2=authNewPassword2.value;if(p.length<8){authMsg.textContent='Şifre en az 8 karakter olmalıdır.';return}if(p!==p2){authMsg.textContent='Şifreler birbiriyle aynı değil.';return}const {error}=await sb.auth.updateUser({password:p});if(error){authMsg.textContent='Hata: '+error.message;return}authMsg.textContent='Şifreniz güncellendi. Panel açılıyor…';setTimeout(()=>location.replace(new URL('app.html',location.href).href),700)}
@@ -1091,7 +1105,7 @@ function saveDraft(){if(saveDraftQuietly())alert('Taslak bu cihazda kaydedildi. 
 async function resetForm(){if(!confirm('Mevcut proforma temizlenip yeni bir proforma açılsın mı?'))return;clearDraft();await startNewProforma()}
 
 function closeAllAppLayers(){
-  const ids=['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay','crmOverlay','calendarOverlay','serviceOverlay'];
+  const ids=['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay','crmOverlay','calendarOverlay','serviceOverlay','teamOverlay'];
   ids.forEach(id=>{
     const el=document.getElementById(id);
     if(el){el.classList.remove('open');el.style.display='';}
@@ -1114,13 +1128,14 @@ function desktopNavigate(action){
 
 function closeAllProeraViews(){
   document.getElementById('dashboardOverlay')?.classList.remove('open');
-  ['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay','crmOverlay','calendarOverlay','serviceOverlay'].forEach(id=>{
+  ['archiveOverlay','customerOverlay','settingsOverlay','catalogOverlay','stockOverlay','crmOverlay','calendarOverlay','serviceOverlay','teamOverlay'].forEach(id=>{
     const el=document.getElementById(id); if(!el)return;
     el.classList.remove('open'); el.style.display='';
   });
   document.body.style.overflow='';
 }
 async function appNavigate(action){
+  if(!hasAppAction(action)){alert('Bu bölüme erişim yetkiniz yok.');return}
   closeAllProeraViews();
   if(action==='home'){document.getElementById('dashboardOverlay').classList.add('open');return loadDashboard()}
   if(action==='new')return resetForm();
@@ -1128,12 +1143,13 @@ async function appNavigate(action){
   if(action==='customers')return openCustomers();
   if(action==='catalog')return openCatalog('manage');
   if(action==='stock')return openStockControl();
+  if(action==='team')return openTeam();
   if(action==='settings'){await openSettings();loadProeraPrefs();return}
   if(action==='crm')return openCrm();
   if(action==='calendar')return openCalendar();
   if(action==='service')return openServices();
 }
-function mobileNavigate(action){const t=document.getElementById('mobileNavToggle');if(t)t.checked=false;setTimeout(()=>appNavigate(action),80)}
+function mobileNavigate(action){if(!hasAppAction(action))return;const t=document.getElementById('mobileNavToggle');if(t)t.checked=false;setTimeout(()=>appNavigate(action),80)}
 function openMobileNavFromLayer(){closeAllProeraViews();const t=document.getElementById('mobileNavToggle');if(t)t.checked=true}
 async function loadDashboard(){
   if(!sb||!currentUser)return;
@@ -1436,7 +1452,8 @@ function serviceError(error){if(['42P01','PGRST205'].includes(error?.code))retur
 function requireServiceSession(){if(!sb||!currentUser||!currentCompanyId){alert('Önce firma çalışma alanınıza giriş yapın.');return false}return true}
 async function openServices(){if(!requireServiceSession())return;closeAllProeraViews();document.getElementById('serviceOverlay').classList.add('open');await loadServices()}
 async function openServicesWithFilter(status){document.getElementById('serviceFilter').value=status;document.getElementById('serviceSearch').value='';return appNavigate('service')}
-function searchServicesFromDashboard(){document.getElementById('serviceSearch').value=val('dashGlobalSearch');document.getElementById('serviceFilter').value='';appNavigate('service')}
+function searchFromDashboard(){const query=val('dashGlobalSearch').trim();if(hasAppAction('archive')){document.getElementById('archiveQuery').value=query;appNavigate('archive')}else if(hasAppAction('service')){document.getElementById('serviceSearch').value=query;document.getElementById('serviceFilter').value='';appNavigate('service')}}
+function searchServicesFromDashboard(){if(!hasAppAction('service'))return;document.getElementById('serviceSearch').value=val('dashGlobalSearch');document.getElementById('serviceFilter').value='';appNavigate('service')}
 function scheduleServiceSearch(){clearTimeout(serviceSearchTimer);serviceSearchTimer=setTimeout(loadServices,250)}
 async function serviceCounts(){const states=Object.keys(SERVICE_STATES);const results=await Promise.all(states.map(status=>sb.from('technical_service_records').select('id',{count:'exact',head:true}).eq('company_id',currentCompanyId).eq('status',status)));const error=results.find(x=>x.error)?.error;if(error)throw error;return Object.fromEntries(states.map((key,i)=>[key,results[i].count||0]))}
 function renderServiceSummary(counts){document.getElementById('serviceSummary').innerHTML=Object.keys(SERVICE_STATES).map(key=>`<button type="button" class="service-summary-card" data-service-filter="${key}" style="--svc-color:${SERVICE_STATES[key].color}"><span>${SERVICE_STATES[key].label}</span><b>${counts[key]}</b></button>`).join('');document.querySelectorAll('[data-service-filter]').forEach(b=>b.onclick=()=>{document.getElementById('serviceFilter').value=b.dataset.serviceFilter;loadServices()})}
@@ -1511,4 +1528,42 @@ activeDialog=function(){return Object.keys(overlayClosers).map(uiById).filter(el
 const uiHeaders={customerOverlay:'Müşteriler',crmOverlay:'Görüşmeler',catalogOverlay:'Ürün Kataloğu',stockOverlay:'Stok Kontrolü',settingsOverlay:'Firma Ayarları'};Object.entries(uiHeaders).forEach(([id,title])=>{const h=uiById(id).querySelector('h2');if(h)h.textContent=title});
 
 setupLogo();document.getElementById('date').value=isoLocal(new Date());updateValidity();render();setAuthBackground(false);initCloud();if(new URLSearchParams(location.search).get('mode')==='signup')setAuthMode('signup');
+
+const proeraAllowedActions={"owner": ["home", "calendar", "crm", "archive", "new", "customers", "catalog", "stock", "service", "settings", "team"], "admin": ["home", "calendar", "crm", "archive", "new", "customers", "catalog", "stock", "service", "settings", "team"], "manager": ["home", "calendar", "crm", "archive", "new", "customers", "catalog", "stock", "service"], "sales": ["home", "calendar", "crm", "archive", "new", "customers", "catalog", "stock"], "service": ["calendar", "customers", "catalog", "stock", "service"], "call_center": ["calendar", "crm", "customers"], "viewer": ["calendar", "catalog", "stock"]};
+function hasAppAction(action){return (proeraAllowedActions[currentMembership?.role]||[]).includes(action)}
+function roleLanding(){const role=currentMembership?.role;return role==='service'?'service':role==='call_center'?'crm':role==='viewer'?'stock':'home'}
+function applyRoleNavigation(){
+ document.querySelectorAll('[onclick]').forEach(el=>{
+  const match=el.getAttribute('onclick').match(/(?:appNavigate|mobileNavigate)\('([a-z_]+)'\)/);
+  if(match)el.hidden=!hasAppAction(match[1]);
+ });
+ document.querySelectorAll('.team-manager-link').forEach(el=>el.hidden=!hasAppAction('team'));
+ const search=document.getElementById('dashGlobalSearch');
+ if(search){search.placeholder='Proforma veya müşteri ara…';search.setAttribute('aria-label','Proformaları ara')}
+}
+
+const teamRoles={admin:'Yönetici',manager:'Müdür',sales:'Satış / Pazarlama',service:'Teknik Servis',call_center:'Çağrı Merkezi',viewer:'Görüntüleyici'};
+function updateTeamNavigation(){document.querySelectorAll('.team-manager-link').forEach(el=>el.hidden=!['owner','admin'].includes(currentMembership?.role))}
+async function openTeam(){
+ if(!['owner','admin'].includes(currentMembership?.role)){alert('Ekip yönetimi için yetkiniz yok.');return}
+ const overlay=document.getElementById('teamOverlay');overlay.style.display='block';
+ const roleSelect=document.getElementById('teamRole');roleSelect.innerHTML=Object.entries(teamRoles).filter(([role])=>currentMembership.role==='owner'||role!=='admin').map(([value,label])=>`<option value="${value}">${label}</option>`).join('');
+ const {data,error}=await sb.from('company_invitations').select('email,role,created_at,expires_at,accepted_at').eq('company_id',currentCompanyId).order('created_at',{ascending:false});
+ document.getElementById('teamInvitations').innerHTML=error?`<p>${esc(error.message)}</p>`:(data?.length?data.map(x=>`<div class="team-invite-row"><b>${esc(x.email)}</b><span>${esc(teamRoles[x.role]||x.role)} · ${x.accepted_at?'Katıldı':new Date(x.expires_at)<new Date()?'Süresi doldu':'Davet bekliyor'}</span></div>`).join(''):'Henüz davet oluşturulmadı.');
+}
+function closeTeam(){document.getElementById('teamOverlay').style.display='none'}
+async function sendTeamInvitation(){
+ const email=document.getElementById('teamEmail').value.trim().toLowerCase(),role=document.getElementById('teamRole').value,msg=document.getElementById('teamMessage');
+ if(!email||!document.getElementById('teamEmail').checkValidity()){msg.textContent='Geçerli e-posta adresi girin.';return}
+ msg.textContent='Davet oluşturuluyor…';
+ const {error}=await sb.rpc('invite_company_member',{p_company_id:currentCompanyId,p_email:email,p_role:role});
+ if(error){msg.textContent='Davet oluşturulamadı: '+error.message;return}
+ const url=new URL('app.html',location.href);url.searchParams.set('invite',currentCompanyId);
+ document.getElementById('teamInviteLink').value=url.href;
+ msg.textContent='Davet hazır. Bağlantıyı yalnızca bu e-posta adresinin sahibiyle paylaşın. Otomatik e-posta gönderilmez.';
+ await openTeam();
+}
+async function copyTeamInvitation(){const value=document.getElementById('teamInviteLink').value;if(!value)return;try{await navigator.clipboard.writeText(value);document.getElementById('teamMessage').textContent='Bağlantı kopyalandı.'}catch(e){document.getElementById('teamInviteLink').select();document.getElementById('teamMessage').textContent='Bağlantıyı seçip kopyalayın.'}}
+const originalResolveWorkspace=resolveWorkspace;
+resolveWorkspace=async function(){const ok=await originalResolveWorkspace();if(ok){updateTeamNavigation();applyRoleNavigation()}return ok};
 </script></body></html>
