@@ -740,6 +740,51 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
 @media screen and (max-width:1100px){#customerOverlay .customer-workspace{grid-template-columns:1fr}#customerOverlay .customer-detail{position:static}}
 @media screen and (max-width:700px){#customerOverlay .customer-head h2{font-size:25px!important}#customerOverlay .customer-toolbar{flex-wrap:wrap!important}#customerOverlay .customer-toolbar input{width:100%!important}}
 
+</style><style id="proformalar-adim-3">
+/* Proformalar: archive table and selected quote side panel. */
+@media screen{
+ #archiveOverlay{background:#f2f7ff!important}
+ #archiveOverlay .archive-modal{max-width:1550px!important}
+ #archiveOverlay .archive-head h2{font-size:32px!important;letter-spacing:-.04em;color:#192f50!important}
+ #archiveOverlay .archive-head .muted{font-size:14px!important;color:#657891!important}
+ #archiveOverlay .archive-stats{gap:14px!important;margin:0 0 18px!important}
+ #archiveOverlay .archive-stat{border:1px solid #dce7f5!important;border-radius:14px!important;padding:20px!important;box-shadow:0 5px 18px #122f5909!important;font-size:12px!important;color:#627996!important}
+ #archiveOverlay .archive-stat b{font-size:29px!important;color:#193b68!important;margin-bottom:7px!important}
+ #archiveOverlay .archive-stat.wait{border-left:4px solid #e5a731!important}
+ #archiveOverlay .archive-stat.ok{border-left:4px solid #1eb582!important}
+ #archiveOverlay .archive-stat.no{border-left:4px solid #ec6475!important}
+ #archiveOverlay .archive-search{background:white!important;border:1px solid #dce7f5!important;border-radius:14px!important;padding:14px!important;margin-bottom:16px!important;display:flex!important;gap:10px!important}
+ #archiveOverlay .archive-search input{min-width:160px!important;flex:1!important}
+ #archiveOverlay .archive-search input,#archiveOverlay .archive-search select{height:43px;border:1px solid #dae5f4!important;border-radius:9px!important;padding:0 12px!important;background:#fff}
+ #archiveOverlay .archive-workspace{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+ #archiveOverlay #archiveList{min-width:0;max-width:none;overflow:auto;background:#fff;border:1px solid #dce7f5;border-radius:14px;box-shadow:0 5px 18px #122f5909}
+ #archiveOverlay .archive-table{min-width:800px;margin:0!important;font-size:12px}
+ #archiveOverlay .archive-table th{background:#f8fbff!important;color:#657a94;font-size:11px;padding:15px 13px!important}
+ #archiveOverlay .archive-table td{padding:15px 13px!important;border-color:#edf1f8!important}
+ #archiveOverlay .archive-table tr[data-quote-row]{cursor:pointer}
+ #archiveOverlay .archive-table tr[data-quote-row]:hover,#archiveOverlay .archive-table tr.selected{background:#eef5ff!important}
+ #archiveOverlay .archive-table .archive-status-select{display:none!important}
+ #archiveOverlay .archive-table .actions{display:none!important}
+ #archiveOverlay .archive-side{position:sticky;top:16px;background:#fff;border:1px solid #dce7f5;border-radius:14px;box-shadow:0 5px 18px #122f5909;padding:20px;min-height:300px}
+ #archiveOverlay .archive-side h3{font-size:21px;color:#193354;margin:0 0 6px}
+ #archiveOverlay .archive-side .subtitle{color:#74869c;font-size:12px;margin:0 0 20px}
+ #archiveOverlay .archive-side section{padding:12px 0;border-top:1px solid #e9eef7;line-height:1.6;font-size:13px}
+ #archiveOverlay .archive-side section small{display:block;color:#71849d;font-size:11px}
+ #archiveOverlay .archive-side .quote-product{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #edf1f6;padding:8px 0}
+ #archiveOverlay .archive-mini{margin:18px 0;border:1px solid #cbd9ec;background:#fff;border-radius:6px;padding:18px;min-height:245px;box-shadow:0 6px 15px #12396310;color:#243957}
+ #archiveOverlay .archive-mini header{display:flex;justify-content:space-between;gap:10px;border-bottom:2px solid #17365e;padding-bottom:13px;font-size:10px}
+ #archiveOverlay .archive-mini header b{color:#1269d9;font-size:17px}
+ #archiveOverlay .archive-mini strong{display:block;font-size:11px;margin:14px 0 5px}
+ #archiveOverlay .archive-mini .mini-items{border-top:1px solid #dce7f5;margin-top:15px}
+ #archiveOverlay .archive-mini .mini-items>div{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid #edf1f7;font-size:10px}
+ #archiveOverlay .archive-mini footer{text-align:right;padding-top:14px;font-weight:800;font-size:12px}
+ #archiveOverlay .archive-side .quote-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}
+ #archiveOverlay .archive-side .btn.primary{background:#116de9!important;border-color:#116de9!important;color:white!important}
+ #archiveOverlay .archive-side select{height:40px;margin-top:6px;width:100%;border:1px solid #dae5f4;border-radius:9px;padding:7px}
+}
+@media screen and (max-width:1100px){#archiveOverlay .archive-workspace{grid-template-columns:1fr}#archiveOverlay .archive-side{position:static}}
+@media screen and (max-width:700px){#archiveOverlay .archive-head h2{font-size:25px!important}#archiveOverlay .archive-search{flex-wrap:wrap!important}#archiveOverlay .archive-search input{width:100%!important;flex:auto!important}#archiveOverlay .archive-search select{flex:1!important}}
+
 </style></head><body>
 
 <div id="inviteGate" class="onboard-overlay" style="display:none"><div class="onboard-card"><h2>Davet bağlantısı</h2><p id="inviteGateMessage"></p><button class="btn primary" onclick="location.href=new URL('app.html',location.href).href">Ana sayfaya dön</button></div></div>
@@ -1176,7 +1221,7 @@ function statusClass(st){return st==='Onaylandı'?'ok':st==='Onaylanmadı'?'no':
 function statusLabel(st){return ['Onaya Gönderildi','Onaylandı','Onaylanmadı'].includes(st)?st:'Onaya Gönderildi'}
 function waitingDays(x){const d=new Date(x.status_changed_at||x.created_at);if(isNaN(d))return 0;return Math.max(0,Math.floor((Date.now()-d.getTime())/86400000))}
 async function updateArchiveStatus(id,status){const {error}=await sb.from('proformas').update({status,status_changed_at:new Date().toISOString()}).eq('company_id',currentCompanyId).eq('id',id);if(error){alert('Durum güncellenemedi: '+error.message);return}await loadArchive()}
-async function loadArchive(){if(!sb||!currentUser)return;const q=(document.getElementById('archiveQuery')?.value||'').trim();const limit=+(document.getElementById('archiveLimit')?.value||25);const {data,error}=await sb.from('proformas').select('id,proforma_number,proforma_date,customer_name,currency,grand_total,status,status_changed_at,items,created_at,bidder,payment_terms').eq('company_id',currentCompanyId).order('created_at',{ascending:false}).limit(limit);let all=data||[];const norm=x=>({...x,status:statusLabel(x.status)});all=all.map(norm);document.getElementById('countWait').textContent=all.filter(x=>x.status==='Onaya Gönderildi').length;document.getElementById('countOk').textContent=all.filter(x=>x.status==='Onaylandı').length;document.getElementById('countNo').textContent=all.filter(x=>x.status==='Onaylanmadı').length;['statWait','statOk','statNo'].forEach(id=>document.getElementById(id)?.classList.remove('active'));if(archiveStatusFilter==='Onaya Gönderildi')document.getElementById('statWait')?.classList.add('active');if(archiveStatusFilter==='Onaylandı')document.getElementById('statOk')?.classList.add('active');if(archiveStatusFilter==='Onaylanmadı')document.getElementById('statNo')?.classList.add('active');let rows=archiveStatusFilter?all.filter(x=>x.status===archiveStatusFilter):all;if(q){const z=q.toLocaleLowerCase('tr-TR');rows=rows.filter(x=>(x.proforma_number||'').toLocaleLowerCase('tr-TR').includes(z)||(x.customer_name||'').toLocaleLowerCase('tr-TR').includes(z)||(x.bidder||'').toLocaleLowerCase('tr-TR').includes(z)||(x.items||[]).some(i=>(i.description||'').toLocaleLowerCase('tr-TR').includes(z)));}const box=document.getElementById('archiveList');if(error){box.innerHTML='<p class="muted">Arşiv yüklenemedi: '+esc(error.message)+'</p>';return}box.innerHTML=`<table class="archive-table"><thead><tr><th>Proforma No</th><th>Tarih</th><th>Müşteri</th><th>Teklifi Veren</th><th>Teklif Edilen Ürün</th><th>Durum</th><th>Toplam</th><th></th></tr></thead><tbody>${rows.map(x=>{const c=statusClass(x.status),days=waitingDays(x);const dateText=x.status!=='Onaya Gönderildi'&&x.status_changed_at?`<div class="muted" style="font-size:10px;margin-top:4px">${new Date(x.status_changed_at).toLocaleDateString('tr-TR')}</div>`:(x.status==='Onaya Gönderildi'?`<div class="waiting-age">${days} gündür bekliyor</div>`:'');return `<tr class="archive-row-${c}"><td><b>${esc(x.proforma_number)}</b></td><td>${esc(x.proforma_date||'')}</td><td>${esc(x.customer_name||'')}</td><td><span class="owner-chip">${esc(x.bidder||'-')}</span></td><td style="max-width:240px;font-size:11px">${esc((x.items||[]).map(i=>i.description||i.desc||'').filter(Boolean).join(', ')||'-')}</td><td><span class="status-badge status-${c}">${esc(x.status)}</span>${dateText}<select class="archive-status-select" onchange="updateArchiveStatus(${x.id},this.value)"><option ${x.status==='Onaya Gönderildi'?'selected':''}>Onaya Gönderildi</option><option ${x.status==='Onaylandı'?'selected':''}>Onaylandı</option><option ${x.status==='Onaylanmadı'?'selected':''}>Onaylanmadı</option></select></td><td>${money(+x.grand_total||0)} ${esc(x.currency||'')}</td><td><div class="actions" style="margin:0;flex-wrap:nowrap"><button class="btn light" onclick="openSavedProformaNewTab(${x.id})">Görüntüle / PDF</button><button class="btn light" onclick="uiCopyArchive(${x.id})">Kopyala</button><button class="btn danger" data-number="${esc(x.proforma_number||'')}" onclick="deleteArchivedProforma(${x.id}, this.dataset.number)">Sil</button></div></td></tr>`}).join('')||'<tr><td colspan="8">Kayıtlı proforma bulunamadı.</td></tr>'}</tbody></table>`}
+async function loadArchive(){if(!sb||!currentUser)return;const q=(document.getElementById('archiveQuery')?.value||'').trim();const limit=+(document.getElementById('archiveLimit')?.value||25);const {data,error}=await sb.from('proformas').select('id,proforma_number,proforma_date,customer_name,currency,grand_total,status,status_changed_at,items,created_at,bidder,payment_terms').eq('company_id',currentCompanyId).order('created_at',{ascending:false}).limit(limit);let all=data||[];const norm=x=>({...x,status:statusLabel(x.status)});all=all.map(norm);document.getElementById('countWait').textContent=all.filter(x=>x.status==='Onaya Gönderildi').length;document.getElementById('countOk').textContent=all.filter(x=>x.status==='Onaylandı').length;document.getElementById('countNo').textContent=all.filter(x=>x.status==='Onaylanmadı').length;['statWait','statOk','statNo'].forEach(id=>document.getElementById(id)?.classList.remove('active'));if(archiveStatusFilter==='Onaya Gönderildi')document.getElementById('statWait')?.classList.add('active');if(archiveStatusFilter==='Onaylandı')document.getElementById('statOk')?.classList.add('active');if(archiveStatusFilter==='Onaylanmadı')document.getElementById('statNo')?.classList.add('active');let rows=archiveStatusFilter?all.filter(x=>x.status===archiveStatusFilter):all;if(q){const z=q.toLocaleLowerCase('tr-TR');rows=rows.filter(x=>(x.proforma_number||'').toLocaleLowerCase('tr-TR').includes(z)||(x.customer_name||'').toLocaleLowerCase('tr-TR').includes(z)||(x.bidder||'').toLocaleLowerCase('tr-TR').includes(z)||(x.items||[]).some(i=>(i.description||'').toLocaleLowerCase('tr-TR').includes(z)));}const box=document.getElementById('archiveList');if(error){box.innerHTML='<p class="muted">Arşiv yüklenemedi: '+esc(error.message)+'</p>';return}window._archiveVisibleRows=rows;box.innerHTML=`<table class="archive-table"><thead><tr><th>Proforma No</th><th>Tarih</th><th>Müşteri</th><th>Teklifi Veren</th><th>Teklif Edilen Ürün</th><th>Durum</th><th>Toplam</th><th></th></tr></thead><tbody>${rows.map(x=>{const c=statusClass(x.status),days=waitingDays(x);const dateText=x.status!=='Onaya Gönderildi'&&x.status_changed_at?`<div class="muted" style="font-size:10px;margin-top:4px">${new Date(x.status_changed_at).toLocaleDateString('tr-TR')}</div>`:(x.status==='Onaya Gönderildi'?`<div class="waiting-age">${days} gündür bekliyor</div>`:'');return `<tr class="archive-row-${c}"><td><b>${esc(x.proforma_number)}</b></td><td>${esc(x.proforma_date||'')}</td><td>${esc(x.customer_name||'')}</td><td><span class="owner-chip">${esc(x.bidder||'-')}</span></td><td style="max-width:240px;font-size:11px">${esc((x.items||[]).map(i=>i.description||i.desc||'').filter(Boolean).join(', ')||'-')}</td><td><span class="status-badge status-${c}">${esc(x.status)}</span>${dateText}<select class="archive-status-select" onchange="updateArchiveStatus(${x.id},this.value)"><option ${x.status==='Onaya Gönderildi'?'selected':''}>Onaya Gönderildi</option><option ${x.status==='Onaylandı'?'selected':''}>Onaylandı</option><option ${x.status==='Onaylanmadı'?'selected':''}>Onaylanmadı</option></select></td><td>${money(+x.grand_total||0)} ${esc(x.currency||'')}</td><td><div class="actions" style="margin:0;flex-wrap:nowrap"><button class="btn light" onclick="openSavedProformaNewTab(${x.id})">Görüntüle / PDF</button><button class="btn light" onclick="uiCopyArchive(${x.id})">Kopyala</button><button class="btn danger" data-number="${esc(x.proforma_number||'')}" onclick="deleteArchivedProforma(${x.id}, this.dataset.number)">Sil</button></div></td></tr>`}).join('')||'<tr><td colspan="8">Kayıtlı proforma bulunamadı.</td></tr>'}</tbody></table>`}
 async function deleteArchivedProforma(id,no){
   if(!confirm((no||'Bu proforma')+' numaralı proformayı silmek istediğinize emin misiniz? Bu işlem geri alınamaz.'))return;
   const {error}=await sb.from('proformas').delete().eq('company_id',currentCompanyId).eq('id',id);
@@ -1704,6 +1749,40 @@ const uiHeaders={customerOverlay:'Müşteriler',crmOverlay:'Görüşmeler',catal
  renderCustomerManager=redraw;
  const header=overlay.querySelector('.customer-head h2');if(header)header.textContent='Müşteriler';
  redraw();
+})();
+
+// Proforma archive layout; reuses the existing Supabase query and actions.
+(function(){
+ const overlay=document.getElementById('archiveOverlay'),list=document.getElementById('archiveList');
+ if(!overlay||!list)return;
+ const workspace=document.createElement('div');workspace.className='archive-workspace';list.before(workspace);workspace.append(list);
+ const side=document.createElement('aside');side.className='archive-side';side.id='archiveSide';side.setAttribute('aria-label','Seçilen proforma ayrıntıları');workspace.append(side);
+ const title=overlay.querySelector('.archive-head h2');if(title)title.textContent='Proformalar';
+ let selected=null;
+ function display(x){
+  if(!x){side.innerHTML='<h3>Proforma ayrıntıları</h3><p class="subtitle">Özetini görmek için listeden bir proforma seçin.</p>';return}
+  const items=Array.isArray(x.items)?x.items:[];
+  side.innerHTML=`<h3>${esc(x.proforma_number||'Proforma')}</h3><p class="subtitle">${esc(x.customer_name||'Müşteri')} · ${esc(x.proforma_date||'Tarih yok')}</p><div class="archive-mini"><header><b>Proera</b><span>PROFORMA FATURA<br>${esc(x.proforma_number||'')}</span></header><strong>${esc(x.customer_name||'Müşteri')}</strong><small>${esc(x.proforma_date||'')}</small><div class="mini-items">${items.slice(0,4).map(i=>`<div><span>${esc(i.description||i.desc||'Ürün')}</span><span>${esc(i.qty||1)} adet</span></div>`).join('')||'<div>Ürün belirtilmedi</div>'}</div><footer>${money(+x.grand_total||0)} ${esc(x.currency||'')}</footer></div><section><small>Teklifi veren</small>${esc(x.bidder||'—')}</section><section><small>Durum</small><span class="status-badge status-${statusClass(x.status)}">${esc(x.status)}</span><select id="archiveSideStatus" aria-label="Proforma durumu"><option value="Onaya Gönderildi">Onaya Gönderildi</option><option value="Onaylandı">Onaylandı</option><option value="Onaylanmadı">Onaylanmadı</option></select></section><div class="quote-actions"><button class="btn primary" id="archiveSideOpen" type="button">Görüntüle / PDF</button><button class="btn light" id="archiveSideCopy" type="button">Kopyala</button><button class="btn light" id="archiveSideDelete" type="button">Sil</button></div>`;
+  side.querySelector('#archiveSideStatus').value=x.status;
+  side.querySelector('#archiveSideStatus').onchange=e=>updateArchiveStatus(x.id,e.target.value);
+  side.querySelector('#archiveSideOpen').onclick=()=>openSavedProformaNewTab(x.id);
+  side.querySelector('#archiveSideCopy').onclick=()=>uiCopyArchive(x.id);
+  side.querySelector('#archiveSideDelete').onclick=()=>deleteArchivedProforma(x.id,x.proforma_number);
+ }
+ function decorate(){
+  const rows=window._archiveVisibleRows||[];
+  if(selected!==null&&!rows.some(x=>String(x.id)===String(selected)))selected=null;
+  list.querySelectorAll('tbody tr').forEach((tr,i)=>{
+   const x=rows[i];if(!x)return;
+   tr.dataset.quoteRow=String(x.id);
+   tr.classList.toggle('selected',String(x.id)===String(selected));
+   tr.onclick=()=>{selected=String(x.id);display(x);list.querySelectorAll('tr.selected').forEach(el=>el.classList.remove('selected'));tr.classList.add('selected')};
+  });
+  display(rows.find(x=>String(x.id)===String(selected))||null);
+ }
+ const base=loadArchive;
+ loadArchive=async function(){await base();decorate()};
+ display(null);
 })();
 
 setupLogo();document.getElementById('date').value=isoLocal(new Date());updateValidity();render();setAuthBackground(false);initCloud();if(new URLSearchParams(location.search).get('mode')==='signup')setAuthMode('signup');
