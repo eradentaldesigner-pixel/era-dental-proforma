@@ -818,6 +818,41 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
 @media screen and (max-width:1100px){#calendarOverlay .calendar-content{grid-template-columns:1fr}#calendarOverlay .calendar-side{position:static}}
 @media screen and (max-width:700px){#calendarOverlay .calendar-head h2{font-size:25px!important}#calendarOverlay .calendar-content>.dash-panel,#calendarOverlay .calendar-side{padding:14px!important}#calendarOverlay .cal-day{min-height:80px!important}}
 
+</style><style id="yeni-proforma-adim-5">
+/* Yeni Proforma: workspace layout with clear editing and A4 preview. */
+@media screen{
+ body:not(.view-mode){background:#f2f7ff!important}
+ .wrap.quote-editor{max-width:1550px!important;margin-inline:auto!important;gap:18px!important;align-items:start!important}
+ .quote-editor .quote-editor-head{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:8px 4px 4px;color:#193450}
+ .quote-editor .quote-editor-head h1{font-size:31px;letter-spacing:-.04em;margin:0 0 5px}
+ .quote-editor .quote-editor-head p{font-size:13px;margin:0;color:#637a95}
+ .quote-editor .quote-editor-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+ .quote-editor .quote-editor-actions button{min-height:41px;padding:10px 14px;border-radius:9px;font-weight:700;cursor:pointer;border:1px solid #d4e2f4;background:white;color:#20558e}
+ .quote-editor .quote-editor-actions button.primary{color:white;border-color:#116de9;background:#116de9;box-shadow:0 5px 12px #116de925}
+ .quote-editor>.panel{min-width:0;background:#fff!important;border:1px solid #dce7f5!important;border-radius:15px!important;padding:22px!important;box-shadow:0 5px 18px #122f5909!important}
+ .quote-editor>.panel>h2{font-size:17px!important;color:#1e385c!important;margin:0 0 8px!important}
+ .quote-editor .quote-basics{border:1px solid #e2eaf6;border-radius:12px;background:#f8fbff;padding:15px;margin:18px 0}
+ .quote-editor .quote-basics h3{margin:0 0 12px;color:#1d3c64;font-size:14px}
+ .quote-editor .section{border:1px solid #e2eaf6!important;border-radius:12px!important;background:#fff!important;padding:18px!important;margin:14px 0!important}
+ .quote-editor .section>label,.quote-editor .section>.grid>label{font-size:17px!important;font-weight:800!important;color:#1e385c!important}
+ .quote-editor .section input,.quote-editor .section select,.quote-editor .section textarea,.quote-editor .quote-basics input{border:1px solid #d9e4f2!important;border-radius:9px!important;padding:9px 11px!important}
+ .quote-editor .section input:focus,.quote-editor .section textarea:focus,.quote-editor .section select:focus{outline:2px solid #7db2ff!important;outline-offset:1px}
+ .quote-editor .section .btn.primary{background:#116de9!important;border-color:#116de9!important;color:#fff!important}
+ .quote-editor .item{border:1px solid #e1eaf6!important;border-radius:11px!important;padding:14px!important;margin:11px 0!important;background:#f9fbff!important}
+ .quote-editor .product-pricing{gap:10px!important}
+ .quote-editor .product-pricing input{min-height:38px!important}
+ .quote-editor .ui-proforma-nav{margin:13px 0!important}
+ .quote-editor .ui-proforma-nav a{border-radius:8px!important;background:#edf4ff!important;color:#126de5!important;font-size:11px!important}
+ .quote-editor>.paper-scroll{background:#eaf0f9!important;border:1px solid #dce7f5!important;border-radius:15px!important;padding:20px!important;box-shadow:0 5px 18px #122f5909!important;position:sticky!important;top:14px!important;min-width:0!important}
+ .quote-editor .paper-preview-heading{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:15px;font-size:13px;font-weight:800;color:#193b63}
+ .quote-editor .paper-preview-heading span{color:#6a7e96;font-size:11px;font-weight:500}
+ .quote-editor .paper{background:#fff!important;box-shadow:0 6px 20px #132c4c19!important}
+ .view-mode .quote-editor-head,.view-mode .paper-preview-heading{display:none!important}
+}
+@media screen and (min-width:1201px){.wrap.quote-editor{grid-template-columns:minmax(450px,1.03fr) minmax(0,.97fr)!important}.quote-editor>.paper-scroll{max-height:calc(100vh - 32px);overflow:auto!important}}
+@media screen and (max-width:1200px){.wrap.quote-editor{grid-template-columns:minmax(0,1fr)!important}.quote-editor .quote-editor-head{grid-column:1}.quote-editor>.paper-scroll{position:relative!important;top:auto!important;max-height:none!important}}
+@media screen and (max-width:700px){.quote-editor .quote-editor-head{flex-direction:column;align-items:stretch!important}.quote-editor .quote-editor-head h1{font-size:24px!important}.quote-editor .quote-editor-actions button{flex:1}.quote-editor>.panel{padding:14px!important}.quote-editor .section{padding:13px!important}.quote-editor>.paper-scroll{padding:12px!important}}
+
 </style></head><body>
 
 <div id="inviteGate" class="onboard-overlay" style="display:none"><div class="onboard-card"><h2>Davet bağlantısı</h2><p id="inviteGateMessage"></p><button class="btn primary" onclick="location.href=new URL('app.html',location.href).href">Ana sayfaya dön</button></div></div>
@@ -1851,6 +1886,24 @@ const uiHeaders={customerOverlay:'Müşteriler',crmOverlay:'Görüşmeler',catal
  const baseToday=calendarToday;
  calendarToday=function(){picker.value=isoLocal(new Date());return baseToday()};
  agenda();
+})();
+
+// Reorganize existing editor controls; keep original saving and preview logic.
+(function(){
+ const wrap=document.querySelector('main.wrap'),panel=wrap?.querySelector(':scope>.panel'),paper=wrap?.querySelector(':scope>.paper-scroll');
+ if(!wrap||!panel||!paper)return;
+ wrap.classList.add('quote-editor');
+ const hero=document.createElement('header');hero.className='quote-editor-head';
+ hero.innerHTML='<div><h1>Yeni Proforma</h1><p>Müşteri ve ürün bilgilerini düzenleyin; belgeyi sağda anlık görün.</p></div><div class="quote-editor-actions"><button type="button" id="quoteTopDraft">Taslak kaydet</button><button type="button" id="quoteTopPreview">PDF önizle</button><button type="button" class="primary" id="quoteTopSave">Kaydet + PDF</button></div>';
+ wrap.prepend(hero);
+ document.getElementById('quoteTopDraft').onclick=()=>saveDraft();
+ document.getElementById('quoteTopSave').onclick=()=>saveProformaAndPdf();
+ document.getElementById('quoteTopPreview').onclick=()=>{
+  if(matchMedia('(max-width:700px)').matches)uiQuotePreview(true);
+  paper.scrollIntoView({behavior:'smooth',block:'start'});
+ };
+ const initial=panel.querySelector(':scope>.grid');if(initial){const basics=document.createElement('section');basics.className='quote-basics';basics.innerHTML='<h3>Teklif bilgileri</h3>';initial.before(basics);basics.append(initial)}
+ const heading=document.createElement('div');heading.className='paper-preview-heading';heading.innerHTML='<b>Proforma önizlemesi (A4)</b><span>Değişiklikler anlık görünür</span>';paper.prepend(heading);
 })();
 
 setupLogo();document.getElementById('date').value=isoLocal(new Date());updateValidity();render();setAuthBackground(false);initCloud();if(new URLSearchParams(location.search).get('mode')==='signup')setAuthMode('signup');
