@@ -1903,7 +1903,7 @@ function buildServicePrint(){
  const company=s.company_display_name||s.legal_name||currentMembership?.companies?.name||'Firma';
  document.getElementById('servicePrintArea').innerHTML=`<article class="svc-a4" style="--service-print-accent:${accent}">
    <header class="svc-a4-header">
-     <div class="svc-a4-brand">${logo?`<img src="${esc(logo)}" alt="${esc(company)} logosu">`:''}<div><strong>${esc(company)}</strong><span>${esc([s.address,s.phone,s.email].filter(Boolean).join(' · '))}</span></div></div>
+     <div class="svc-a4-brand">${logo?`<img src="${esc(logo)}" alt="${esc(company)} logosu">`:`<strong>${esc(company)}</strong>`}<div><span>${esc([s.address,s.phone,s.email].filter(Boolean).join(' · '))}</span></div></div>
      <div class="svc-a4-document"><h1>TEKNİK SERVİS FORMU</h1>${serviceEditing?.service_number?`<strong>${esc(serviceEditing.service_number)}</strong>`:''}<span>Kabul tarihi: ${esc(serviceDate(p.received_date))}</span></div>
    </header>
    <div class="svc-a4-stripe"><span>Servis ve teslim kayıt formu</span><b>${esc(serviceState(p.status).label)}</b></div>
@@ -1915,7 +1915,7 @@ function buildServicePrint(){
      <div class="svc-a4-work-grid">${section('Teslim alınan aksesuarlar / fiziksel durum',p.accessories,130)}${section('Bildirilen arıza / talep',p.reported_issue,220)}${section('Teknik tespit / teşhis',p.diagnosis,230)}${section('Yapılan işlem / yapılamama nedeni',p.work_performed,260)}${section('Kullanılan / değiştirilen parçalar',p.parts_used,155)}${section('Notlar ve öneriler',p.notes,155)}</div>
    </div>
    <div class="svc-a4-signatures"><div><b>Servis Yetkilisi</b><span>Ad Soyad / İmza</span></div><div><b>Müşteri / Teslim Alan</b><span>Ad Soyad / İmza</span></div></div>
-   <footer class="svc-a4-footer"><span>Bu belge teknik servis işlem ve teslim kaydıdır.${serviceDirty?' · Kaydedilmemiş değişiklikler içerir.':''}</span><span>${esc(company)}</span></footer>
+   <footer class="svc-a4-footer"><span>Bu belge teknik servis işlem ve teslim kaydıdır.${serviceDirty?' · Kaydedilmemiş değişiklikler içerir.':''}</span><span>${esc(serviceEditing?.service_number||'Teknik Servis')}</span></footer>
  </article>`;
 }
 
