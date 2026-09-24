@@ -853,6 +853,103 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
 @media screen and (max-width:1200px){.wrap.quote-editor{grid-template-columns:minmax(0,1fr)!important}.quote-editor .quote-editor-head{grid-column:1}.quote-editor>.paper-scroll{position:relative!important;top:auto!important;max-height:none!important}}
 @media screen and (max-width:700px){.quote-editor .quote-editor-head{flex-direction:column;align-items:stretch!important}.quote-editor .quote-editor-head h1{font-size:24px!important}.quote-editor .quote-editor-actions button{flex:1}.quote-editor>.panel{padding:14px!important}.quote-editor .section{padding:13px!important}.quote-editor>.paper-scroll{padding:12px!important}}
 
+</style><style id="proera-kalan-menuler-adim-6">
+/* Remaining inner pages, following the established Proera table/detail design. */
+@media screen{
+ #catalogOverlay,#stockOverlay,#settingsOverlay,.team-overlay,.service-overlay{background:#f2f7ff!important}
+ #catalogOverlay .catalog-modal,#stockOverlay .stock-modal,#settingsOverlay .settings-modal,.service-page,.team-card{max-width:1500px!important}
+ #catalogOverlay .catalog-head h2,#stockOverlay .stock-head h2,#settingsOverlay .settings-head h2,.service-page-head h1,.team-card .ui-title h2{font-size:30px!important;letter-spacing:-.035em;color:#1b3455!important}
+ #catalogOverlay .catalog-body,#stockOverlay .stock-body,#settingsOverlay .settings-body{background:transparent!important}
+ #catalogOverlay .catalog-workspace,#stockOverlay .stock-workspace,.service-workspace{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+ #catalogOverlay #catalogList,#stockOverlay #stockList,.service-workspace #serviceList{min-width:0;overflow:auto;background:#fff;border:1px solid #dce7f5;border-radius:14px;box-shadow:0 5px 18px #122f5909;padding:10px}
+ #catalogOverlay #catalogList.ui-cards{display:block!important}
+ #catalogOverlay #catalogList .catalog-row{display:grid!important;grid-template-columns:minmax(0,2fr) 115px 110px 115px!important;gap:10px;align-items:center;margin:0!important;padding:15px 12px!important;border:0!important;border-bottom:1px solid #e9eff7!important;box-shadow:none!important;border-radius:0!important;cursor:pointer}
+ #catalogOverlay #catalogList .catalog-row:hover,#catalogOverlay #catalogList .catalog-row.selected{background:#eef5ff!important}
+ #catalogOverlay .catalog-side,#stockOverlay .stock-side,.service-workspace .service-side{background:#fff;border:1px solid #dce7f5;border-radius:14px;box-shadow:0 5px 18px #122f5909;padding:20px;position:sticky;top:16px;min-height:290px}
+ #catalogOverlay .catalog-side h3,#stockOverlay .stock-side h3,.service-workspace .service-side h3{margin:0 0 5px;color:#193756;font-size:20px}
+ #catalogOverlay .catalog-side p,#stockOverlay .stock-side p,.service-workspace .service-side p{font-size:12px;color:#70839b;margin:0 0 15px;line-height:1.5}
+ #catalogOverlay .catalog-side section,#stockOverlay .stock-side section,.service-workspace .service-side section{border-top:1px solid #e8eef7;padding:11px 0;font-size:13px;overflow-wrap:anywhere}
+ #catalogOverlay .catalog-side section small,#stockOverlay .stock-side section small,.service-workspace .service-side section small{display:block;color:#72849b;margin-bottom:4px}
+ #catalogOverlay .catalog-side .btn,#stockOverlay .stock-side .btn,.service-workspace .service-side .btn{margin-top:12px}
+ #stockOverlay .stock-stats{gap:14px!important;margin-bottom:17px!important}
+ #stockOverlay .stock-stat,.service-summary-card{background:#fff!important;border:1px solid #dce7f5!important;border-radius:13px!important;padding:18px!important;box-shadow:0 5px 18px #122f5909!important}
+ #stockOverlay .stock-stat b{font-size:27px!important;color:#1b385c}
+ #stockOverlay .stock-movement{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;border:0!important;padding:0!important;margin:14px 0 0!important;box-shadow:none!important}
+ #stockOverlay .stock-movement .btn.primary{background:#116de9!important;color:#fff!important;border-color:#116de9!important}
+ #stockOverlay .stock-table{min-width:610px;margin:0!important}
+ #stockOverlay .stock-table tr[data-stock-id]{cursor:pointer}
+ #stockOverlay .stock-table tr[data-stock-id]:hover,#stockOverlay .stock-table tr.selected{background:#edf5ff}
+ #stockOverlay .stock-table td,#stockOverlay .stock-table th{padding:13px!important}
+ #stockOverlay .stock-table td:last-child{white-space:nowrap}
+ .service-workspace #serviceList{padding:0}
+ .service-workspace .service-table{border-collapse:collapse;width:100%;min-width:730px;font-size:12px}
+ .service-workspace .service-table th{text-align:left;background:#f8fbff;color:#6b809a;padding:14px 12px;border-bottom:1px solid #e3ebf7;font-size:11px}
+ .service-workspace .service-table td{padding:14px 12px;border-bottom:1px solid #e8eef7;vertical-align:middle}
+ .service-workspace .service-table tr[data-service-id]{cursor:pointer}
+ .service-workspace .service-table tr[data-service-id]:hover,.service-workspace .service-table tr.selected{background:#edf5ff}
+ .service-workspace .service-table td:first-child b{display:block;color:#1765cf}
+ .service-workspace .service-table td small{display:block;color:#788ba3;margin-top:3px}
+ .team-overlay .team-card{max-width:1450px!important}
+ .team-overlay .team-box{border-radius:15px!important;box-shadow:0 5px 18px #122f5909!important;padding:22px!important}
+ .team-overlay .team-fields{gap:13px!important}
+ .team-overlay .team-invite-row{padding:14px 10px!important;border-bottom:1px solid #e9eff7!important}
+ .team-overlay .team-invite-row:nth-child(odd){background:#f7faff}
+ .team-overlay .team-role-guide{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+ .team-overlay .team-role-guide article{background:#f8fbff;border:1px solid #deebf8;padding:14px;border-radius:10px;font-size:12px;line-height:1.55}
+ .team-overlay .team-role-guide b{display:block;color:#1266d7;margin-bottom:6px}
+ #settingsOverlay .settings-card{border:1px solid #dce7f5!important;border-radius:15px!important;box-shadow:0 5px 18px #122f5909!important;padding:22px!important}
+ #settingsOverlay #uiSettingsTabs{margin:0 0 20px!important}
+ #settingsOverlay .settings-body{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:15px!important}
+ #settingsOverlay .settings-body>.settings-card:first-child,#settingsOverlay .settings-body>.settings-card:has(#bankEditors){grid-column:1/-1}
+ #settingsOverlay .settings-footer{border-radius:12px!important}
+}
+@media screen and (max-width:1100px){#catalogOverlay .catalog-workspace,#stockOverlay .stock-workspace,.service-workspace{grid-template-columns:1fr}#catalogOverlay .catalog-side,#stockOverlay .stock-side,.service-workspace .service-side{position:static}.team-overlay .team-role-guide{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media screen and (max-width:700px){#catalogOverlay #catalogList .catalog-row{grid-template-columns:1fr 1fr!important}#stockOverlay .stock-stats{grid-template-columns:repeat(3,minmax(0,1fr))!important}#settingsOverlay .settings-body{grid-template-columns:1fr!important}#settingsOverlay .settings-body>.settings-card:first-child,#settingsOverlay .settings-body>.settings-card:has(#bankEditors){grid-column:1}.team-overlay .team-role-guide{grid-template-columns:1fr}}
+
+</style><style id="proera-print-hotfix">
+/* Editor controls are screen-only. Print only the actual proforma document. */
+@media print{
+  .quote-editor-head,
+  .paper-preview-heading,
+  .quote-editor-actions,
+  .quote-editor .ui-mobile-back{
+    display:none!important;
+  }
+  .wrap.quote-editor{
+    display:block!important;
+    width:auto!important;
+    max-width:none!important;
+    margin:0!important;
+    padding:0!important;
+    gap:0!important;
+  }
+  .quote-editor>.paper-scroll{
+    display:block!important;
+    position:static!important;
+    width:100%!important;
+    max-height:none!important;
+    overflow:visible!important;
+    padding:0!important;
+    margin:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:white!important;
+    box-shadow:none!important;
+  }
+  .quote-editor .paper{
+    display:block!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    box-shadow:none!important;
+    zoom:1!important;
+  }
+  @page{size:A4;margin:10mm}
+}
+
 </style></head><body>
 
 <div id="inviteGate" class="onboard-overlay" style="display:none"><div class="onboard-card"><h2>Davet bağlantısı</h2><p id="inviteGateMessage"></p><button class="btn primary" onclick="location.href=new URL('app.html',location.href).href">Ana sayfaya dön</button></div></div>
@@ -1904,6 +2001,81 @@ const uiHeaders={customerOverlay:'Müşteriler',crmOverlay:'Görüşmeler',catal
  };
  const initial=panel.querySelector(':scope>.grid');if(initial){const basics=document.createElement('section');basics.className='quote-basics';basics.innerHTML='<h3>Teklif bilgileri</h3>';initial.before(basics);basics.append(initial)}
  const heading=document.createElement('div');heading.className='paper-preview-heading';heading.innerHTML='<b>Proforma önizlemesi (A4)</b><span>Değişiklikler anlık görünür</span>';paper.prepend(heading);
+})();
+
+// UI-only continuation. All reads and writes still use existing Supabase policies and methods.
+(function(){
+ const by=id=>document.getElementById(id);
+ // Product catalogue: keep the existing edit and selection flows.
+ const catalog=by('catalogOverlay'),catalogList=by('catalogList');
+ const catalogLayout=document.createElement('div');catalogLayout.className='catalog-workspace';catalogList.before(catalogLayout);catalogLayout.append(catalogList);
+ const catalogSide=document.createElement('aside');catalogSide.className='catalog-side';catalogLayout.append(catalogSide);
+ let chosenProduct=null;
+ const productDetail=p=>{
+  if(!p){catalogSide.innerHTML='<h3>Ürün ayrıntıları</h3><p>Bilgileri görmek için soldan bir ürün seçin.</p>';return}
+  catalogSide.innerHTML=`<h3>${esc(p.name||'Ürün')}</h3><p>${esc(p.brand||'Marka belirtilmedi')} · ${esc(p.model||'Model belirtilmedi')}</p><section><small>Ürün kodu / GTİP</small>${esc(p.product_code||'—')} / ${esc(p.gtip||'—')}</section><section><small>Menşei</small>${esc(p.origin||'Belirtilmedi')}</section><section><small>Fiyat / KDV</small>${p.default_price!=null?money(+p.default_price):'—'} ${esc(p.currency||'')} · %${esc(p.vat_rate??20)}</section><section><small>Mevcut stok / kritik sınır</small>${esc(p.stock_quantity??0)} adet / ${esc(p.stock_low_threshold??5)} adet</section><button class="btn primary" type="button" id="catalogSelectedEdit">Ürünü düzenle</button>`;
+  by('catalogSelectedEdit').onclick=()=>editCatalogProduct(p.id);
+ };
+ const baseCatalogLoad=loadCatalog;
+ loadCatalog=async function(){await baseCatalogLoad();const selecting=catalog.dataset.mode==='select';catalogSide.hidden=selecting;
+  const products=window._catalog||[];
+  catalogList.querySelectorAll('.catalog-row').forEach(row=>{
+   if(selecting)return;
+   const id=row.querySelector('button[onclick*="editCatalogProduct"]')?.getAttribute('onclick')?.match(/\((\d+)\)/)?.[1];
+   if(!id)return;row.dataset.productId=id;
+   row.classList.toggle('selected',id===String(chosenProduct));
+   row.addEventListener('click',e=>{if(e.target.closest('button,input'))return;chosenProduct=id;productDetail(products.find(p=>String(p.id)===id));catalogList.querySelectorAll('.catalog-row.selected').forEach(x=>x.classList.remove('selected'));row.classList.add('selected')});
+  });
+  productDetail(products.find(p=>String(p.id)===String(chosenProduct))||null);
+ };
+ catalog.querySelector('.catalog-head h2').textContent='Ürün Kataloğu';
+ productDetail(null);
+
+ // Stock: movement form is beside the table, including the already-authorized service flow.
+ const stockList=by('stockList'),stockForm=document.querySelector('#stockOverlay .stock-movement');
+ const stockLayout=document.createElement('div');stockLayout.className='stock-workspace';stockList.before(stockLayout);stockLayout.append(stockList);
+ const stockSide=document.createElement('aside');stockSide.className='stock-side';stockLayout.append(stockSide);
+ const stockSummary=document.createElement('div');stockSummary.id='stockSelection';stockSide.append(stockSummary);
+ const formHeading=document.createElement('h3');formHeading.textContent='Stok hareketi';stockSide.append(formHeading,stockForm);
+ let chosenStock=null;
+ function stockDetail(p){stockSummary.innerHTML=p?`<h3>${esc(p.name||'Ürün')}</h3><p>${esc(p.brand||'')} · ${esc(p.model||'')}</p><section><small>Mevcut stok</small><b>${esc(p.stock_quantity??0)} adet</b></section><section><small>Kritik stok sınırı</small>${esc(p.stock_low_threshold??5)} adet</section><section><small>Durum</small>${stockBadge(p)}</section>`:'<h3>Stok durumu</h3><p>Bir ürünü seçerek miktarını ve eşiklerini görün.</p>';}
+ const baseStockRender=renderStockControl;
+ renderStockControl=function(){baseStockRender();const products=window._stockProducts||[];
+  stockList.querySelectorAll('tbody tr').forEach(row=>{
+   const id=row.querySelector('button[onclick*="openCatalogForStock"]')?.getAttribute('onclick')?.match(/\((\d+)\)/)?.[1];
+   if(!id)return;row.dataset.stockId=id;row.classList.toggle('selected',id===String(chosenStock));
+   row.onclick=e=>{if(e.target.closest('button,input'))return;chosenStock=id;const p=products.find(x=>String(x.id)===id);stockDetail(p);by('moveProduct').value=id;stockList.querySelectorAll('tr.selected').forEach(x=>x.classList.remove('selected'));row.classList.add('selected')};
+  });stockDetail(products.find(x=>String(x.id)===String(chosenStock))||null);
+ };
+ by('moveProduct')?.addEventListener('change',e=>{chosenStock=e.target.value;stockDetail((window._stockProducts||[]).find(p=>String(p.id)===chosenStock))});
+ by('stockOverlay').querySelector('.stock-head h2').textContent='Stok Kontrolü';stockDetail(null);
+
+ // Service: actionable table on the left; the existing full service form stays available.
+ const serviceList=by('serviceList'),serviceLayout=document.createElement('div');serviceLayout.className='service-workspace';serviceList.before(serviceLayout);serviceLayout.append(serviceList);
+ const serviceSide=document.createElement('aside');serviceSide.className='service-side';serviceLayout.append(serviceSide);
+ let chosenService=null;
+ function serviceDetail(x){
+  if(!x){serviceSide.innerHTML='<h3>Servis ayrıntıları</h3><p>Bir servis kaydını seçerek durumunu ve arıza notlarını görün.</p>';return}
+  serviceSide.innerHTML=`<h3>${esc(x.service_number||'Servis kaydı')}</h3><p>${esc(x.customer_name||'Müşteri')} · ${esc(serviceDate(x.received_date))}</p><section><small>Cihaz / model</small>${esc(x.device_name||'—')} ${esc(x.brand_model||'')}</section><section><small>Seri numarası</small>${esc(x.serial_number||'—')}</section><section><small>Arıza / talep</small>${esc(x.reported_issue||'—')}</section><section><small>Teknisyen / sonraki takip</small>${esc(x.assigned_to||'Atanmadı')} · ${esc(serviceDate(x.follow_up_date))}</section><section><small>Durum</small>${serviceBadge(x.status)}</section><button class="btn primary" id="serviceSelectedOpen" type="button">Servis formunu aç</button>`;
+  by('serviceSelectedOpen').onclick=()=>editServiceRecord(x.id);
+ }
+ const baseServiceRender=renderServiceList;
+ renderServiceList=function(){baseServiceRender();const rows=serviceRows||[];
+  serviceList.innerHTML=rows.length?`<table class="service-table"><thead><tr><th>Kayıt no</th><th>Müşteri / cihaz</th><th>Arıza / talep</th><th>Teknisyen</th><th>Kabul</th><th>Durum</th></tr></thead><tbody>${rows.map(x=>`<tr data-service-id="${esc(x.id)}"><td><b>${esc(x.service_number||'—')}</b></td><td>${esc(x.customer_name||'—')}<small>${esc(x.device_name||'—')}</small></td><td>${esc((x.reported_issue||'—').slice(0,70))}</td><td>${esc(x.assigned_to||'—')}</td><td>${esc(serviceDate(x.received_date))}</td><td>${serviceBadge(x.status)}</td></tr>`).join('')}</tbody></table>`:'<p class="ui-empty">Bu filtreyle eşleşen servis kaydı yok.</p>';
+  serviceList.querySelectorAll('[data-service-id]').forEach(tr=>{tr.onclick=()=>{chosenService=tr.dataset.serviceId;serviceDetail(rows.find(x=>String(x.id)===chosenService));serviceList.querySelectorAll('tr.selected').forEach(x=>x.classList.remove('selected'));tr.classList.add('selected')};tr.classList.toggle('selected',String(chosenService)===tr.dataset.serviceId)});
+  serviceDetail(rows.find(x=>String(x.id)===String(chosenService))||null);
+ };
+ serviceDetail(null);
+
+ // Team role explanation; the actual RPC authorization is unchanged.
+ const teamCard=by('teamOverlay')?.querySelector('.team-card');
+ if(teamCard){const permissions=document.createElement('section');permissions.className='team-box';permissions.innerHTML='<h3>Rollere göre çalışma alanı</h3><div class="team-role-guide"><article><b>Şirket sahibi</b>Şirket, ekip ve tüm iş akışları.</article><article><b>Yönetici</b>Ekip yönetimi ve şirket operasyonları.</article><article><b>Müdür</b>Satış ve servis çalışmalarını takip eder.</article><article><b>Satış / Pazarlama</b>Görüşmeler, müşteriler ve proformalar.</article><article><b>Teknik Servis</b>Servis kayıtları ve servis stok kullanımı; proformalar görünmez.</article><article><b>Çağrı Merkezi</b>Müşteri görüşmeleri ve takvim.</article></div>';teamCard.append(permissions)}
+
+ // Distinct banking tab, reusing the original bank editor and save button.
+ const settingsCards=[...document.querySelectorAll('#settingsOverlay .settings-body>.settings-card')];
+ const bank=settingsCards.find(c=>c.querySelector('#bankEditors'));if(bank)bank.dataset.uiSettingsGroup='bank';
+ const tabs=by('uiSettingsTabs');if(tabs&&bank){const b=document.createElement('button');b.type='button';b.dataset.key='bank';b.textContent='Banka Hesapları';b.setAttribute('aria-pressed','false');b.onclick=()=>{uiSelect('uiSettingsTabs','bank');uiSettingsTab('bank')};tabs.insertBefore(b,tabs.querySelector('[data-key="document"]'));}
+ const settingsHead=by('settingsOverlay')?.querySelector('.settings-head h2');if(settingsHead)settingsHead.textContent='Şirket Ayarları';
 })();
 
 setupLogo();document.getElementById('date').value=isoLocal(new Date());updateValidity();render();setAuthBackground(false);initCloud();if(new URLSearchParams(location.search).get('mode')==='signup')setAuthMode('signup');
