@@ -961,6 +961,40 @@ body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI"
   @page{size:A4;margin:0}
 }
 
+</style><style id="service-a4-print">
+@media print{
+  @page{size:A4 portrait;margin:0}
+  body.printing-service,body.printing-service #servicePrintArea{margin:0!important;padding:0!important;width:210mm!important;min-width:210mm!important;max-width:210mm!important;height:297mm!important;min-height:297mm!important;overflow:hidden!important;background:#fff!important}
+  body.printing-service #servicePrintArea{display:block!important;box-sizing:border-box!important;break-after:avoid!important;page-break-after:avoid!important}
+  body.printing-service .svc-a4{width:210mm;height:297mm;padding:11mm 12mm 9mm;display:flex;flex-direction:column;gap:3.2mm;box-sizing:border-box;overflow:hidden;color:#172a40;background:#fff;font:8.4pt/1.38 Arial,sans-serif;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  .svc-a4 *{box-sizing:border-box;min-width:0}
+  .svc-a4-header{display:grid;grid-template-columns:minmax(0,1fr) 60mm;gap:6mm;align-items:start;min-height:25mm;padding-bottom:3.5mm;border-bottom:1.5px solid var(--service-print-accent)}
+  .svc-a4-brand{display:flex;align-items:flex-start;gap:3mm;min-width:0}
+  .svc-a4-brand img{display:block;max-width:41mm;max-height:14mm;object-fit:contain;object-position:left top;flex-shrink:0;margin:0}
+  .svc-a4-brand strong{display:block;color:var(--service-print-accent);font-size:12pt;line-height:1.2;margin-bottom:1.6mm}
+  .svc-a4-brand span{display:block;font-size:7.4pt;line-height:1.3;overflow-wrap:anywhere;max-height:12mm;overflow:hidden}
+  .svc-a4-document{text-align:right;white-space:normal}
+  .svc-a4-document h1{font-size:13pt!important;line-height:1.15;margin:0 0 3mm!important;color:var(--service-print-accent);font-weight:800}
+  .svc-a4-document strong,.svc-a4-document span{display:block;font-size:8pt;overflow-wrap:anywhere}
+  .svc-a4-stripe{display:flex;justify-content:space-between;align-items:center;padding:2mm 3mm;border-left:2.5mm solid var(--service-print-accent);background:#edf3f9;color:var(--service-print-accent);font-size:8pt;line-height:1.2}
+  .svc-a4-cards{display:grid;grid-template-columns:1fr 1fr;gap:3mm;align-items:stretch}
+  .svc-a4-card{border:1px solid #cbd6e2;padding:3mm;min-height:58mm;max-height:68mm;overflow:hidden}
+  .svc-a4 h2{font-size:8.5pt!important;line-height:1.2;color:var(--service-print-accent);margin:0 0 2.5mm!important;font-weight:800}
+  .svc-a4-card dl{display:grid;grid-template-columns:1fr 1fr;gap:2.2mm 3mm;margin:0}
+  .svc-a4-card .svc-a4-field:first-child,.svc-a4-card .svc-a4-field:last-child{grid-column:1/-1}
+  .svc-a4-field dt{font-size:6.8pt;color:#617084;margin:0 0 .5mm}
+  .svc-a4-field dd{font-size:8pt;font-weight:700;line-height:1.24;margin:0;overflow-wrap:anywhere;max-height:10.5mm;overflow:hidden}
+  .svc-a4-work{border:1px solid #cbd6e2;padding:3mm;flex:1;min-height:0;overflow:hidden}
+  .svc-a4-work-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,minmax(0,1fr));gap:2.5mm 3mm;height:calc(100% - 7mm)}
+  .svc-a4-section{border-top:1px solid #d8e1ec;padding:1.5mm 1mm 0;min-height:0;overflow:hidden}
+  .svc-a4-section h3{font-size:7.6pt!important;line-height:1.22;color:var(--service-print-accent);margin:0 0 1.5mm!important;font-weight:800}
+  .svc-a4-section p{font-size:8pt!important;line-height:1.33;margin:0!important;white-space:pre-wrap;overflow-wrap:anywhere;max-height:100%;overflow:hidden}
+  .svc-a4-signatures{display:grid;grid-template-columns:1fr 1fr;gap:3mm;margin:0!important;min-height:23mm}
+  .svc-a4-signatures>div{border:1px solid #cbd6e2;border-top:2px solid var(--service-print-accent);padding:2.5mm 3mm;min-height:23mm;position:relative}
+  .svc-a4-signatures b{font-size:8pt;color:var(--service-print-accent)}
+  .svc-a4-signatures span{position:absolute;bottom:2mm;left:3mm;font-size:7pt;color:#627287}
+  .svc-a4-footer{display:flex;justify-content:space-between;gap:3mm;font-size:6.8pt;color:#627287;border-top:1px solid #cbd6e2;padding-top:2mm;text-align:left!important;margin:0!important}
+}
 </style></head><body>
 
 <div id="inviteGate" class="onboard-overlay" style="display:none"><div class="onboard-card"><h2>Davet bağlantısı</h2><p id="inviteGateMessage"></p><button class="btn light" type="button" onclick="retryPendingInvite()">Tekrar dene</button> <button class="btn primary" type="button" onclick="leaveInvitation()">Çalışma alanıma dön</button></div></div>
@@ -1855,8 +1889,37 @@ function closeServiceForm(){if(serviceBusy)return false;if(serviceDirty&&!confir
 function servicePayload(){const payload={company_id:currentCompanyId};Object.entries(SERVICE_FIELDS).forEach(([id,key])=>{const v=val(id).trim();payload[key]=['follow_up_date','delivered_date'].includes(key)?v||null:v});return payload}
 async function saveServiceRecord(){if(serviceBusy||!requireServiceSession())return;const form=document.getElementById('serviceForm');if(!form.reportValidity())return;const payload=servicePayload();if(!payload.customer_name||!payload.device_name||!payload.reported_issue){alert('Müşteri, cihaz ve arıza bilgilerini doldurun.');return}if(['completed','failed'].includes(payload.status)&&!payload.work_performed){alert('Yapılan işlemi veya yapılamama nedenini yazın.');document.getElementById('svcWork').focus();return}if(payload.delivered_date&&payload.delivered_date<payload.received_date){alert('Teslim tarihi kabul tarihinden önce olamaz.');return}const state=document.getElementById('serviceSaveState'),button=document.getElementById('serviceSaveBtn');serviceBusy=true;button.disabled=true;state.textContent='Kaydediliyor…';try{const id=val('svcId');let query=id?sb.from('technical_service_records').update(payload).eq('company_id',currentCompanyId).eq('id',id).eq('updated_at',val('svcVersion')):sb.from('technical_service_records').insert(payload);const {data,error}=await query.select().maybeSingle();if(error)throw error;if(!data)throw Error('Bu kayıt başka bir kullanıcı tarafından değiştirilmiş olabilir. Formu kapatıp yeniden açın.');serviceEditing=data;serviceDirty=false;document.getElementById('svcId').value=data.id;document.getElementById('svcVersion').value=data.updated_at;document.getElementById('svcNumber').textContent=data.service_number;document.getElementById('serviceFormTitle').textContent='Servis formunu düzenle';state.textContent='✓ Servis kaydı buluta kaydedildi.';await loadServiceHistory(data.id);await refreshServiceDashboard();if(document.getElementById('serviceOverlay').classList.contains('open'))await loadServices()}catch(e){state.textContent='Kayıt tamamlanamadı. '+(e?.message||serviceError(e));console.warn('Service save',e)}finally{serviceBusy=false;button.disabled=false}}
 async function loadServiceHistory(id){const box=document.getElementById('serviceHistory');try{const {data,error}=await sb.from('technical_service_history').select('old_status,new_status,changed_at').eq('service_id',id).order('changed_at',{ascending:false}).limit(50);if(error)throw error;box.innerHTML=(data||[]).map(r=>`<div><time>${new Date(r.changed_at).toLocaleString('tr-TR')}</time><span>${r.old_status?esc(serviceState(r.old_status).label)+' → ':'Kayıt açıldı → '}${esc(serviceState(r.new_status).label)}</span></div>`).join('')||'<span class="muted">Henüz durum değişikliği yok.</span>'}catch(e){box.textContent='Durum geçmişi yüklenemedi.'}}
-function buildServicePrint(){const p=servicePayload(),s=window._companySettings||{},logo=window._companyLogo||s.logo_data||'',field=(title,value)=>`<div><small>${title}</small><b>${esc(value||'—')}</b></div>`,section=(title,text)=>`<section class="svc-print-section"><h3>${title}</h3><p>${esc(text||'—')}</p></section>`;document.getElementById('servicePrintArea').innerHTML=`<header class="svc-print-head"><div>${logo?`<img src="${esc(logo)}" alt="Şirket logosu">`:''}<h2>${esc(s.company_display_name||s.legal_name||'Firma')}</h2><p>${esc([s.address,s.phone,s.email].filter(Boolean).join(' · '))}</p></div><div><h1>TEKNİK SERVİS FORMU</h1><b>${esc(serviceEditing?.service_number||'TASLAK')}</b><p>${serviceDate(p.received_date)}</p>${serviceBadge(p.status)}${serviceDirty?'<small>Kaydedilmemiş değişiklikler içerir.</small>':''}</div></header><div class="svc-print-fields">${field('Firma / Klinik',p.customer_name)}${field('İlgili kişi',p.contact_name)}${field('Telefon',p.phone)}${field('E-posta',p.email)}${field('Adres',p.address)}${field('Servis sorumlusu',p.assigned_to)}</div><div class="svc-print-fields">${field('Cihaz',p.device_name)}${field('Marka / Model',p.brand_model)}${field('Seri numarası',p.serial_number)}${field('Garanti',p.warranty_status)}${field('Sonraki takip',serviceDate(p.follow_up_date))}${field('Teslim tarihi',serviceDate(p.delivered_date))}</div>${section('Teslim alınan aksesuarlar / fiziksel durum',p.accessories)}${section('Bildirilen arıza / talep',p.reported_issue)}${section('Teknik tespit / teşhis',p.diagnosis)}${section('Yapılan işlem / yapılamama nedeni',p.work_performed)}${section('Kullanılan / değiştirilen parçalar',p.parts_used)}${section('Notlar ve öneriler',p.notes)}<div class="svc-print-signatures"><div><b>Servis Yetkilisi</b><p>Ad Soyad / İmza</p></div><div><b>Müşteri / Teslim Alan</b><p>Ad Soyad / İmza</p></div></div><footer>Bu belge teknik servis işlem ve teslim kayıt formudur.</footer>`}
-async function printServiceForm(){buildServicePrint();const imgs=[...document.querySelectorAll('#servicePrintArea img')];await Promise.all(imgs.map(img=>img.decode?.().catch(()=>{})));window._servicePrintTitle=document.title;document.title=(serviceEditing?.service_number||'Teknik Servis')+' - '+safeFileName(val('svcCustomer'));document.body.classList.add('printing-service');window.print()}
+function servicePrintExcerpt(value,limit=190){
+ const text=String(value||'').trim();
+ if(!text)return '—';
+ if(text.length<=limit)return text;
+ return text.slice(0,limit).trimEnd()+'… (tam metin dijital kayıtta)';
+}
+function buildServicePrint(){
+ const p=servicePayload(),s=window._companySettings||{},logo=window._companyLogo||s.logo_data||'';
+ const accent=/^#[0-9a-f]{6}$/i.test(s.corporate_color||'')?s.corporate_color:'#174a78';
+ const field=(title,value)=>`<div class="svc-a4-field"><dt>${title}</dt><dd>${esc(value||'—')}</dd></div>`;
+ const section=(title,value,limit)=>`<section class="svc-a4-section"><h3>${title}</h3><p>${esc(servicePrintExcerpt(value,limit))}</p></section>`;
+ const company=s.company_display_name||s.legal_name||currentMembership?.companies?.name||'Firma';
+ document.getElementById('servicePrintArea').innerHTML=`<article class="svc-a4" style="--service-print-accent:${accent}">
+   <header class="svc-a4-header">
+     <div class="svc-a4-brand">${logo?`<img src="${esc(logo)}" alt="${esc(company)} logosu">`:''}<div><strong>${esc(company)}</strong><span>${esc([s.address,s.phone,s.email].filter(Boolean).join(' · '))}</span></div></div>
+     <div class="svc-a4-document"><h1>TEKNİK SERVİS FORMU</h1><strong>${esc(serviceEditing?.service_number||'TASLAK')}</strong><span>Kabul tarihi: ${esc(serviceDate(p.received_date))}</span></div>
+   </header>
+   <div class="svc-a4-stripe"><span>Servis ve teslim kayıt formu</span><b>${esc(serviceState(p.status).label)}</b></div>
+   <div class="svc-a4-cards">
+     <section class="svc-a4-card"><h2>01 &nbsp; MÜŞTERİ BİLGİLERİ</h2><dl>${field('Firma / Klinik',p.customer_name)}${field('İlgili kişi',p.contact_name)}${field('Telefon',p.phone)}${field('E-posta',p.email)}${field('Adres',servicePrintExcerpt(p.address,110))}</dl></section>
+     <section class="svc-a4-card"><h2>02 &nbsp; CİHAZ VE SERVİS</h2><dl>${field('Cihaz',p.device_name)}${field('Marka / Model',p.brand_model)}${field('Seri numarası',p.serial_number)}${field('Garanti',p.warranty_status)}${field('Servis sorumlusu',p.assigned_to)}${field('Takip / Teslim',`${serviceDate(p.follow_up_date)} / ${serviceDate(p.delivered_date)}`)}</dl></section>
+   </div>
+   <div class="svc-a4-work"><h2>03 &nbsp; SERVİS İŞLEM DETAYI</h2>
+     <div class="svc-a4-work-grid">${section('Teslim alınan aksesuarlar / fiziksel durum',p.accessories,130)}${section('Bildirilen arıza / talep',p.reported_issue,220)}${section('Teknik tespit / teşhis',p.diagnosis,230)}${section('Yapılan işlem / yapılamama nedeni',p.work_performed,260)}${section('Kullanılan / değiştirilen parçalar',p.parts_used,155)}${section('Notlar ve öneriler',p.notes,155)}</div>
+   </div>
+   <div class="svc-a4-signatures"><div><b>Servis Yetkilisi</b><span>Ad Soyad / İmza</span></div><div><b>Müşteri / Teslim Alan</b><span>Ad Soyad / İmza</span></div></div>
+   <footer class="svc-a4-footer"><span>Bu belge teknik servis işlem ve teslim kaydıdır.${serviceDirty?' · Kaydedilmemiş değişiklikler içerir.':''}</span><span>${esc(company)}</span></footer>
+ </article>`;
+}
+
+async function printServiceForm(){buildServicePrint();const imgs=[...document.querySelectorAll('#servicePrintArea img')];await Promise.all(imgs.map(img=>img.decode?.().catch(()=>{})));window._servicePrintTitle=document.title;document.title='';document.body.classList.add('printing-service');window.print()}
 window.addEventListener('afterprint',()=>{document.body.classList.remove('printing-service');if(window._servicePrintTitle){document.title=window._servicePrintTitle;delete window._servicePrintTitle}});
 document.getElementById('serviceForm').addEventListener('input',()=>serviceDirty=true);document.getElementById('serviceForm').addEventListener('change',()=>serviceDirty=true);
 window.addEventListener('beforeunload',e=>{if(serviceDirty){e.preventDefault();e.returnValue=''}});
