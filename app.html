@@ -1337,10 +1337,34 @@ async function acceptPendingInvite(){
  const {data,error}=await sb.rpc('accept_company_invitation',{p_company_id:id});
  if(error){document.getElementById('onboardOverlay').style.display='none';document.getElementById('inviteGate').style.display='grid';document.getElementById('inviteGateMessage').textContent='Davet kabul edilemedi: '+error.message;return false}
  if(!data){document.getElementById('onboardOverlay').style.display='none';document.getElementById('inviteGate').style.display='grid';document.getElementById('inviteGateMessage').textContent='Bu e-posta adresine ait geçerli bir davet bulunamadı. Daveti gönderen kişiden yeni bağlantı isteyin.';return false}
+ localStorage.setItem('proera_selected_company:'+currentUser.id,id);
  const u=new URL(location.href);u.searchParams.delete('invite');history.replaceState(null,'',u.href);
  document.getElementById('inviteGate').style.display='none';return true
 }
-async function resolveWorkspace(){if(!currentUser)return false;const {data,error}=await sb.from('company_members').select('company_id,role,companies(name)').eq('user_id',currentUser.id).limit(1).maybeSingle();if(error){console.error(error);return false}currentMembership=data||null;currentCompanyId=data?.company_id||null;if(!currentCompanyId){document.getElementById('onboardOverlay').style.display='grid';return false}document.getElementById('onboardOverlay').style.display='none';return true}
+async function resolveWorkspace(){
+ if(!currentUser)return false;
+ const {data,error}=await sb.from('company_members').select('company_id,role,companies(name)').eq('user_id',currentUser.id);
+ if(error){console.error('Üyelikler yüklenemedi',error);document.getElementById('syncStatus').textContent='● Üyelik hatası';return false}
+ window._companyMemberships=data||[];
+ const preferred=localStorage.getItem('proera_selected_company:'+currentUser.id);
+ currentMembership=window._companyMemberships.find(m=>m.company_id===preferred)||window._companyMemberships[0]||null;
+ currentCompanyId=currentMembership?.company_id||null;
+ if(!currentCompanyId){document.getElementById('onboardOverlay').style.display='grid';return false}
+ document.getElementById('onboardOverlay').style.display='none';
+ renderWorkspacePickers();return true;
+}
+function renderWorkspacePickers(){
+ const memberships=window._companyMemberships||[];
+ for(const container of [document.querySelector('.ds-profile'),document.querySelector('.md-account')]){
+  if(!container)continue;
+  let picker=container.querySelector('.workspace-picker');
+  if(memberships.length<2){picker?.remove();continue}
+  if(!picker){picker=document.createElement('select');picker.className='workspace-picker';picker.setAttribute('aria-label','Çalışma alanı seç');picker.style.cssText='display:block;width:100%;max-width:230px;margin-top:8px;padding:7px;border-radius:8px;background:#fff;color:#172033';container.append(picker)}
+  picker.replaceChildren(...memberships.map(m=>{const o=document.createElement('option');o.value=m.company_id;o.textContent=(m.companies?.name||'Şirket')+' ('+(m.role==='owner'?'Sahip':m.role==='call_center'?'Çağrı Merkezi':m.role)+')';return o}));
+  picker.value=currentCompanyId;
+  picker.onchange=()=>{saveDraftQuietly();localStorage.setItem('proera_selected_company:'+currentUser.id,picker.value);location.reload()};
+ }
+}
 async function bootWorkspace(){if(window._bootPromise)return window._bootPromise;window._bootPromise=(async()=>{try{if(!(await acceptPendingInvite()))return;if(!(await resolveWorkspace()))return;const key=currentUser.id+':'+currentCompanyId;if(window._bootedWorkspace===key)return;document.getElementById('profileEmail').textContent=currentUser.email||'';await loadCompanySettings();await loadBanksCloud();document.getElementById('desktopSideCompany').textContent=document.getElementById('profileCompany').textContent;applyProeraPrefs();const archiveId=new URLSearchParams(location.search).get('proforma');if(archiveId&&hasAppAction('archive')){await loadSavedProforma(archiveId,true)}else{const landing=roleLanding();if(hasAppAction('new')){applyCompanyDefaults();const restored=restoreDraft();if(!restored){await ensureProformaNo();await fetchRate()}}appNavigate(landing)}window._bootedWorkspace=key;document.getElementById('syncStatus').textContent='● Bağlı';checkLowStock().catch(console.error)}catch(e){document.getElementById('syncStatus').textContent='● Yükleme hatası';alert('Çalışma alanı yüklenemedi: '+e.message)}finally{window._bootPromise=null}})();return window._bootPromise}
 function updateAuthGate(){document.getElementById('authGate').style.display=currentUser?'none':'grid';setAuthBackground(!!currentUser);if(!currentUser){document.querySelectorAll('.team-manager-link').forEach(el=>el.hidden=true);document.getElementById('teamOverlay').style.display='none';serviceRows=[];serviceCustomers=[];serviceEditing=null;serviceDirty=false;document.getElementById('serviceFormModal').classList.remove('open');window._bootedWorkspace=null;closeAllProeraViews();currentCompanyId=null;document.getElementById('syncStatus').textContent='● Giriş gerekli';return}bootWorkspace()}
 let authMode='login';
@@ -2131,6 +2155,8 @@ function applyRoleNavigation(){
   if(match)el.hidden=!hasAppAction(match[1]);
  });
  document.querySelectorAll('.team-manager-link').forEach(el=>el.hidden=!hasAppAction('team'));
+ const headerActions={openArchive:'archive',openCatalog:'catalog',openStockControl:'stock',openSettings:'settings'};
+ document.querySelectorAll('.top-actions button[onclick]').forEach(el=>{const call=el.getAttribute('onclick').match(/^([a-zA-Z]+)\(/)?.[1];if(headerActions[call])el.hidden=!hasAppAction(headerActions[call])});
  const search=document.getElementById('dashGlobalSearch');
  if(search){search.placeholder='Proforma veya müşteri ara…';search.setAttribute('aria-label','Proformaları ara')}
 }
