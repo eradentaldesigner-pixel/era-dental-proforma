@@ -3109,4 +3109,31 @@ const piCSS=document.createElement('style');piCSS.textContent='.product-image-ed
 Object.assign(auditFieldLabels,{image_path:'Ürün görseli'});
 
 let piSaving=false;async function saveCatalogProduct(){if(piSaving)return;if(!piCanWrite()){alert('Ürün düzenleme yetkiniz yok.');return}piSaving=true;try{await piSaveCatalogProductBase()}catch(e){alert('Ürün kaydedilemedi: '+e.message)}finally{piSaving=false}}
+/* Role explanations reflect the existing action map; they do not grant access. */
+const roleHelpDescriptions={
+ owner:['Şirket sahibi','Şirketi kuran kişi. Çalışanları ve yetkileri yönetir; proformaları onaylar ve şirket süreçlerini takip eder.','Şirket sahipliği çalışan davetinden atanmaz.'],
+ admin:['Yönetici','Çalışan davetlerini, proforma onaylarını, şirket ayarlarını ve operasyonları yönetir.','Yeni yönetici atamasını şirket sahibi yapar.'],
+ manager:['Müdür','Satış, müşteri, stok, servis ve sipariş süreçlerini takip eder; teklif ve proforma hazırlar.','Proforma kaşe/imza onayı ve ekip yönetimi bu rolün yetkisinde değildir.'],
+ sales:['Satış / Pazarlama','Görüşme ve müşteri kayıtlarını yönetir; teklif hazırlar, kabul edilen tekliften proforma oluşturur ve yönetici onayına gönderir.','Fatura ve sevkiyat işlemlerini muhasebe ile lojistik yürütür.'],
+ service:['Teknik Servis','Servis kayıtlarını ve planlarını yönetir; servis parçaları için teklif ve proforma hazırlayıp onaya gönderir.','Ürün ve belge erişimi servis parçaları kapsamındadır.'],
+ call_center:['Çağrı Merkezi','Müşteri ve görüşme kayıtları oluşturur; takip ve randevuları takvimde planlar.','Teklif, proforma, stok yönetimi ve yönetici onayı yetkisi yoktur.'],
+ accounting:['Muhasebe','Onaylı siparişleri inceler; fatura bilgilerini ve fatura belgesini kaydeder.','Depo hazırlığı, sevkiyat ve proforma onayını yapmaz.'],
+ logistics:['Depo / Lojistik','Siparişleri hazırlar; sevkiyat ve teslimat kayıtlarını, gerekli belgeleri ve seyahat organizasyonlarını yönetir.','Fatura düzenleme ve proforma onayı yetkisi yoktur.'],
+ viewer:['Görüntüleyici','Ürün kataloğu ve stok bilgilerini inceler; takvim bölümüne erişir.','Görüntüleyici rolünü takvim dahil salt okunur kabul etmeyin; mevcut takvim kuralları ayrıca geçerlidir.']
+};
+const roleHelpActions={home:'Ana sayfa',calendar:'Takvim',crm:'Görüşmeler',archive:'Proformalar',new:'Proforma hazırlama',customers:'Müşteriler',catalog:'Ürün kataloğu',stock:'Stok',service:'Teknik servis',settings:'Şirket ayarları',team:'Ekip yönetimi',orders:'Sipariş / Teslimat',organization:'Organizasyon'};
+function renderRoleHelp(){
+ const selected=document.getElementById('teamRole').value,d=roleHelpDescriptions[selected];
+ const box=document.getElementById('teamRoleHelp');if(!box||!d)return;
+ box.innerHTML='<strong>'+esc(d[0])+'</strong><p>'+esc(d[1])+'</p><div class="rh-chips">'+(proeraAllowedActions[selected]||[]).map(a=>'<span>'+esc(roleHelpActions[a]||a)+'</span>').join('')+'</div><small>'+esc(d[2])+'</small>';
+ document.getElementById('teamRoleMatrix').innerHTML='<div class="rh-table-wrap"><table><thead><tr><th>Rol</th><th>Ne yapar?</th><th>Önemli sınır</th></tr></thead><tbody>'+Object.values(roleHelpDescriptions).map(d=>'<tr><td><strong>'+esc(d[0])+'</strong></td><td>'+esc(d[1])+'</td><td>'+esc(d[2])+'</td></tr>').join('')+'</tbody></table></div>';
+}
+(function(){
+ const style=document.createElement('style');style.textContent='.rh-help{margin:16px 0 0;padding:18px;background:#f2f7ff;border:1px solid #d7e5fa;border-radius:12px}.rh-help p{line-height:1.6;margin:8px 0}.rh-help small{display:block;margin-top:12px;color:#526781;line-height:1.5}.rh-chips{display:flex;flex-wrap:wrap;gap:6px}.rh-chips span{font-size:12px;padding:5px 9px;border-radius:7px;background:white;color:#175da1}.rh-table-wrap{overflow:auto}.rh-table-wrap table{width:100%;border-collapse:collapse;font-size:13px;line-height:1.6}.rh-table-wrap th,.rh-table-wrap td{text-align:left;vertical-align:top;border-bottom:1px solid #e2eaf4;padding:13px 10px}.rh-table-wrap th{background:#f5f8fc}.rh-table-wrap td:first-child{min-width:135px}.rh-table-wrap td:nth-child(2){min-width:240px}.rh-table-wrap td:nth-child(3){min-width:210px}';document.head.append(style);
+ const help=document.createElement('div');help.id='teamRoleHelp';help.className='rh-help';help.setAttribute('aria-live','polite');document.querySelector('#teamOverlay .team-fields').after(help);
+ const section=document.createElement('section');section.className='team-box';section.innerHTML='<h3>Kime hangi rolü vermeliyim?</h3><p class="muted">Bölüme erişim ile işlem yetkisi farklıdır. Her rol yalnızca kendi şirketindeki izin verilen kayıtlara erişir.</p><div id="teamRoleMatrix"></div>';document.querySelector('#teamOverlay .team-card').append(section);
+ document.getElementById('teamRole').addEventListener('change',renderRoleHelp);
+ const base=openTeam;openTeam=function(){const pending=base();if(['owner','admin'].includes(currentMembership?.role))renderRoleHelp();return pending};
+ const topicsBase=pgTopics;pgTopics=function(){const topics=topicsBase();topics.splice(1,0,{id:'role-permissions',title:'Roller ve yetkiler',intro:'Şirket sahibi çalışanları görevlerine uygun rollerle davet eder. Rolünüz hangi bölümlere erişebileceğinizi ve hangi işlemleri yapabileceğinizi belirler.',steps:Object.values(roleHelpDescriptions).map(d=>d[0]+': '+d[1]+' '+d[2]),tip:'Rolünüz yanlışsa şirket yöneticisine bildirin. Proforma onayı yalnızca şirket sahibi veya yönetici tarafından verilir.',links:hasAppAction('team')?[['Ekip ve Rolleri aç','team']]:[]});return topics};
+})();
 </script></body></html>
