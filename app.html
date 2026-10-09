@@ -2807,4 +2807,163 @@ loadDashboard=async function(){
 };
 hdRole();
 
+// Role-aware learning guide. Reading progress is local; it never changes business records.
+let pgTopic='welcome',pgRead={},pgIdentity='',pgReturnFocus=null;
+const pgKey=()=>[currentCompanyId,currentUser?.id,currentMembership?.role].join('|');
+function pgStorageKey(){return 'proera_learning_v2_'+pgKey()}
+function pgTopics(){
+ const role=currentMembership?.role,manage=['owner','admin','manager'].includes(role),topics=[];
+ const add=(id,title,intro,steps,tip,links=[])=>topics.push({id,title,intro,steps,tip,links});
+ add('welcome','İlk giriş ve ilk gün','Proera; müşteri görüşmelerini, teklifleri, proformaları, teknik servisi, takvimi ve teslimat sürecini aynı şirket çalışma alanında takip etmenizi sağlar.',[
+ 'Şirket davetiyle katılıyorsanız, davetteki e-posta adresiyle kayıt olun veya giriş yapın; davet bağlantısını açıp katılımı tamamlayın. Çalışan olarak katılmak için ayrıca yeni şirket oluşturmanız gerekmez.',
+ 'Giriş yaptıktan sonra şirket adını ve rolünüzü kontrol edin. Yanlış şirket veya yanlış rol görünüyorsa şirket yöneticinize bildirin.',
+ 'Ana Sayfa’yı açın. Bekleyen işlerinizi ve yaklaşan planları inceleyin; kartlar sizi ilgili bölüme götürür.',
+ 'Sol menüde yalnızca rolünüze açık bölümler bulunur. Telefonda menüyü üstteki menü düğmesinden açın.',
+ 'Aşağıdaki rehber konularını okuyun. “Bu bölümü okudum” sadece öğrenme ilerlemesini işaretler; şirkette kayıt veya işlem oluşturmaz.'
+ ],'Davetin oluşturulması otomatik e-posta gönderildiği anlamına gelmez. Davet bağlantısını yöneticinizden isteyin.',[['Ana sayfayı aç','home']]);
+ add('workflow','İş akışı: tekliften teslimata','Teklif, proforma, sipariş ve fatura aynı belge değildir. Her aşama farklı bir işin tamamlandığını gösterir.',[
+ 'Görüşme: müşterinin ihtiyacını, ürünleri, görüşme notunu ve sonraki takip tarihini kaydedin.',
+ 'Fiyat teklifi: müşteriye sunulacak ürünleri ve fiyatları hazırlayın. Teklifi kaydedin; PDF olarak indirin ve isterseniz WhatsApp üzerinden paylaşın.',
+ 'Müşteri kabulü: müşteri teklifi kabul ettiğinde çalışan kabulü kaydeder. Bu işlem müşteriden otomatik bir onay toplamaz.',
+ 'Proforma: kabul edilen teklifi proformaya dönüştürün; yönetici onayına gönderin. Yetkili yönetici inceler ve kaşe / imza ile onaylar veya revizyon ister.',
+ 'Sipariş: onaylı proformayı müşteriye iletin. Müşteri teyidini ve teslimat bilgilerini girerek “Siparişi operasyona aktar” işlemini yapın.',
+ 'Muhasebe: faturayı şirketin muhasebe programında düzenleyin; fatura bilgilerini ve PDF’ini siparişe ekleyin.',
+ 'Depo / Lojistik: ayrılan stokları kontrol edin, paketleyin, sevkiyat planı oluşturun ve irsaliye PDF’ini ekleyin.',
+ 'Çıkış ve teslim: sevkiyatı çıkarın; fiziksel stok gönderilen miktar kadar azalır. Ürün teslim edilince teslim tarihi ve teslim alan kişiyi kaydedin.'
+ ],'Proera resmî fatura veya irsaliye kesmez. Dışarıda düzenlenen belgeler burada kayıt ve takip için kullanılır.');
+ add('home','Ana sayfa ve öncelikli işler','Güne Ana Sayfa’dan başlayın. Gösterilen kartlar ve kayıtlar rolünüze göre değişir.',[
+ 'Üstteki kartlardan onay bekleyen belgeleri, açık servisleri ve sevkiyat bekleyen işleri görün. Kartın üzerine basarak ilgili listeye geçin.',
+ '“Öncelikli İşler” bölümünü kontrol edin. Kırmızı kayıtlar geçmiş takip tarihlerini; sarı kayıtlar bekleyen işlemleri belirtir.',
+ 'Tümü / Satış / Servis / Operasyon filtrelerini kullanın. İlgili kaydı satırdaki düğmeden açın.',
+ '“Yaklaşan Planlar” bölümünde Bugün, 7 Gün veya 30 Gün seçin. Etkinliği açarak ayrıntılarını kontrol edin.',
+ 'Hızlı işlem düğmeleriyle yeni görüşme, fiyat teklifi, servis kaydı veya etkinlik başlatın. Yalnızca yetkili olduğunuz düğmeler görünür.',
+ 'Satış Akışı dönem seçimi alt bölümdeki belge özetini değiştirir; üstteki bekleyen iş kartları güncel durumları gösterir.',
+ 'Bir sayı veya bölüm alınamadıysa “Yenile” düğmesini kullanın. Boş liste ile bağlantı hatası aynı şey değildir.'
+ ],'Öncelikli listede en fazla 8 iş gösterilir. Tüm kayıtları görmek için ilgili menüyü açın.',[['Ana sayfayı aç','home']]);
+ if(hasAppAction('calendar'))add('calendar','Takvim, ziyaret ve hatırlatmalar','Kurulum, eğitim, tanıtım, müşteri ziyareti ve toplantıları tarihleriyle kaydedin.',[
+ 'Takvim’i açın; ilgili günün + düğmesine veya yeni etkinlik işlemine basın.',
+ 'Başlığı, etkinlik türünü, tarihi ve varsa başlangıç / bitiş saatini girin. Başlık, yapılacak işi açıkça anlatmalı: “Giresun · Elite kurulumu” gibi.',
+ 'İl, konum ve personel / sorumlu çalışan bilgisini doldurun. Notlara müşteri teyidini, adresi, ekipmanı ve gerekli hazırlıkları yazın.',
+ 'Şehir dışı bir görevse seyahat hazırlığını işaretleyin. Ulaşım, otel ve diğer hazırlık görevlerini kontrol edip tamamlananları işaretleyin.',
+ 'Hatırlatma süresini seçin ve kaydedin. Yaklaşan planlar ana sayfada da görünür.',
+ 'Etkinlik tamamlandığında randevuyu “Tamamlandı” olarak işaretleyin. Plan değiştiyse yeni durumu kaydedin.'
+ ],'Hatırlatmalar site açıkken güncellenir; telefon bildirimi, otomatik bilet satın alma veya otel rezervasyonu yapılmaz. Seyahat ve masraf talebi modülü bu sürümde yoktur.',[['Takvimi aç','calendar']]);
+ if(hasAppAction('crm'))add('crm','Görüşmeler ve müşteri takibi','Görüşme kaydı, müşteriyle konuşulanları ve bir sonraki adımı ekip içinde görünür kılar.',[
+ 'Görüşmeler’i açıp yeni görüşme oluşturun. Firma / kişi adı, telefon ve il bilgisini girin.',
+ 'Görüşme tarihini, ilgilenilen ürünleri, kanalı ve satış sorumlusunu belirtin.',
+ 'Notlara müşterinin ihtiyacını, sorularını, verdiğiniz bilgiyi ve anlaşmaya varılan sonraki adımı yazın.',
+ 'Sonraki takip ve hatırlatma tarihini belirleyin. “Daha sonra arayacağım” yerine açık bir tarih kullanın.',
+ 'Durumu güncel tutun: görüşme devam ediyorsa takipte bırakın; sonuç değiştiğinde ilgili durumu seçin.',
+ 'Sonraki görüşmede önce eski notu okuyun; yeni gelişmeyi kaydedin. Teklif verme yetkiniz varsa Fiyat Teklifleri bölümünden belge hazırlayın.'
+ ],'Çağrı merkezi rolü görüşme ve randevu takibi yapar; satış belgesi veya yönetici onayı yetkisi kendiliğinden kazanmaz.',[['Görüşmeleri aç','crm']]);
+ if(hasAppAction('customers'))add('customers','Müşteri kayıtları','Müşteri kartı ortak iletişim ve firma bilgisidir. Her arama veya teklif için aynı müşteriyi yeniden oluşturmayın.',[
+ 'Müşteriler’de firma veya kişi adını, telefonu ya da vergi numarasını arayın.',
+ 'Kayıt varsa ayrıntılarını açın; iletişim ve adres bilgisini kontrol edin.',
+ 'Yeni müşteri gerekiyorsa firma adı, ilgili kişi, telefon, e-posta, adres ve varsa vergi bilgilerini kaydedin.',
+ 'Teklif / proforma hazırlarken kayıtlı müşteriyi seçin ve belgeye gelen bilgilerin doğruluğunu kontrol edin.',
+ 'Müşteri bilgilerinde bir değişiklik varsa yetkiniz kapsamında kartı güncelleyin; eski belge bilgileri için ilgili belgenin kopyasını inceleyin.'
+ ],'Bir müşteriyi iki farklı yazımla açmak takip geçmişini parçalar. Önce arama yapın.',[['Müşterileri aç','customers']]);
+ if(offerAllowed())add('documents',role==='service'?'Servis parça teklifi ve proforma':'Fiyat teklifi ve proforma','Önce fiyat teklifi hazırlanır. Müşteri kabulünden sonra proforma ve yönetici onayı aşamasına geçilir.',[
+ 'Fiyat Teklifleri bölümünden yeni teklif açın. Müşteriyi ve katalog ürünlerini seçin; miktar ve ürün açıklamalarını kontrol edin.',
+ role==='service'?'Teknik servis rolünde yalnızca katalogda servis parçası olarak sınıflandırılmış ürünleri kullanın. Parça sınıflandırmasını yönetim yapar.':'Katalog fiyatını, miktarı, para birimini ve KDV dahil / hariç seçimini kontrol edin.',
+ 'TL teklif verecekseniz kur ve dönüşüm sonucunu kontrol edin. Kur alınamıyorsa ekrandaki uyarıya bakın; doğruladığınız kuru girip birim fiyatları ve toplamı kontrol edin.',
+ 'Teklifi kaydedin. PDF indir / Yazdır ile dosya oluşturun. WhatsApp paylaşımı hazır mesaj açar; PDF dosyasını görüşmeye ayrıca ekleyin.',
+ 'Müşteri kabul ettiğinde teklif listesinden “Müşteri kabulünü kaydet” işlemini yapın; kabul açıklamasını yazın.',
+ '“Proformaya dönüştür” işlemiyle proforma oluşturun ve yönetici onayına gönderin. Fiyat, kur, KDV, ödeme ve teslimat bilgilerini son kez kontrol edin.',
+ 'Onaylandıktan sonra kaşe / imzalı belgeyi inceleyin ve müşteriye gönderin. Revizyon istendiyse açıklamaya göre düzenleyip yeniden onaya gönderin.',
+ 'Müşteri teyidinden sonra “Siparişi operasyona aktar” düğmesinden teslimat adresi, ilgili kişi ve telefonu girin; teyit kutusunu işaretleyin.'
+ ],'WhatsApp düğmesi belgeyi otomatik göndermez. Onaylı ve operasyona aktarılmış belgeyi değiştirmek yerine yetkili yöneticiyle revizyon sürecini görüşün.',[['Fiyat tekliflerini aç','offers'],['Proformaları aç','archive']]);
+ if(hasAppAction('service'))add('service','Teknik servis: kabulden teslime','Her cihaz için anlaşılır bir servis kaydı oluşturun; arıza, işlem ve takip bilgilerini güncel tutun.',[
+ 'Servis Kayıtları’ndan yeni servis formu oluşturun. Kabul tarihini, müşteriyi, cihazı, marka / modeli ve seri numarasını girin.',
+ 'Bildirilen arızayı veya talebi açıkça yazın. Teslim alınan aksesuarları ve cihazın fiziksel durumunu belirtin.',
+ 'Servis sorumlusunu, önceliği, garanti durumunu ve sonraki takip tarihini belirleyip kaydedin.',
+ 'İnceleme sonrası teknik tespiti ve yapılan işlemi ekleyin; durum değiştiğinde formdaki servis durumunu güncelleyin.',
+ 'Parça kullandıysanız parça bilgisini ve yetkili stok kullanım işlemini kaydedin. Sadece forma parça adı yazmak stoktan düşüm yapmaz.',
+ 'Müşteriye parça satılacaksa servis parça teklif / proforma sürecini kullanın. Cihaz satış belgesi yerine servis parçalarıyla sınırlı çalışın.',
+ 'Tamamlandı / yapılamadı durumunda işlem veya gerekçeyi doldurun. Teslim bilgisini kaydedin.',
+ 'Yazdır / PDF ile A4 servis formunu alın; basmadan önce müşteri, cihaz, işlem ve imza alanlarını kontrol edin.'
+ ],'Durum geçmişi, hangi işlemin ne zaman değiştiğini takip etmenize yardımcı olur. “Beklemede” bırakılmış bir işin takip tarihini atlamayın.',[['Servis kayıtlarını aç','service']]);
+ if(hasAppAction('stock')||hasAppAction('catalog'))add('stock','Ürün kataloğu ve stok','Fiziksel stok depodaki toplamdır; ayrılan stok siparişlere rezerve edilmiştir; kullanılabilir stok yeni işler için kalan miktardır.',[
+ 'Ürün Kataloğu’nda ürünün adı, kodu, fiyatı, para birimi ve KDV bilgisini kontrol edin. Katalog düzenleme işlemini yetkili personel yapar.',
+ 'Stok Kontrolü’nde fiziksel, ayrılan ve kullanılabilir miktarları birlikte okuyun. Fiziksel stok var diye tamamı yeni satışa uygun olmayabilir.',
+ 'Kritik stok renkleri ürünün kayıtlı eşiklerine göre değişir. Düşük stok gördüğünüzde sorumlu birime haber verin.',
+ 'Yetkiliyseniz gerçek giriş, iade veya düzeltme için uygun stok hareketini ve açıklamasını kaydedin. Sadece sayı değiştirmeyi alışkanlık haline getirmeyin.',
+ 'Sipariş çıkışları sevkiyat işlemiyle otomatik düşer. Aynı çıkış için ayrıca manuel satış hareketi oluşturmayın.',
+ 'Teknik servis parça kullanımında ilgili stok kullanım işlemini kullanın. Başka siparişe ayrılmış stok kullanılamaz.'
+ ],role==='viewer'?'Görüntüleyici rolü kayıtları inceler; stok veya katalog bilgilerini değiştiremez.':'Ayrılan miktar, fiziksel miktarın altına düşecek bir stok değişikliğini sistem engeller.',[['Stok kontrolünü aç','stock'],['Kataloğu aç','catalog']]);
+ if(manage)add('management','Yönetim: onaylar ve ekip','Yönetim günlük işlerin takibini yapar; belge onayını ve çalışanların doğru rollerle çalışmasını sağlar.',[
+ 'Ana Sayfa’daki onay bekleyen proformaları açın. Müşteri, ürün, fiyat, KDV, kur, ödeme ve teslimat bilgilerini inceleyin.',
+ 'Onay yetkiniz varsa, şirketin yüklenmiş kaşe ve imza görselleriyle belgeyi onaylayın. Eksik veya yanlış bilgi varsa açıklamayla revizyon isteyin.',
+ 'Sipariş ve Teslimat ekranından fatura, paketleme ve sevkiyat ilerlemesini izleyin.',
+ 'Ekip ve Roller erişiminiz varsa çalışanı doğru e-posta adresi ve rol ile davet edin; bağlantıyı çalışanla paylaşın.',
+ 'Çalışan şirkete katıldıktan sonra üyeliğini ve rolünü kontrol edin. Yetkiniz kapsamında rolü değiştirin veya şirket üyeliğini kaldırın.',
+ 'Yetkiniz varsa Ayarlar → İşlem Geçmişi bölümünden işlem, kullanıcı, zaman ve değişen bilgileri inceleyin. Yönetici işlemleri de kaydedilir.'
+ ],'Müdür rolü ile yönetici rolü aynı yetkilere sahip değildir. Bu rehberde anlatılan bir işlem için düğme yoksa kendi rolünüzün izinlerini kontrol edin.',[['Ana sayfayı aç','home'],['Ekip ve Rolleri aç','team'],['Firma ayarlarını aç','settings']]);
+ if(hasAppAction('orders')&&['owner','admin','accounting'].includes(role))add('accounting','Muhasebe: fatura ve PDF','Muhasebe onaylı sipariş üzerinden faturayı düzenler ve fatura kaydını operasyona bağlar.',[
+ 'Sipariş ve Teslimat’tan siparişi açın. Onaylı proforma, müşteri vergi bilgileri, ürünler ve toplamı kontrol edin.',
+ 'Faturayı kendi muhasebe programınızda düzenleyin. Proera’da resmî fatura kesilmez.',
+ 'Muhasebe bölümünde fatura numarasını ve tarihini girin; durumu “Fatura kaydedildi” yapıp kaydedin.',
+ 'Fatura PDF’leri bölümünden en fazla 10 MB boyutunda PDF dosyasını yükleyin.',
+ 'Yanlış dosya için doğru sürümü yeniden ekleyin. Önceki PDF sürümleri korunur; hazır belgeler uygulamadan silinmez.',
+ 'Belgeyi açıp doğru siparişe ait olduğunu kontrol edin. Depo / lojistik birimi faturayı görerek sevkiyat hazırlığını devam ettirir.'
+ ],'Fatura durumunu kaydetmek ve fatura PDF’ini eklemek iki ayrı adımdır. Sevkiyat çıkışı için ikisi de gerekir.',[['Siparişleri aç','orders']]);
+ if(hasAppAction('orders')&&['owner','admin','logistics'].includes(role))add('logistics','Depo / lojistik: rezervasyon ve sevkiyat','Ürünleri siparişe ayırın; her gerçek sevkiyatı ayrı planlayıp çıkış ve teslim bilgisini kaydedin.',[
+ 'Siparişi açın. “Sipariş / Ayrılan / Gönderilen / Kalan” miktarlarını inceleyin. Katalog eşleştirmesi eksikse doğru ürünü seçin.',
+ 'Rezervasyonu kontrol edin ve gerekiyorsa kaydedin. Fiziksel miktar rezervasyon sırasında azalmaz.',
+ 'Ürünleri hazırlayın, seri numaralarını ve depo notunu girin; hazırlık durumunu “Paketlendi” olarak kaydedin.',
+ '“Sevkiyat planla” ile kargo, şirket aracı veya müşteri teslimi seçin. Bu sevkiyatta gönderilecek miktarı girin; kısmi gönderim yapabilirsiniz.',
+ 'Kargo firması / takip numarası veya araç / teslim sorumlusu bilgilerini doldurun. İrsaliye numarası ve tarihini girip bu sevkiyata irsaliye PDF’ini ekleyin.',
+ 'Fatura kaydı, fatura PDF’i, paketleme ve irsaliye PDF’i hazırsa gerçek çıkış tarihini seçip “Sevkiyatı çıkar” işlemini yapın. Gönderilen miktar stoktan düşer.',
+ 'Kalan ürünler varsa sonraki gönderim için paketlemeyi yeniden tamamlayıp yeni sevkiyat planı açın.',
+ 'Teslim sonrası teslim tarihini ve teslim alan kişiyi girerek kaydedin. Sipariş tüm miktarlar teslim edildiğinde tamamlanır.'
+ ],'Planlanmış sevkiyatta miktar değişecekse planı iptal edip yenisini oluşturun. Çıkmış sevkiyatı sıradan plan iptaliyle geri alamazsınız.',[['Siparişleri aç','orders']]);
+ if(hasAppAction('settings'))add('setup','Şirket sahibi: ilk kurulum','Çalışanlar başlamadan önce şirketin temel bilgilerini ve belge ayarlarını hazırlayın.',[
+ 'Ayarlar’da firma adı, adres, telefon, vergi bilgileri ve şirket logosunu kaydedin.',
+ 'Banka / IBAN bilgilerini ve proforma varsayılanlarını kontrol edin. Teklifte banka bilgileri gösterilmez.',
+ 'Yönetici onayında kullanılacak görselleri Ayarlar → Kaşe ve İmza bölümünden yükleyin; örnek bir belge görünümünde kontrol edin.',
+ 'Ürün Kataloğu’na ürün kodlarını, fiyatları, para birimini, KDV oranını, gerçek stok miktarını ve stok eşiklerini girin.',
+ 'Teknik servis parçalarını ayrıca sınıflandırın; servis çalışanları yalnızca bu ürünlerle teklif / proforma hazırlayabilir.',
+ 'Ekip ve Roller’den çalışanları davet edin. Yönetici, müdür, satış / pazarlama, teknik servis, çağrı merkezi, muhasebe ve depo / lojistik rollerini göreve göre seçin.'
+ ],'Çalışanlara yöneticilik vermek yerine işlerine uygun rol atayın. Şirket sahibi rolü sıradan çalışan daveti değildir.',[['Firma ayarlarını aç','settings'],['Ekip ve Rolleri aç','team']]);
+ add('help','Sık sorulanlar ve günlük kontrol','Bir işlem yapmadan önce bilgiyi kontrol edin; işlemden sonra kaydın ve durumun güncellendiğini doğrulayın.',[
+ 'Menü veya işlem düğmesi yok: önce şirketinizi ve rolünüzü kontrol edin. Erişim gerekiyorsa yöneticinizle görüşün.',
+ 'Kaydetme hatası: ekrandaki hata mesajını okuyun. Eksik alanları düzeltin; başka biri kaydı değiştirdiyse ekranı yenileyip son bilgiyi kontrol edin.',
+ 'PDF yazdırma: yazdırma önizlemesinde A4 seçin. Tarayıcı üstbilgi / altbilgilerini kapatın; tarih veya site adresi böyle kaldırılır. Belgeyi basmadan önce sayfa sayısını kontrol edin.',
+ 'WhatsApp paylaşımı: açılan mesajı kontrol edin, doğru numarayı seçin ve PDF dosyasını ayrıca ekleyin. Paylaşım düğmesi karşı tarafa otomatik teslim yapmaz.',
+ 'Stok var ama gönderemiyorum: kullanılabilir stok ile fiziksel stok farklıdır. Başka siparişlere ayrılan miktarı ve bu siparişin rezervasyonunu kontrol edin.',
+ 'Sevkiyat çıkmıyor: fatura numarası / tarihi, fatura PDF’i, paketleme, irsaliye numarası / tarihi ve irsaliye PDF’i tamam mı kontrol edin.',
+ 'Günün başında: öncelikli işleri, takip tarihlerini ve yaklaşan planları inceleyin. Günün sonunda: görüşme / servis notlarını, randevu durumlarını ve teslim bilgilerini güncelleyin.'
+ ],'Loglar uygulama üzerinden düzenlenmez. İşlem geçmişi korunur; kayıtları düzeltirken açıklama yazın. Bu sürümde OpenAI API asistanı yoktur.');
+ return topics;
+}
+const pgOverlay=document.getElementById('guideOverlay');
+pgOverlay.innerHTML='<section class="pg-shell" role="dialog" aria-modal="true" aria-labelledby="pgTitle"><header class="pg-header"><div><small class="workspace-kicker">PROERA · KULLANIM REHBERİ</small><h2 id="pgTitle">İlk günden doğru kullanın</h2><p id="pgRole"></p></div><button class="btn light" id="pgClose" type="button">Kapat</button></header><div class="pg-layout"><aside class="pg-sidebar"><label for="pgSearch">Rehberde ara</label><input id="pgSearch" type="search" placeholder="Teklif, stok, PDF…"><nav id="pgNav" aria-label="Rehber konuları"></nav><div class="pg-progress"><b id="pgProgressLabel"></b><div><i id="pgProgress"></i></div><small>Okuma ilerlemesi bu tarayıcıda saklanır.</small></div></aside><main id="pgArticle" class="pg-article" tabindex="-1"></main></div></section>';
+const pgStyle=document.createElement('style');pgStyle.textContent='.guide-overlay{z-index:18000!important;padding:22px!important;background:#071c3db0}.pg-shell{width:min(1140px,96vw);height:min(820px,92dvh);background:#fff;border-radius:16px;box-shadow:0 25px 90px #071c3d55;display:flex;flex-direction:column;overflow:hidden;color:#173352}.pg-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;padding:24px 28px;border-bottom:1px solid #e4ebf4;background:#f7faff}.pg-header h2{font-size:25px;margin:6px 0;color:#102947;letter-spacing:-.5px}.pg-header p{font-size:12px;color:#637994;margin:8px 0 0}.pg-layout{display:grid;grid-template-columns:270px minmax(0,1fr);min-height:0;flex:1}.pg-sidebar{padding:20px;border-right:1px solid #e5edf6;background:#f8fafd;overflow:auto}.pg-sidebar label{font-size:11px}.pg-sidebar input{font-size:12px}.pg-sidebar nav{display:grid;gap:4px;margin-top:16px}.pg-sidebar nav button{border:0;border-radius:7px;text-align:left;padding:11px 12px;background:transparent;font-size:12px;color:#385572;line-height:1.5;cursor:pointer}.pg-sidebar nav button[aria-current=page]{background:#0878f9;color:white;font-weight:700}.pg-progress{margin-top:22px;padding:15px 5px;border-top:1px solid #dfe7f3;font-size:12px}.pg-progress>div{height:6px;margin:12px 0;background:#dfe9f6;border-radius:5px;overflow:hidden}.pg-progress i{display:block;height:100%;background:#0eaf87}.pg-progress small{font-size:10px;line-height:1.6;color:#7c8fa7}.pg-article{padding:30px 34px;overflow:auto;line-height:1.8;outline-offset:-4px}.pg-article h3{font-size:24px;color:#112b4c;letter-spacing:-.5px;line-height:1.4;margin:4px 0 12px}.pg-article p{font-size:14px;color:#53708e;line-height:1.8}.pg-article ol{padding-left:24px;margin:20px 0}.pg-article li{font-size:14px;color:#284562;margin:0 0 17px;padding-left:6px}.pg-article li::marker{font-weight:800;color:#0878f9}.pg-tip{background:#edf5ff;border:1px solid #dceafa;border-left:3px solid #0878f9;border-radius:8px;padding:14px 17px;font-size:13px;color:#284e77;line-height:1.8}.pg-buttons{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0}.pg-buttons .btn{font-size:12px}.pg-bottom{display:flex;justify-content:space-between;gap:12px;align-items:center;border-top:1px solid #e7edf6;padding-top:20px;margin-top:28px}.pg-bottom label{display:flex;align-items:center;gap:9px;font-size:12px;line-height:1.6}.pg-bottom input{width:18px;height:18px;flex-shrink:0}.pg-bottom .btn{font-size:12px}.pg-step{font-size:11px;color:#7287a0}@media(max-width:760px){.guide-overlay{padding:0!important}.pg-shell{width:100%;height:100dvh;border-radius:0}.pg-header{padding:18px}.pg-header h2{font-size:21px}.pg-layout{display:flex;flex-direction:column}.pg-sidebar{border-right:0;border-bottom:1px solid #e5edf6;padding:12px 16px;flex-shrink:0;max-height:220px}.pg-sidebar nav{display:flex;overflow:auto;margin-top:9px;gap:6px}.pg-sidebar nav button{flex-shrink:0;max-width:180px;font-size:11px;padding:8px 10px}.pg-progress{padding:8px 0 0;margin-top:8px}.pg-progress>div{margin:6px 0}.pg-progress small{display:none}.pg-article{padding:22px 20px;flex:1}.pg-article h3{font-size:22px}.pg-article li{font-size:13px}.pg-bottom{flex-wrap:wrap}.pg-bottom label{flex-basis:100%}.pg-sidebar input{font-size:16px}}@media print{.guide-overlay{display:none!important}}';document.head.append(pgStyle);
+function pgLoadRead(){try{pgRead=JSON.parse(localStorage.getItem(pgStorageKey())||'{}');if(!pgRead||Array.isArray(pgRead)||typeof pgRead!=='object')pgRead={}}catch{pgRead={}}}
+function pgRender(){
+ const topics=pgTopics(),query=val('pgSearch').toLocaleLowerCase('tr-TR').trim(),visible=topics.filter(t=>(t.title+' '+t.intro+' '+t.steps.join(' ')+' '+t.tip).toLocaleLowerCase('tr-TR').includes(query));
+ if(!visible.some(t=>t.id===pgTopic))pgTopic=visible[0]?.id||'';
+ document.getElementById('pgRole').textContent='Rolünüz: '+(teamRoles[currentMembership?.role]||'Şirket sahibi')+' · Rehber mevcut yetkilerinize göre hazırlanır.';
+ document.getElementById('pgNav').innerHTML=visible.map(t=>'<button type="button" data-pg-topic="'+t.id+'" '+(t.id===pgTopic?'aria-current="page"':'')+'>'+esc(t.title)+(pgRead[t.id]?' ✓':'')+'</button>').join('')||'<p>Aramanıza uygun konu yok.</p>';
+ document.querySelectorAll('[data-pg-topic]').forEach(b=>b.onclick=()=>{pgTopic=b.dataset.pgTopic;pgRender()});
+ const done=topics.filter(t=>pgRead[t.id]).length;document.getElementById('pgProgressLabel').textContent=done+' / '+topics.length+' bölüm okundu';document.getElementById('pgProgress').style.width=Math.round(done/topics.length*100)+'%';
+ const t=topics.find(t=>t.id===pgTopic),article=document.getElementById('pgArticle');
+ if(!t){article.innerHTML='<h3>Sonuç bulunamadı</h3><p>Başka bir kelime deneyin veya arama alanını temizleyin.</p>';return}
+ const index=topics.indexOf(t),links=t.links.filter(([,action])=>action==='offers'?offerAllowed():hasAppAction(action));
+ article.innerHTML='<small class="pg-step">Bölüm '+(index+1)+' / '+topics.length+'</small><h3>'+esc(t.title)+'</h3><p>'+esc(t.intro)+'</p><ol>'+t.steps.map(s=>'<li>'+esc(s)+'</li>').join('')+'</ol><aside class="pg-tip"><b>Bilmeniz gereken:</b> '+esc(t.tip)+'</aside>'+(links.length?'<div class="pg-buttons">'+links.map(([label,action])=>'<button type="button" class="btn primary" data-pg-open="'+action+'">'+esc(label)+' →</button>').join('')+'</div>':'')+'<footer class="pg-bottom"><label><input id="pgReadTopic" type="checkbox" '+(pgRead[t.id]?'checked':'')+'> Bu bölümü okudum</label><div class="actions"><button class="btn light" id="pgPrev" '+(index===0?'disabled':'')+'>Önceki</button><button class="btn primary" id="pgNext">'+(index===topics.length-1?'Rehberi kapat':'Sonraki')+'</button></div></footer>';
+ document.getElementById('pgReadTopic').onchange=e=>{pgRead[t.id]=e.target.checked;try{localStorage.setItem(pgStorageKey(),JSON.stringify(pgRead))}catch{}pgRender();document.getElementById('pgReadTopic')?.focus()};
+ document.getElementById('pgPrev').onclick=()=>{pgTopic=topics[Math.max(0,index-1)].id;document.getElementById('pgSearch').value='';pgRender()};
+ document.getElementById('pgNext').onclick=()=>{if(index===topics.length-1)finishGuide();else{pgTopic=topics[index+1].id;document.getElementById('pgSearch').value='';pgRender()}};
+ article.querySelectorAll('[data-pg-open]').forEach(b=>b.onclick=async()=>{const action=b.dataset.pgOpen;if(action==='offers'?!offerAllowed():!hasAppAction(action))return;finishGuide();try{if(action==='offers')await openOffers();else await appNavigate(action)}catch(e){alert('Bölüm açılamadı: '+e.message)}});
+ article.scrollTop=0;
+}
+openGuide=function(){if(!currentUser||!currentCompanyId)return;pgReturnFocus=document.activeElement;pgIdentity=pgKey();pgLoadRead();pgTopic='welcome';document.getElementById('pgSearch').value='';pgRender();pgOverlay.classList.add('open');document.getElementById('pgClose').focus()};
+finishGuide=function(){pgOverlay.classList.remove('open');if(pgReturnFocus?.isConnected)pgReturnFocus.focus();pgReturnFocus=null};
+guidePrev=function(){document.getElementById('pgPrev')?.click()};
+guideNext=function(){document.getElementById('pgNext')?.click()};
+document.getElementById('pgSearch').oninput=pgRender;document.getElementById('pgClose').onclick=finishGuide;
+pgOverlay.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();finishGuide();return}if(e.key!=='Tab')return;const controls=[...pgOverlay.querySelectorAll('button:not([disabled]),input,select,a[href]')].filter(x=>!x.hidden);const first=controls[0],last=controls.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}});
+const pgRoleBase=applyRoleNavigation;applyRoleNavigation=function(){pgRoleBase();if(pgIdentity!==pgKey()){finishGuide();pgRead={};document.getElementById('pgArticle').replaceChildren();document.getElementById('pgNav').replaceChildren();pgIdentity=pgKey()}};
+const pgClearBase=clearOperations;clearOperations=function(){pgClearBase();if(pgOverlay.classList.contains('open'))finishGuide()};
+
 </script></body></html>
