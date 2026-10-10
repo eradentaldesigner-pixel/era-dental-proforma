@@ -3205,7 +3205,7 @@ const erActions={save:'Taslak / bilgiler kaydedildi',submit:'Yönetime gönderil
 let erRows=[],erCurrent=null,erPage=0,erRequest=0,erDetailRequest=0,erBusy=false,erScope='';
 function erManager(){return ['owner','admin'].includes(currentMembership?.role)}
 function erAllowed(){return !!currentUser&&!!currentCompanyId&&!!currentMembership}
-function erReset(){++erRequest;++erDetailRequest;erRows=[];erCurrent=null;erBusy=false;erScope='';erPage=0;document.getElementById('requestsOverlay').hidden=true;document.getElementById('erList').replaceChildren();document.getElementById('erEditor').replaceChildren();document.getElementById('erHomeList').replaceChildren();document.getElementById('erHome').hidden=true;document.querySelectorAll('[data-er-open]').forEach(b=>b.hidden=true)}
+function erReset(){++erRequest;++erDetailRequest;erRows=[];erCurrent=null;erBusy=false;erScope='';erPage=0;document.getElementById('requestsOverlay').hidden=true;document.getElementById('erList').replaceChildren();document.getElementById('erEditor').replaceChildren();document.getElementById('erHomeList').replaceChildren();document.getElementById('erHome').hidden=true;document.querySelectorAll('[data-er-open]').forEach(b=>b.hidden=!erAllowed())}
 function erRole(){if(erScope&&erScope!==opsKey())erReset();document.querySelectorAll('[data-er-open]').forEach(b=>b.hidden=!erAllowed())}
 function erBadge(state){return '<span class="er-badge '+esc(state)+'">'+esc(erStates[state]||state)+'</span>'}
 function erMessage(msg,error=false){const box=document.getElementById('erMessage');box.textContent=msg;box.classList.toggle('error',error)}
