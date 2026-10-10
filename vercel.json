@@ -25,7 +25,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://jxsmopzptcfcodrpuahx.supabase.co; connect-src 'self' https://jxsmopzptcfcodrpuahx.supabase.co wss://jxsmopzptcfcodrpuahx.supabase.co https://www.tcmb.gov.tr; font-src 'self' data:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://jxsmopzptcfcodrpuahx.supabase.co; connect-src 'self' https://jxsmopzptcfcodrpuahx.supabase.co wss://jxsmopzptcfcodrpuahx.supabase.co https://www.tcmb.gov.tr; font-src 'self' data:; frame-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
         },
         {
           "key": "Cross-Origin-Opener-Policy",
