@@ -1,1 +1,4 @@
-Yalnızca app.html dosyasını mevcut dosyanın yerine yükleyin. Ctrl + F5 yapın. Ağız içi tarama çizimi Aoralscan Elite formuna göre yenilendi. Şablon renk seçimi çalışmaya devam eder. SQL ve ek görsel dosyası yüklemesi gerekmez.
+CepFirma iPhone paketi
+ZIP içindeki app.html, manifest.webmanifest, cepfirma-logo.svg, apple-touch-icon.png, icon-192.png ve icon-512.png dosyalarını sitenizin aynı ana klasörüne yükleyin. Mevcut app.html dosyasını değiştirin. SQL gerekmiyor.
+Safari üzerinden sitenizin app.html adresini açın. Paylaş > Ana Ekrana Ekle > varsa Web Uygulaması Olarak Aç > Ekle. Eski Proera kısayolunu kaldırıp yeniden ekleyin.
+Mobil alt menü rol izinlerini kullanır. Veriler için internet bağlantısı gereklidir. Bu paket App Store uygulaması değildir; ana ekran web uygulamasıdır. Uygulamanın adının ve simgesinin yenilenmesi için eski kısayolun tekrar eklenmesi gerekir.
