@@ -1,0 +1,42 @@
+/* Explicit measured A4 pages, independent of application CSS. */
+#prPrintRoot{display:none}
+#prPrintRoot.pr-measuring{display:block!important;position:fixed!important;left:-20000px!important;top:0!important;visibility:hidden!important;width:210mm!important}
+#prPrintRoot .pr-page{position:relative!important;box-sizing:border-box!important;width:210mm!important;height:297mm!important;padding:12mm 14mm 17mm!important;background:white!important;color:#14243a!important;font-family:Arial,"Segoe UI",sans-serif!important;font-size:10pt!important;overflow:hidden!important;break-after:page!important;page-break-after:always!important}
+#prPrintRoot .pr-page:last-child{break-after:auto!important;page-break-after:auto!important}
+#prPrintRoot .pr-content{height:268mm!important;overflow:visible!important;display:block!important}
+#prPrintRoot .pr-header{display:flex!important;justify-content:space-between!important;gap:8mm!important;align-items:flex-start!important;border-bottom:1.5pt solid #1478ed!important;padding:0 0 4mm!important;margin-bottom:5mm!important;break-inside:avoid!important}
+#prPrintRoot .pr-header img{width:auto!important;max-width:49mm!important;max-height:16mm!important;object-fit:contain!important;display:block!important;margin-bottom:2mm!important}
+#prPrintRoot .pr-header h1{font-size:16pt!important;line-height:1.2!important;margin:0 0 3mm!important;color:#102b4a!important;font-weight:700!important}
+#prPrintRoot .pr-header .pr-heading-meta{font-size:9pt!important;text-align:right!important;line-height:1.5!important;max-width:95mm!important}
+#prPrintRoot .pr-contact{font-size:8pt!important;line-height:1.4!important;max-width:68mm!important;color:#475467!important}
+#prPrintRoot .pr-footer{position:absolute!important;bottom:8mm!important;left:14mm!important;right:14mm!important;display:flex!important;justify-content:space-between!important;gap:5mm!important;border-top:1px solid #dce5ee!important;padding-top:2mm!important;font-size:8pt!important;color:#667085!important}
+#prPrintRoot .boxes{display:grid!important;grid-template-columns:1fr 1fr!important;gap:4mm!important;margin:0 0 4mm!important}
+#prPrintRoot .box{border:1px solid #dce5ee!important;border-radius:2mm!important;padding:3mm!important;background:white!important;margin-bottom:3mm!important}
+#prPrintRoot h3{font-size:9pt!important;line-height:1.4!important;color:#102b4a!important;margin:0 0 2mm!important}
+#prPrintRoot .box p{font-size:9pt!important;line-height:1.4!important;margin:1mm 0!important;overflow-wrap:anywhere!important}
+#prPrintRoot .ptable{width:100%!important;table-layout:fixed!important;border-collapse:collapse!important;font-size:9pt!important;margin:0 0 4mm!important}
+#prPrintRoot .ptable th,#prPrintRoot .ptable td{padding:2.2mm 1.5mm!important;border:1px solid #dce5ee!important;vertical-align:top!important;line-height:1.4!important;overflow-wrap:anywhere!important;font-size:9pt!important}
+#prPrintRoot .ptable th{background:#eff4fa!important;color:#102b4a!important;font-weight:700!important}
+#prPrintRoot .ptable th:nth-child(1){width:6%}#prPrintRoot .ptable th:nth-child(2){width:43%}#prPrintRoot .ptable th:nth-child(3){width:8%}#prPrintRoot .ptable th:nth-child(4){width:17%}#prPrintRoot .ptable th:nth-child(5){width:9%}#prPrintRoot .ptable th:nth-child(6){width:17%}
+#prPrintRoot .product-subline{font-size:8pt!important;line-height:1.4!important;margin-top:1mm!important;font-weight:400!important}
+#prPrintRoot .ptable .muted{font-size:8pt!important}
+#prPrintRoot .rate-box{border:1px solid #dce5ee!important;background:#f7f9fc!important;display:flex!important;justify-content:space-between!important;gap:4mm!important;margin:0 0 3mm!important;padding:2.5mm!important;font-size:9pt!important}
+#prPrintRoot .rate-main{font-size:10pt!important;font-weight:700!important;color:#101828!important}#prPrintRoot .rate-meta,#prPrintRoot .rate-label{font-size:8pt!important;line-height:1.4!important}
+#prPrintRoot .totals{width:85mm!important;margin:2mm 0 4mm auto!important;float:none!important}.pr-page .totalrow{display:flex!important;justify-content:space-between!important;gap:3mm!important;font-size:10pt!important;padding:2mm!important;line-height:1.4!important}
+#prPrintRoot .grand{background:#102b4a!important;color:white!important;border:0!important;font-size:11pt!important;border-radius:1mm!important}
+#prPrintRoot .payment-box,#prPrintRoot .notes{font-size:9pt!important;line-height:1.5!important;margin:0 0 3mm!important;padding:2mm!important;overflow-wrap:anywhere!important}
+#prPrintRoot .payment-line,#prPrintRoot .payment-text,#prPrintRoot .paper-bidder,#prPrintRoot .paper-validity{font-size:9pt!important;line-height:1.5!important}
+#prPrintRoot .bank-cards{display:grid!important;grid-template-columns:1fr 1fr!important;gap:3mm!important}#prPrintRoot .bank-card{font-size:8.5pt!important;line-height:1.5!important;border:1px solid #dce5ee!important;padding:2mm!important}
+#prPrintRoot .signature-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:5mm!important;margin-top:3mm!important}.pr-page .signature-box{min-height:30mm!important;height:auto!important;padding:3mm!important;border:1px solid #dce5ee!important;box-sizing:border-box!important;font-size:9pt!important}.pr-page .signature-line{margin-top:18mm!important;font-size:8pt!important;line-height:1.4!important}
+#prPrintRoot .seller-signing-images{height:26mm!important;position:relative!important;margin:1mm 0!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:2mm!important}#prPrintRoot .seller-stamp{width:48mm!important;max-width:65%!important;height:25mm!important;object-fit:contain!important;position:static!important}#prPrintRoot .seller-authorized-signature{width:29mm!important;max-width:35%!important;height:18mm!important;object-fit:contain!important;position:static!important}#prPrintRoot .signed .signature-line{margin-top:2mm!important}
+#prPrintRoot [hidden]{display:none!important}#prPrintRoot .pr-continuation{font-size:8pt!important;color:#667085!important;margin:0 0 2mm!important}
+@media print{
+@page{size:A4;margin:0}
+html:has(body.pr-printing),html:has(body.pr-printing) body{width:auto!important;height:auto!important;min-height:0!important;margin:0!important;padding:0!important;background:white!important;overflow:visible!important}
+body.pr-printing> :not(#prPrintRoot){display:none!important}
+body.pr-printing #prPrintRoot{display:block!important;position:static!important;visibility:visible!important;margin:0!important;padding:0!important}
+#prPrintRoot *{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+}
+
+@media screen{#prPrintRoot.pr-preview{display:block!important;position:fixed;inset:0;z-index:13000;overflow:auto;background:#e8edf4;padding:16px;visibility:visible}#prPrintRoot.pr-preview .pr-page{margin:18px auto;box-shadow:0 5px 24px #102b4a20}.pr-preview-controls{position:sticky;top:0;z-index:1;background:#fff;border:1px solid #e4e7ec;border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;min-width:300px}.pr-preview-controls b{margin-right:auto;font-size:13px}@media(max-width:800px){#prPrintRoot.pr-preview{padding:8px}.pr-preview-controls{position:sticky;left:0;flex-wrap:wrap}.pr-preview-controls b{width:100%}}}
+@media print{.pr-preview-controls{display:none!important}}
