@@ -1,1 +1,12 @@
-Bu üç HTML dosyasını GitHub era-dental-proforma deposunun ana klasörüne yükleyip mevcut dosyaları değiştirin. app.html dosyanızı değiştirmeyin. CepFirma tanıtım sayfası Vercel üzerinde zaten yayındadır; bu paket GitHub kaynaklarını aynı sürüme getirir.
+CepFirma – Bildirimler ve Hatırlatmalar
+
+Site ve sunucu altyapısı güncellendi. GitHub kaynağını güncellemek için app.html, push-sw.js ve vercel.json dosyalarını köke; api/weather.js dosyasını api klasörüne yükleyin. Dosya adlarını değiştirmeyin. SQL işlemleri zaten uygulandı; SQL veya API anahtarı eklemeniz gerekmez.
+
+Kullanım: Ayarlar → Bildirimler → Bu cihazda aç → İzin ver → Test bildirimi.
+iPhone: Safari üzerinden siteyi açın, Paylaş → Ana Ekrana Ekle. CepFirma’yı ana ekrandaki simgeden açın. iOS 16.4 veya üzeri ve bildirim izni gerekir.
+
+Tercihler kullanıcı ve şirket bazında kaydedilir. Takvim/görüşme/servis hatırlatmaları atanmış hesaplara göre çalışır. Stok, talepler, onaylar ve operasyon bildirimlerinde rol izinleri uygulanır. Takvim hatırlatmaları etkinlik formundaki süreyi kullanır. Yeni etkinliklerin varsayılan süresi kişisel ayardan seçilir. Sessiz saatler Türkiye saatine göredir.
+Kontrol yaklaşık 5 dakikada bir yapılır; bağlantı, cihazın Odak modu ve bildirim izni teslimatı etkileyebilir. Görüşme/servis/kritik stok ve operasyon özetleri günde bir; yeni talep sonuçları ve onaya gönderilen proformalar kayıt bazında iletilir.
+Kilit ekranında müşteri, belge tutarı veya gizli şirket ayrıntısı gösterilmez.
+Site içi kişisel hatırlatmaların okundu durumu bu cihazda tutulur. Tercihler hesabın diğer cihazlarına da uygulanır; cihaz aboneliği ayrı açılır/kapatılır. Çıkış yaparken bu cihazın aboneliği kapatılır.
+Bu servis çalışanı çevrimdışı kayıt yapmaz; giriş verilerini veya belgeleri önbelleklemez.
