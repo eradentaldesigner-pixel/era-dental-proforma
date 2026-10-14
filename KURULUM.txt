@@ -1,7 +1,22 @@
-CepFirma — Tek dosyada PDF bileşenleri
+CEP FIRMA — DÜZELTİLMİŞ UYGULAMA
 
-app.html dosyasını kökteki app.html ile değiştirin. Bu sürümde PDF oluşturmak için ayrı vendor klasörü gerekmez; bileşenler app.html içine dahil edilmiştir.
-Bildirimler için push-sw.js ve vercel.json kökte; hava durumu için api/weather.js api klasöründe kalır. SQL gerekmez.
+1. ZIP dosyasını çıkarın.
+2. İçindeki app.html dosyasını GitHub projenizdeki mevcut app.html ile değiştirin.
+3. ZIP dosyasını siteye yüklemeyin. Diğer proje dosyalarını ve vendor klasörünü koruyun.
+4. Vercel yayını tamamlanınca siteyi Ctrl+F5 ile yenileyin; telefonda eski sekmeyi kapatıp yeniden açın.
 
-PDF sekmesindeki giriş ekranının açık kalması düzeltildi. Görüntüle, yetkiniz olan kayıt için gerçek PDF üretir ve yeni sekmede açar. Logo ve onaylı kaşe/imza belgeden alınır. PDF hazırlama hataları görünür olarak bildirilir. Boş oluşan PDF sayfaları teslim edilmez.
-Kullandığımız PDF bileşenlerinin lisansları PDF-LIBRARY-LICENSES.txt içinde bulunur.
+Yapılanlar:
+- Eski belge motoru kaldırıldı; teklif ve proforma tek A4 motoruyla oluşturulur.
+- Renk, logo, font, tablo ve bölüm görünürlüğü mevcut ayarlardan gelir.
+- Satırlar ve alt bilgi grubu otomatik sayfalanır; zorla küçültme uygulanmaz.
+- Slogan, opsiyonel çözüm listesi ve proje/referans alanları mevcut kayıt yapısına bağlandı.
+- Ubuntu ve Türkçe sayı yazımı eklendi; KDV dahil/hariç, farklı KDV oranları ve mevcut iskonto alanı hesaplanır.
+- Mobil ürün fiyat alanları iki sütuna alındı; PDF görüntü oluşturma ölçeği mobilde azaltıldı.
+- Yeni pencere engellendiğinde PDF uygulama içindeki kapatılabilir ekranda açılır.
+- PDF paylaşımında Firma Profili'nden hazırlayan firma metni eklenir; WhatsApp'ın bu metni göstermesi cihaz/uygulama davranışına bağlıdır.
+
+Kontroller: Tüm scriptlerde sözdizimi kontrolü, 42 matematik testi, 7/8 kalemli yerleşim testi ve uygulama içi PDF ekranının DOM kontrolü geçti.
+7 kalem örneği kompakt ve kısa içerikli, 8 kalem örneği normal ve ayrıntılıdır. Sayfa sayısı içeriğe göre değişir.
+
+Sınır: Gerçek Chromium/Safari ve telefon üzerinde giriş, kayıt, PDF indirme ve WhatsApp uçtan uca testi yapılmadı. Bu paket tüm uygulamanın hatasız olduğuna dair bir garanti değildir; tespit edilen çıktı/mobil sorunlarının düzeltmesidir.
+Canlı site kodu bu çalışma sırasında yayımlanmadı.
