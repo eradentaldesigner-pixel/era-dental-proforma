@@ -1,12 +1,7 @@
-CepFirma – Bildirimler ve Hatırlatmalar
+CepFirma — Tek dosyada PDF bileşenleri
 
-Site ve sunucu altyapısı güncellendi. GitHub kaynağını güncellemek için app.html, push-sw.js ve vercel.json dosyalarını köke; api/weather.js dosyasını api klasörüne yükleyin. Dosya adlarını değiştirmeyin. SQL işlemleri zaten uygulandı; SQL veya API anahtarı eklemeniz gerekmez.
+app.html dosyasını kökteki app.html ile değiştirin. Bu sürümde PDF oluşturmak için ayrı vendor klasörü gerekmez; bileşenler app.html içine dahil edilmiştir.
+Bildirimler için push-sw.js ve vercel.json kökte; hava durumu için api/weather.js api klasöründe kalır. SQL gerekmez.
 
-Kullanım: Ayarlar → Bildirimler → Bu cihazda aç → İzin ver → Test bildirimi.
-iPhone: Safari üzerinden siteyi açın, Paylaş → Ana Ekrana Ekle. CepFirma’yı ana ekrandaki simgeden açın. iOS 16.4 veya üzeri ve bildirim izni gerekir.
-
-Tercihler kullanıcı ve şirket bazında kaydedilir. Takvim/görüşme/servis hatırlatmaları atanmış hesaplara göre çalışır. Stok, talepler, onaylar ve operasyon bildirimlerinde rol izinleri uygulanır. Takvim hatırlatmaları etkinlik formundaki süreyi kullanır. Yeni etkinliklerin varsayılan süresi kişisel ayardan seçilir. Sessiz saatler Türkiye saatine göredir.
-Kontrol yaklaşık 5 dakikada bir yapılır; bağlantı, cihazın Odak modu ve bildirim izni teslimatı etkileyebilir. Görüşme/servis/kritik stok ve operasyon özetleri günde bir; yeni talep sonuçları ve onaya gönderilen proformalar kayıt bazında iletilir.
-Kilit ekranında müşteri, belge tutarı veya gizli şirket ayrıntısı gösterilmez.
-Site içi kişisel hatırlatmaların okundu durumu bu cihazda tutulur. Tercihler hesabın diğer cihazlarına da uygulanır; cihaz aboneliği ayrı açılır/kapatılır. Çıkış yaparken bu cihazın aboneliği kapatılır.
-Bu servis çalışanı çevrimdışı kayıt yapmaz; giriş verilerini veya belgeleri önbelleklemez.
+PDF sekmesindeki giriş ekranının açık kalması düzeltildi. Görüntüle, yetkiniz olan kayıt için gerçek PDF üretir ve yeni sekmede açar. Logo ve onaylı kaşe/imza belgeden alınır. PDF hazırlama hataları görünür olarak bildirilir. Boş oluşan PDF sayfaları teslim edilmez.
+Kullandığımız PDF bileşenlerinin lisansları PDF-LIBRARY-LICENSES.txt içinde bulunur.
