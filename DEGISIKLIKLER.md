@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-18.7)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-18.8)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -107,6 +107,12 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Hata düzeltmeleri
 
+- **Plan formu boşluğa tıklayınca kapanıyordu:** plan, servis, görüşme ve müşteri formları artık
+  pencere dışına tıklanınca kapanmaz (girilen bilgi kaybolmaz); Kapat düğmesiyle kapanır.
+- **Saat seçimi:** tarayıcının saat penceresi yerine saat + dakika listesi (5 dakikalık adımlar,
+  "Saat yok" ve temizle düğmesi); kayıtlı 11:26 gibi saatler de korunur.
+- **Gereksiz şifre önerileri:** İlçe / adres gibi alanlarda tarayıcı kayıtlı şifre öneriyordu —
+  giriş alanları ayrı bir forma bağlandı, öneriler yalnızca giriş ekranında çıkar.
 - **Bildirimler:** şirkete sonradan katılan kişi, kendisi katılmadan önce oluşmuş ortak
   bildirimleri (stok, onay, sipariş, talep) artık görmez; sınır `company_members.created_at`.
 - **Proforma IBAN:** banka satırı hesabın para birimiyle başlar (`TL IBAN`, `EUR IBAN`, `USD IBAN`);
@@ -129,7 +135,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-18.7">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-18.8">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma

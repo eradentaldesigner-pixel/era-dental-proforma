@@ -1,4 +1,4 @@
-<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-18.7"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
+<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-18.8"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
 #prPrintRoot.cf-pdf-capture{display:block!important;visibility:visible!important;position:fixed!important;left:-12000px!important;top:0!important;right:auto!important;bottom:auto!important;width:210mm!important;padding:0!important;margin:0!important;max-height:none!important;overflow:visible!important;background:white!important;z-index:-1!important}#prPrintRoot.cf-pdf-capture .pr-page{margin:0!important;box-shadow:none!important;zoom:1!important;transform:none!important}
 html.cf-native-pdf-route #authGate{display:none!important}html.cf-native-pdf-route body{padding:0!important;margin:0!important;background:#f6f8fc!important}html.cf-native-pdf-route body>*:not(.auth-shell):not(#cfPdfRouteStatus):not(#prPrintRoot):not(script):not(style):not(iframe):not(.html2canvas-container):not([style*="visibility: hidden"]){display:none!important}#cfPdfRouteStatus{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:#f6f8fc;color:#193450;font:16px system-ui;padding:24px;text-align:center}#cfPdfRouteStatus h1{font-size:22px;margin:0}#cfPdfRouteStatus button,#cfPdfRouteStatus a{font:14px system-ui;padding:12px 18px;background:white;border:1px solid #d9e4f2;border-radius:9px;color:#075cc5;text-decoration:none;cursor:pointer}
 }
@@ -2156,7 +2156,7 @@ document.getElementById('authGate').addEventListener('keydown',e=>{if(e.key==='E
 // Handle unavailable SDK and network failures without leaving a loading message forever.
 for(const name of ['loginUser','signupUser','loginGoogle','resetPassword','saveNewPassword']){const original=window[name];window[name]=async function(){if(!sb){document.getElementById('authMsg').textContent='Giriş hizmeti yüklenemedi. Sayfayı yenileyin.';return}if(window._authBusy)return;window._authBusy=true;try{if(name!=='saveNewPassword'&&!document.getElementById('authEmail').checkValidity()){document.getElementById('authMsg').textContent='Geçerli bir e-posta adresi girin.';return}await original()}catch(e){document.getElementById('authMsg').textContent='İşlem tamamlanamadı. Bağlantınızı kontrol edip tekrar deneyin.'}finally{window._authBusy=false}}}
 const overlayClosers={serviceFormModal:closeServiceForm,calendarModal:closeCalendarModal,guideOverlay:finishGuide,customerOverlay:closeCustomers,crmOverlay:closeCrm,settingsOverlay:closeSettings,catalogOverlay:closeCatalog,stockOverlay:closeStockControl,archiveOverlay:closeArchive,mobileNotifyShell:closeMobileNotifications};
-for(const [id,close] of Object.entries(overlayClosers)){const el=document.getElementById(id);el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label',el.querySelector('h2,h3')?.textContent||'Bildirimler');el.addEventListener('click',e=>{if(e.target===el)close()})}
+for(const [id,close] of Object.entries(overlayClosers)){const el=document.getElementById(id);el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label',el.querySelector('h2,h3')?.textContent||'Bildirimler');el.addEventListener('click',e=>{/* CepFirma düzeltme: form pencereleri boşluğa tıklayınca kapanmaz (girilen bilgi kaybolmasın) */if(e.target===el&&!['serviceFormModal','calendarModal','crmForm','customerForm'].includes(id))close()})}
 function activeDialog(){return Object.keys(overlayClosers).map(id=>document.getElementById(id)).filter(el=>getComputedStyle(el).display!=='none').sort((a,b)=>Number(getComputedStyle(b).zIndex)-Number(getComputedStyle(a).zIndex))[0]}
 document.addEventListener('keydown',e=>{const drawer=document.getElementById('mobileNavToggle').checked;const dialog=drawer?document.getElementById('mobileDrawer'):activeDialog();if(e.key==='Escape'){if(drawer)setMobileMenu(false);else if(dialog)overlayClosers[dialog.id]();return}if(e.key==='Tab'&&dialog){const nodes=[...dialog.querySelectorAll('button,a[href],input,select,textarea,[tabindex="0"]')].filter(el=>!el.disabled&&el.getClientRects().length);const first=nodes[0],last=nodes.at(-1);if(first&&(!dialog.contains(document.activeElement)||(e.shiftKey&&document.activeElement===first)||(!e.shiftKey&&document.activeElement===last))){e.preventDefault();(e.shiftKey?last:first).focus()}}});
 document.getElementById('mobileNavToggle').addEventListener('change',e=>setMobileMenu(e.target.checked));
@@ -7619,7 +7619,14 @@ function pwEnhance(root){(root||document).querySelectorAll('input[type=password]
   wrap.append(b);
 })}
 pwEnhance();
-let pwTimer=0;new MutationObserver(()=>{if(pwTimer)return;pwTimer=setTimeout(()=>{pwTimer=0;pwEnhance()},150)}).observe(document.body,{childList:true,subtree:true});
+/* Tarayıcının şifre önerileri yalnızca giriş alanlarında çıksın: şifre alanlarını ve
+   yanlarındaki e-posta alanlarını görünmez ayrı bir forma bağla (DOM yerinden oynamaz).
+   Aksi halde formsuz tüm alanlar tek form sayılıyor ve plan / müşteri alanlarında da
+   "kayıtlı şifre" önerisi çıkıyordu. */
+let isoN=0;
+function isolateLogin(){document.querySelectorAll('input[type=password]').forEach(pw=>{if(pw.form&&!pw.form.dataset.cfAuto)return;const box=pw.closest('.auth-card,.security-panel,.settings-card,.ui-drawer-card')||pw.parentElement?.parentElement?.parentElement;if(!box)return;let id=box.dataset.cfForm;if(!id||!document.getElementById(id)){id='cfAuthForm'+(++isoN);box.dataset.cfForm=id;const f=document.createElement('form');f.id=id;f.hidden=true;f.setAttribute('aria-hidden','true');f.dataset.cfAuto='1';f.addEventListener('submit',e=>e.preventDefault());document.body.append(f)}box.querySelectorAll('input:not([type=hidden]):not([type=checkbox]):not([type=radio]):not([type=file])').forEach(inp=>{if(!inp.form||inp.form.dataset.cfAuto){if(inp.getAttribute('form')!==id)inp.setAttribute('form',id)}})})}
+isolateLogin();
+let pwTimer=0;new MutationObserver(()=>{if(pwTimer)return;pwTimer=setTimeout(()=>{pwTimer=0;pwEnhance();isolateLogin()},150)}).observe(document.body,{childList:true,subtree:true});
 
 /* =================== 2) Çalışan listesi =================== */
 let peopleCache=null;
@@ -7646,7 +7653,7 @@ async function loadPicker(ids){const box=mountPicker();if(!box)return;const toke
   try{const [ready,list]=await Promise.all([partsReady(),people()]);if(token!==pickerToken)return;
     if(!ready){note.className='cfpp-note warn';note.textContent='Birden fazla kişi seçimi için veritabanı kurulumu gerekli (plan-katilimcilar.sql). Şimdilik yalnızca sorumlu çalışan kaydedilir.';paintPicker(list);$('cfppList').querySelectorAll('input:not([disabled])').forEach(i=>i.disabled=true);return}
     note.textContent='Sorumlu çalışan yeşil, katılımcılar mavi görünür. Hepsinin İşlerim ekranına düşer.';paintPicker(list)}
-  catch(e){if(token===pickerToken){note.className='cfpp-note warn';note.textContent='Çalışan listesi alınamadı: '+(e.message||'bağlantıyı kontrol edin')}}}
+  catch(e){if(token===pickerToken){if(!loadPicker.__retry){loadPicker.__retry=1;peopleCache=null;setTimeout(()=>{if(token===pickerToken)loadPicker([...selected]).finally(()=>{loadPicker.__retry=0})},1500);return}note.className='cfpp-note warn';note.textContent='Çalışan listesi alınamadı. Formu kapatıp yeniden açın.'}}}
 window.cfCalExtraPayload=()=>{if(!partsProbe.ready||!$('cfppBox'))return {};const lead=$('calAssignee')?.value||'';return {participant_ids:[...selected].filter(id=>id&&id!==lead)}};
 /* sorumlu değişince seçim kutularını yenile */
 document.addEventListener('change',e=>{if(e.target?.id==='calAssignee'&&$('cfppBox')){const lead=e.target.value;selected.delete(lead);people().then(list=>{paintPicker(list);if(pickerTouched||!$('calPersonnel').value.trim())syncPersonnel(list)}).catch(()=>{})}});
@@ -7741,6 +7748,12 @@ let moTimer=0;new MutationObserver(()=>{if(moTimer)return;moTimer=setTimeout(()=
 .cfq-hint{display:block;font-size:12px;color:var(--mt-ink-3,#71717a);margin-top:4px}
 .calendar-form.cfq-on .cfq-hide{display:none!important}
 .cfq-orgp-hidden{display:none!important}
+.cft{display:flex;align-items:center;gap:6px}
+.cft select{flex:1;min-width:0}
+.cft b{font-weight:600;color:var(--mt-ink-3,#71717a)}
+.cft-clear{border:0;background:transparent;color:var(--mt-ink-3,#71717a);cursor:pointer;font-size:18px;width:32px;height:32px;border-radius:8px;flex:none}
+.cft-clear:hover{background:var(--mt-hover,#f4f4f5);color:var(--mt-ink,#18181b)}
+.cft-native{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;overflow:hidden!important}
 @media(max-width:640px){.cfq-row{grid-template-columns:1fr}}
 /* ana sayfa kartı */
 .cfq-home{background:var(--mt-panel,#fff);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius,8px);padding:16px 18px;margin:0 0 16px}
@@ -7775,7 +7788,7 @@ function mount(){const form=document.querySelector('#calendarModal .calendar-for
   const sw=document.createElement('div');sw.id='cfqSwitch';sw.className='cfq-switch';sw.setAttribute('role','tablist');sw.innerHTML='<button type="button" data-cfq="quick" role="tab">Hızlı ziyaret<small>İl içi · günlük rota, demo, tarama</small></button><button type="button" data-cfq="detail" role="tab">Detaylı plan<small>Şehir dışı · ulaşım, otel, organizasyon</small></button>';
   const panel=document.createElement('div');panel.id='cfqPanel';panel.className='cfq-panel';
   panel.innerHTML='<div><label>Ne yapılacak?</label><div class="cfq-chips" id="cfqKinds">'+KINDS.map(([l,v])=>'<button type="button" class="cfq-chip" data-kind="'+escH(v)+'">'+escH(l)+'</button>').join('')+'</div></div>'
-   +'<div class="cfq-row"><div><label for="cfqWho">Klinik / müşteri</label><input id="cfqWho" list="cfqWhoList" placeholder="Örn: Hakan Uzun Diş Kliniği" autocomplete="off"><datalist id="cfqWhoList"></datalist></div><div><label for="cfqWhere">İlçe / adres</label><input id="cfqWhere" placeholder="Örn: Beykoz"></div></div>'
+   +'<div class="cfq-row"><div><label for="cfqWho">Klinik / müşteri</label><input id="cfqWho" list="cfqWhoList" placeholder="Örn: Hakan Uzun Diş Kliniği" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore data-form-type="other"><datalist id="cfqWhoList"></datalist></div><div><label for="cfqWhere">İlçe / adres</label><input id="cfqWhere" placeholder="Örn: Beykoz" autocomplete="off" data-lpignore="true" data-1p-ignore data-bwignore data-form-type="other"></div></div>'
    +'<div><label>Ne zaman?</label><div class="cfq-chips" id="cfqWhen"><button type="button" class="cfq-chip" data-when="0">Bugün</button><button type="button" class="cfq-chip" data-when="1">Yarın</button><button type="button" class="cfq-chip" data-when="2">Öbür gün</button><button type="button" class="cfq-chip" data-when="x">Başka gün…</button></div><span class="cfq-hint" id="cfqWhenHint"></span></div>';
   form.prepend(sw,panel);
   /* hızlı modda gizlenecek alanlar */
@@ -7806,8 +7819,8 @@ function setMode(m,user){const form=mount();if(!form)return;mode=m==='detail'?'d
 function splitTitle(title,type){const label=(KINDS.find(k=>k[1]===type)||[type])[0];const t=String(title||'');const suf=' – '+label;return t.endsWith(suf)?t.slice(0,-suf.length):(t===label?'':t)}
 /* yeni plan: son kullanılan mod (ilk seferde hızlı ziyaret) */
 function wrap(){
-  if(typeof newCalendarEvent==='function'&&!newCalendarEvent.__cfq){const base=newCalendarEvent;newCalendarEvent=function(...a){const r=base.apply(this,a);const go=()=>{mount();kind='Müşteri Ziyareti';userTitle=false;$('cfqWho').value='';$('cfqWhere').value='';const city=store.get('cfq-city','');if(city&&!$('calCity').value)$('calCity').value=city;setMode(window.__cfqForce||store.get('cfq-mode','quick'));window.__cfqForce=null;setTimeout(()=>{if(mode==='quick')$('cfqWho')?.focus()},60)};r?.then?r.then(v=>{go();return v}):go();return r};newCalendarEvent.__cfq=1;window.newCalendarEvent=newCalendarEvent}
-  if(typeof editCalendarEvent==='function'&&!editCalendarEvent.__cfq){const base=editCalendarEvent;editCalendarEvent=function(id,...a){const r=base.call(this,id,...a);const x=(window.calendarEvents||calendarEvents||[]).find(v=>String(v.id)===String(id));if(x){mount();const p=x.organization_plan||{};const detail=!!(x.travel_required||p.enabled||p.scope==='outstation'||x.end_time&&!KINDS.some(k=>k[1]===x.event_type));kind=x.event_type||'Müşteri Ziyareti';userTitle=true;$('cfqWho').value=splitTitle(x.title,x.event_type);$('cfqWhere').value=x.location||'';setMode(detail?'detail':'quick')}return r};editCalendarEvent.__cfq=1;window.editCalendarEvent=editCalendarEvent}
+  if(typeof newCalendarEvent==='function'&&!newCalendarEvent.__cfq){const base=newCalendarEvent;newCalendarEvent=function(...a){const r=base.apply(this,a);const go=()=>{mount();kind='Müşteri Ziyareti';$('calType').value=kind;userTitle=false;window.cfTimeSync?.();$('cfqWho').value='';$('cfqWhere').value='';const city=store.get('cfq-city','');if(city&&!$('calCity').value)$('calCity').value=city;setMode(window.__cfqForce||store.get('cfq-mode','quick'));window.__cfqForce=null;setTimeout(()=>{if(mode==='quick')$('cfqWho')?.focus()},60)};r?.then?r.then(v=>{go();return v}):go();return r};newCalendarEvent.__cfq=1;window.newCalendarEvent=newCalendarEvent}
+  if(typeof editCalendarEvent==='function'&&!editCalendarEvent.__cfq){const base=editCalendarEvent;editCalendarEvent=function(id,...a){const r=base.call(this,id,...a);const x=(window.calendarEvents||calendarEvents||[]).find(v=>String(v.id)===String(id));if(x){mount();const p=x.organization_plan||{};const detail=!!(x.travel_required||p.enabled||p.scope==='outstation'||x.end_time&&!KINDS.some(k=>k[1]===x.event_type));kind=x.event_type||'Müşteri Ziyareti';userTitle=true;$('cfqWho').value=splitTitle(x.title,x.event_type);$('cfqWhere').value=x.location||'';setMode(detail?'detail':'quick');window.cfTimeSync?.()}return r};editCalendarEvent.__cfq=1;window.editCalendarEvent=editCalendarEvent}
   if(typeof saveCalendarEvent==='function'&&!saveCalendarEvent.__cfq){const base=saveCalendarEvent;saveCalendarEvent=async function(...a){if(mode==='quick'&&$('cfqSwitch')&&document.querySelector('#calendarModal .calendar-form.cfq-on')){
       if(!$('cfqWho').value.trim()&&!confirm('Klinik / müşteri yazılmadı. Plan "'+kindLabel()+'" başlığıyla kaydedilsin mi?'))return;
       syncTitle();$('calType').value=kind;$('calLocation').value=$('cfqWhere').value.trim();$('calEnd').value='';
@@ -7820,6 +7833,24 @@ function wrap(){
 /* Katılımcılar seçimi → organizasyon planındaki "Diğer katılımcılar" */
 document.addEventListener('change',e=>{if(!e.target.closest?.('#cfppList'))return;const sel=$('orgParticipants');if(!sel)return;const ids=new Set([...document.querySelectorAll('#cfppList input:checked:not([disabled])')].map(i=>i.value));[...sel.options].forEach(o=>o.selected=ids.has(o.value));sel.dispatchEvent(new Event('change',{bubbles:true}))});
 wrap();
+/* =================== Saat seçimi: saat + dakika listesi =================== */
+/* Tarayıcının saat penceresi açık kalıp dışarı tıklanınca sorun çıkarıyordu; yerine iki basit liste. */
+function timeEnhance(id){const input=$(id);if(!input||input.dataset.cft)return;input.dataset.cft='1';input.classList.add('cft-native');input.tabIndex=-1;input.setAttribute('aria-hidden','true');
+  const box=document.createElement('div');box.className='cft';box.id=id+'Cft';
+  const hs=document.createElement('select');hs.setAttribute('aria-label',(id==='calEnd'?'Bitiş':'Başlangıç')+' saati');hs.innerHTML='<option value="">Saat yok</option>'+Array.from({length:18},(_,i)=>{const h=String(i+6).padStart(2,'0');return '<option value="'+h+'">'+h+'</option>'}).join('');
+  const ms=document.createElement('select');ms.setAttribute('aria-label','Dakika');ms.innerHTML=Array.from({length:12},(_,i)=>{const m=String(i*5).padStart(2,'0');return '<option value="'+m+'">'+m+'</option>'}).join('');
+  const sep=document.createElement('b');sep.textContent=':';
+  const clear=document.createElement('button');clear.type='button';clear.className='cft-clear';clear.title='Saati temizle';clear.setAttribute('aria-label','Saati temizle');clear.textContent='×';
+  box.append(hs,sep,ms,clear);input.after(box);
+  const write=()=>{const v=hs.value?hs.value+':'+(ms.value||'00'):'';ms.disabled=!hs.value;clear.hidden=!hs.value;if(input.value!==v){input.value=v;input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}))}};
+  hs.onchange=write;ms.onchange=write;clear.onclick=()=>{hs.value='';write()};
+  const lab=document.querySelector('label[for="'+id+'"]');if(lab)lab.htmlFor='';
+  timeRead(id)}
+function timeRead(id){const input=$(id),box=$(id+'Cft');if(!input||!box)return;const [hs,,ms]=box.children;const v=String(input.value||'').slice(0,5);const [h,m]=v.split(':');
+  if(h&&![...hs.options].some(o=>o.value===h))hs.add(new Option(h,h));if(m&&![...ms.options].some(o=>o.value===m))ms.add(new Option(m,m));
+  hs.value=h||'';ms.value=m||'00';ms.disabled=!h;box.querySelector('.cft-clear').hidden=!h}
+window.cfTimeSync=()=>{['calStart','calEnd'].forEach(id=>{timeEnhance(id);timeRead(id)})};
+window.cfTimeSync();
 
 /* =================== Ana sayfa: Bugünün planım =================== */
 let homeToken=0;
