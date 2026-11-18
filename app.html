@@ -1,4 +1,4 @@
-<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-18.1"><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
+<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-18.3"><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
 #prPrintRoot.cf-pdf-capture{display:block!important;visibility:visible!important;position:fixed!important;left:-12000px!important;top:0!important;right:auto!important;bottom:auto!important;width:210mm!important;padding:0!important;margin:0!important;max-height:none!important;overflow:visible!important;background:white!important;z-index:-1!important}#prPrintRoot.cf-pdf-capture .pr-page{margin:0!important;box-shadow:none!important;zoom:1!important;transform:none!important}
 html.cf-native-pdf-route #authGate{display:none!important}html.cf-native-pdf-route body{padding:0!important;margin:0!important;background:#f6f8fc!important}html.cf-native-pdf-route body>*:not(.auth-shell):not(#cfPdfRouteStatus):not(#prPrintRoot):not(script):not(style):not(iframe):not(.html2canvas-container):not([style*="visibility: hidden"]){display:none!important}#cfPdfRouteStatus{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:#f6f8fc;color:#193450;font:16px system-ui;padding:24px;text-align:center}#cfPdfRouteStatus h1{font-size:22px;margin:0}#cfPdfRouteStatus button,#cfPdfRouteStatus a{font:14px system-ui;padding:12px 18px;background:white;border:1px solid #d9e4f2;border-radius:9px;color:#075cc5;text-decoration:none;cursor:pointer}
 }
@@ -4046,7 +4046,7 @@ async function refreshNotices(){if(!active()||!ready||centerBusy)return;if(loadi
 if(prefs.stock&&permit('stock'))jobs.push((async()=>{let q=sb.from('stock_notifications').select('product_id,severity,cycle,changed_at,products!inner(name,company_id,is_service_part)').eq('active',true).eq('products.company_id',company);if(currentMembership?.role==='service')q=q.eq('products.is_service_part',true);const [r,read]=await Promise.all([centerFetchAll(q.order('product_id')),centerFetchAll(sb.from('stock_notification_reads').select('product_id,cycle').eq('user_id',user).order('product_id').order('cycle'))]);if(r.error||read.error)throw r.error||read.error;const set=new Set((read.data||[]).map(x=>x.product_id+':'+x.cycle));for(const x of r.data||[])add({key:'stock:'+x.product_id+':'+x.cycle,category:'stock',id:x.product_id,title:x.products?.name||'Ürün',detail:x.severity==='red'?'Kritik stok':'Azalan stok',cycle:x.cycle,severity:x.severity,occurredAt:x.changed_at,legacyRead:set.has(x.product_id+':'+x.cycle)})})());
 if(prefs.calendar&&permit('calendar'))jobs.push((async()=>{const r=await centerFetchAll(sb.from('calendar_events').select('id,title,event_date,start_time,reminder_minutes,updated_at,created_at').eq('company_id',company).eq('assigned_user_id',user).is('completed_at',null).gte('event_date',today).lte('event_date',agendaDateAdd(today,1)));if(r.error)throw r.error;for(const x of r.data||[]){const start=Date.parse(x.event_date+'T'+(x.start_time||'09:00:00')+'+03:00');if(x.reminder_minutes>0&&start>Date.now()&&start-Date.now()<=x.reminder_minutes*60000)add({key:'calendar:'+x.id+':'+x.event_date+':'+x.start_time,category:'calendar',id:x.id,title:x.title,detail:'Yaklaşan etkinlik',date:x.event_date,dueAt:x.event_date+' '+(x.start_time||''),occurredAt:x.updated_at||x.created_at})}})());
 for(const [category,table,date]of [['crm','customer_interactions','next_follow_up'],['service','technical_service_records','follow_up_date']])if(prefs[category]&&permit(category))jobs.push((async()=>{let q=sb.from(table).select(category==='crm'?'id,company_name,contact_name,next_follow_up,reminder_date,status,created_at,updated_at':'id,service_number,device_name,follow_up_date,status,created_at,updated_at').eq('company_id',company).eq('assigned_user_id',user);if(category==='crm')q=q.is('deleted_at',null).eq('status','gorusuluyor').or('next_follow_up.lte.'+today+',reminder_date.lte.'+today);else q=q.in('status',['waiting','following','approved']).lte(date,today);const r=await centerFetchAll(q.order(date,{nullsFirst:false}).order('id'));if(r.error)throw r.error;for(const x of r.data||[]){const due=[x[date],x.reminder_date].filter(Boolean).sort()[0];add({key:category+':'+x.id+':'+due+':'+x.status,category,id:x.id,legacyKey:category+':'+x.id+':'+due,title:category==='crm'?(x.company_name||x.contact_name):x.service_number+' · '+x.device_name,detail:category==='crm'?'Müşteri takibi bekliyor':'Servis takibi bekliyor',dueAt:due,occurredAt:x.updated_at||x.created_at})}})());
-if(prefs.approvals&&permit('approvals'))jobs.push((async()=>{const e=await centerFetchAll(sb.from('proforma_approval_events').select('id,proforma_id,revision,action,note,snapshot,created_at').eq('company_id',company).contains('recipient_ids',[user]).order('created_at',{ascending:false}).order('id'));if(e.error)throw e.error;const submitted=new Set();for(const x of e.data||[]){if(x.action==='submit'&&!isProformaApprover())continue;if(x.action==='submit')submitted.add(String(x.proforma_id)+':'+x.revision);add({key:'proforma-event:'+x.id,category:'approvals',id:x.proforma_id,title:x.snapshot?.proforma_number||'Proforma',detail:({submit:'İncelemenizi bekliyor',approve:'Proforma onaylandı · Paylaşılmaya hazır',revision:'Revizyon istendi',reject:'Proforma reddedildi'}[x.action]||'Belge güncellendi')+(x.note?' · '+x.note:''),occurredAt:x.created_at})}if(isProformaApprover()){const r=await centerFetchAll(sb.from('proformas').select('id,proforma_number,approval_revision,approval_requested_at,created_at').eq('company_id',company).is('deleted_at',null).eq('approval_state','pending'));if(r.error)throw r.error;for(const x of r.data||[])if(!submitted.has(String(x.id)+':'+x.approval_revision))add({key:'approvals:'+x.id+':'+x.approval_revision,category:'approvals',id:x.id,title:x.proforma_number,detail:'Yönetim onayı bekliyor',occurredAt:x.approval_requested_at||x.created_at})}})());
+if(prefs.approvals&&permit('approvals'))jobs.push((async()=>{const e=await centerFetchAll(sb.from('proforma_approval_events').select('id,proforma_id,revision,action,note,snapshot,created_at').eq('company_id',company).contains('recipient_ids',[user]).order('created_at',{ascending:false}).order('id'));if(e.error)throw e.error;/* CepFirma düzeltme: onay isteği bildirimi, belge artık o sürümde onay beklemiyorsa gösterilmez */let cfPendingRows=[];if(isProformaApprover()){const pr=await centerFetchAll(sb.from('proformas').select('id,proforma_number,approval_revision,approval_requested_at,created_at').eq('company_id',company).is('deleted_at',null).eq('approval_state','pending'));if(pr.error)throw pr.error;cfPendingRows=pr.data||[]}const cfPendingKeys=new Set(cfPendingRows.map(x=>String(x.id)+':'+x.approval_revision));const submitted=new Set();for(const x of e.data||[]){if(x.action==='submit'&&!isProformaApprover())continue;if(x.action==='submit'&&!cfPendingKeys.has(String(x.proforma_id)+':'+x.revision))continue;if(x.action==='submit')submitted.add(String(x.proforma_id)+':'+x.revision);add({key:'proforma-event:'+x.id,category:'approvals',id:x.proforma_id,title:x.snapshot?.proforma_number||'Proforma',detail:({submit:'İncelemenizi bekliyor',approve:'Proforma onaylandı · Paylaşılmaya hazır',revision:'Revizyon istendi',reject:'Proforma reddedildi'}[x.action]||'Belge güncellendi')+(x.note?' · '+x.note:''),occurredAt:x.created_at})}if(isProformaApprover()){for(const x of cfPendingRows)if(!submitted.has(String(x.id)+':'+x.approval_revision))add({key:'approvals:'+x.id+':'+x.approval_revision,category:'approvals',id:x.id,title:x.proforma_number,detail:'Yönetim onayı bekliyor',occurredAt:x.approval_requested_at||x.created_at})}})());
 if(prefs.operations&&permit('operations'))jobs.push((async()=>{let q=sb.from('operation_orders').select('id,order_number,updated_at,updated_by,created_by').eq('company_id',company).is('cancelled_at',null).gte('updated_at',today+'T00:00:00+03:00');if(currentMembership?.role==='service')q=q.eq('document_scope','service');const r=await centerFetchAll(q.order('updated_at',{ascending:false}).order('id'));if(r.error)throw r.error;for(const x of r.data||[])if((x.updated_by||x.created_by)!==user)add({key:'operations:'+x.id+':'+x.updated_at,category:'operations',id:x.id,title:x.order_number,detail:'Sipariş / teslimat güncellendi',occurredAt:x.updated_at})})());
 if(prefs.requests&&permit('requests'))jobs.push((async()=>{const r=await centerFetchAll(sb.from('employee_request_notifications').select('id,request_id,title,created_at,read_at').eq('company_id',company).eq('recipient_id',user).order('created_at',{ascending:false}));if(r.error)throw r.error;const ids=new Set();for(const x of r.data||[]){ids.add(String(x.request_id));add({key:'request-event:'+x.id,category:'requests',id:x.request_id,title:x.title,detail:'Talep bildirimi',occurredAt:x.created_at,legacyRead:!!x.read_at})}if(erManager()){const m=await centerFetchAll(sb.from('employee_requests').select('id,title,revision,updated_at,requester_label').eq('company_id',company).neq('requester_id',user).in('state',['submitted','reviewing']));if(m.error)throw m.error;for(const x of m.data||[])if(!ids.has(String(x.id)))add({key:'requests-manager:'+x.id+':'+x.revision,category:'requests',id:x.id,title:x.title,detail:'Karar bekleyen talep · '+x.requester_label,occurredAt:x.updated_at})}})());
 const promise=(async()=>{const results=await Promise.allSettled(jobs);if(k!==key()||token!==centerVersion)return;const failures=results.filter(r=>r.status==='rejected');const candidates=centerNormalize(items);try{const states=await centerLoadStates(candidates,k);if(k!==key()||token!==centerVersion)return;centerRows=candidates;noticeRows=centerRows;centerStates=states;centerCloud=true}catch(e){if(k!==key()||token!==centerVersion)return;centerCloud=false;if(['42P01','PGRST205','PGRST204'].includes(e.code)){centerRows=candidates;noticeRows=centerRows}centerError='Kalıcı okundu / temizleme kullanılamıyor. Yönetici kurulumu veya bağlantıyı kontrol edin.'}if(failures.length)centerError+=(centerError?' ':'')+'Bazı bildirim kaynakları alınamadı; Yenile ile tekrar deneyin.';lastRefresh=Date.now();paint()})().finally(()=>{if(loading===promise){loading=null;if(k!==key()&&active()&&ready)void refreshNotices()}});loading=promise;paint();return promise}
@@ -5065,285 +5065,429 @@ return {open,close,read,info,decide,submit,isOpen:()=>!!active,isBusy:()=>openin
 
 </script>
 <!-- ==========================================================================
-     CepFirma — Dosyalar modülü (Metis "File Manager" düzeninden uyarlanmıştır)
-     Mevcut kayıtlara bağlı dosyaları tek ekranda listeler: servis ekleri,
-     fatura / irsaliye PDF'leri ve organizasyon belgeleri.
-     Yalnızca okur; dosya silmez, değiştirmez, yüklemez.
-     Kaldırmak için id değeri cf-files-style olan stil ve cf-files-module olan betik
-     bloklarını silmeniz yeterlidir.
+     CepFirma — Dosyalar (Metis "File Manager" düzeni)
+     Klasörler, yükleme (sürükle-bırak), önizleme, indirme, paylaşım bağlantısı,
+     yeniden adlandırma, taşıma, silme. Veri: company_folders / company_files
+     tabloları ve company-files depolama alanı (dosyalar-kurulum.sql).
+     "Kayıt ekleri" bölümü servis / sipariş / organizasyon kayıtlarına eklenmiş
+     dosyaları salt okunur listeler.
+     Kaldırmak için id değeri cf-files-style olan stil ve cf-files-module olan
+     betik bloklarını silmeniz yeterlidir.
      ========================================================================== -->
 <style id="cf-files-style">
 .cf-files-overlay{z-index:10600!important;background:var(--mt-app,#fafafa);overflow:auto}
-.cf-files-overlay .pr-page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
-.cf-files-head-actions{display:flex;gap:8px;flex-wrap:wrap}
-.cf-files-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:18px 0}
-.cf-files-stat{display:flex;align-items:center;gap:12px;background:var(--mt-panel,#fff);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius,8px);padding:14px 16px;text-align:left;font:inherit;color:inherit;cursor:pointer;transition:border-color .15s,background-color .15s}
-.cf-files-stat:hover{border-color:var(--mt-border-strong,#d4d4d8);background:var(--mt-hover,#f4f4f5)}
-.cf-files-stat[aria-pressed=true]{border-color:var(--mt-primary,#2563eb);box-shadow:0 0 0 1px var(--mt-primary,#2563eb)}
-.cf-files-stat-icon{flex:none;width:38px;height:38px;border-radius:var(--mt-radius-sm,6px);display:grid;place-items:center;background:var(--mt-sunken,#f4f4f5);border:1px solid var(--mt-border,#e4e4e7);color:var(--mt-ink-2,#52525b)}
-.cf-files-stat-icon svg{width:18px;height:18px}
-.cf-files-stat small{display:block;font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--mt-ink-3,#71717a)}
-.cf-files-stat b{display:block;font-size:22px;font-weight:600;letter-spacing:-.02em;color:var(--mt-ink,#18181b);font-variant-numeric:tabular-nums;line-height:1.2}
-.cf-files-stat em{display:block;font-style:normal;font-size:12px;color:var(--mt-ink-3,#71717a)}
-.cf-files-toolbar{display:grid;grid-template-columns:minmax(200px,1fr) repeat(3,minmax(140px,180px)) auto;gap:10px;align-items:center;background:var(--mt-panel,#fff);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius,8px);padding:12px}
-.cf-files-toolbar input,.cf-files-toolbar select{width:100%;min-height:38px;padding:8px 10px}
-.cf-files-status{margin:12px 2px;color:var(--mt-ink-3,#71717a);font-size:13px}
-.cf-files-status.err{color:var(--mt-danger,#dc2626)}
-.cf-files-table-wrap{background:var(--mt-panel,#fff);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius,8px);overflow:auto}
-.cf-files-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px}
-.cf-files-table th{position:sticky;top:0;text-align:left;white-space:nowrap;padding:10px 14px}
-.cf-files-table td{padding:10px 14px;vertical-align:middle}
-.cf-files-name{display:flex;align-items:center;gap:10px;min-width:220px}
-.cf-files-name b{display:block;font-weight:500;color:var(--mt-ink,#18181b);word-break:break-word}
-.cf-files-name small{color:var(--mt-ink-3,#71717a);font-size:12px}
-.cf-files-ficon{flex:none;width:34px;height:34px;border-radius:var(--mt-radius-sm,6px);display:grid;place-items:center;font-size:10px;font-weight:700;letter-spacing:.03em;border:1px solid var(--mt-border,#e4e4e7);background:var(--mt-sunken,#f4f4f5);color:var(--mt-ink-2,#52525b)}
-.cf-files-ficon.pdf{background:#fef2f2;border-color:#fecaca;color:#b91c1c}
-.cf-files-ficon.img{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
-.cf-files-src{display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;background:var(--mt-sunken,#f4f4f5);color:var(--mt-ink-2,#52525b);white-space:nowrap}
-.cf-files-src i{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.8}
-.cf-files-src.service{color:#0e7490;background:#ecfeff}
-.cf-files-src.orders{color:#7c3aed;background:#f5f3ff}
-.cf-files-src.organization{color:#b45309;background:#fffbeb}
-.cf-files-rec{color:var(--mt-ink-2,#52525b);font-size:13px}
-.cf-files-rec small{display:block;color:var(--mt-ink-3,#71717a)}
-.cf-files-num{white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--mt-ink-2,#52525b)}
-.cf-files-actions{display:flex;gap:6px;justify-content:flex-end;white-space:nowrap}
-.cf-files-actions .btn{padding:6px 10px!important;font-size:12.5px!important}
-.cf-files-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}
-.cf-files-card{display:flex;flex-direction:column;background:var(--mt-panel,#fff);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius,8px);overflow:hidden;transition:border-color .15s}
-.cf-files-card:hover{border-color:var(--mt-border-strong,#d4d4d8)}
-.cf-files-thumb{height:120px;display:grid;place-items:center;background:var(--mt-gray-50,#fafafa);border-bottom:1px solid var(--mt-border,#e4e4e7);overflow:hidden;cursor:pointer;border-width:0 0 1px;width:100%;padding:0}
-.cf-files-thumb img{width:100%;height:100%;object-fit:cover}
-.cf-files-thumb .cf-files-ficon{width:52px;height:52px;font-size:13px}
-.cf-files-card-body{padding:10px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
-.cf-files-card-body b{font-weight:500;font-size:13px;color:var(--mt-ink,#18181b);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cf-files-card-body small{color:var(--mt-ink-3,#71717a);font-size:12px}
-.cf-files-card .cf-files-actions{justify-content:flex-start;flex-wrap:wrap;padding:0 12px 12px}
-.cf-files-empty{padding:42px 18px;text-align:center;color:var(--mt-ink-3,#71717a);background:var(--mt-panel,#fff);border:1px dashed var(--mt-border-strong,#d4d4d8);border-radius:var(--mt-radius,8px)}
-.cf-files-empty b{display:block;color:var(--mt-ink,#18181b);font-size:15px;margin-bottom:4px}
-.cf-files-more{display:flex;justify-content:center;margin-top:12px}
-.cf-files-preview{position:fixed;inset:0;z-index:13000;display:grid;place-items:center;padding:20px;background:rgba(9,9,11,.55);backdrop-filter:blur(2px)}
-.cf-files-preview[hidden]{display:none}
-.cf-files-preview-card{width:min(1000px,100%);height:min(86vh,900px);display:flex;flex-direction:column;background:var(--mt-panel,#fff);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius-lg,10px);box-shadow:0 16px 40px rgba(9,9,11,.18);overflow:hidden}
-.cf-files-preview-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-bottom:1px solid var(--mt-border,#e4e4e7)}
-.cf-files-preview-head b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cf-files-preview-body{flex:1;min-height:0;display:grid;place-items:center;background:var(--mt-gray-100,#f4f4f5)}
-.cf-files-preview-body img{max-width:100%;max-height:100%;object-fit:contain}
-.cf-files-preview-body iframe{width:100%;height:100%;border:0;background:#fff}
-@media (max-width:900px){.cf-files-toolbar{grid-template-columns:1fr 1fr}.cf-files-toolbar input{grid-column:1/-1}.cf-files-table .cf-col-rec,.cf-files-table .cf-col-date{display:none}}
-@media (max-width:560px){.cf-files-table .cf-col-size{display:none}.cf-files-actions .cf-files-act-rec{display:none}.cf-files-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.cffm{display:grid;grid-template-columns:260px minmax(0,1fr);gap:16px;align-items:start}
+.cffm-side{position:sticky;top:12px;display:flex;flex-direction:column;gap:12px}
+.cffm-box{background:var(--mt-panel,#fff);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius,8px);padding:12px}
+.cffm-box h4{margin:0 0 8px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mt-ink-3,#71717a);display:flex;justify-content:space-between;align-items:center}
+.cffm-box h4 button{border:0;background:none;font:inherit;font-size:11px;font-weight:600;color:var(--mt-primary,#2563eb);cursor:pointer;letter-spacing:0;text-transform:none}
+.cffm-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cffm-actions .btn{width:100%;justify-content:center}
+.cffm-nav{display:flex;flex-direction:column;gap:2px}
+.cffm-nav button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:8px 8px;border-radius:6px;font:inherit;font-size:13.5px;color:var(--mt-gray-700,#3f3f46);cursor:pointer;text-align:left}
+.cffm-nav button:hover{background:var(--mt-hover,#f4f4f5)}
+.cffm-nav button[aria-current=true]{background:var(--mt-primary-soft,#eff6ff);color:var(--mt-primary,#2563eb);font-weight:600}
+.cffm-nav button .ic{flex:none;width:28px;height:28px;border-radius:6px;display:grid;place-items:center;background:var(--mt-sunken,#f4f4f5);color:var(--mt-ink-2,#52525b)}
+.cffm-nav button .ic svg{width:15px;height:15px}
+.cffm-nav button[aria-current=true] .ic{background:#dbeafe;color:var(--mt-primary,#2563eb)}
+.cffm-nav button span.l{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cffm-nav button b{font-weight:500;font-size:12px;color:var(--mt-ink-3,#71717a);font-variant-numeric:tabular-nums}
+.cffm-nav .fm{opacity:0;border:0;background:none;padding:0 4px;color:var(--mt-ink-3,#71717a);cursor:pointer;font-size:16px;line-height:1}
+.cffm-nav button:hover .fm,.cffm-nav button:focus-within .fm{opacity:1}
+.cffm-store small{display:block;font-size:12px;color:var(--mt-ink-3,#71717a)}
+.cffm-store b{font-size:15px;font-weight:600}
+.cffm-bar{height:6px;border-radius:6px;background:var(--mt-gray-100,#f4f4f5);overflow:hidden;margin:8px 0 6px}
+.cffm-bar i{display:block;height:100%;background:linear-gradient(90deg,#2563eb,#3b82f6);border-radius:6px}
+.cffm-main{min-width:0;display:flex;flex-direction:column;gap:12px}
+.cffm-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--mt-panel,#fff);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius,8px);padding:10px 12px}
+.cffm-crumb{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--mt-ink-3,#71717a);min-width:0}
+.cffm-crumb b{color:var(--mt-ink,#18181b);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cffm-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cffm-tools input{width:200px;min-height:34px;padding:6px 10px}
+.cffm-tools select{width:auto;min-height:34px;padding:4px 8px}
+.cffm-seg{display:inline-flex;gap:2px;padding:2px;background:var(--mt-sunken,#f4f4f5);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius,8px)}
+.cffm-seg button{border:0;background:transparent;padding:5px 10px;border-radius:6px;font:inherit;font-size:12.5px;font-weight:500;color:var(--mt-ink-2,#52525b);cursor:pointer}
+.cffm-seg button[aria-pressed=true]{background:var(--mt-panel,#fff);color:var(--mt-ink,#18181b);font-weight:600;box-shadow:0 1px 2px rgba(9,9,11,.08),0 0 0 1px var(--mt-border,#e4e4e7)}
+.cffm-sel{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--mt-radius,8px);font-size:13px;color:#1e3a8a}
+.cffm-sel b{margin-right:auto}
+.cffm-sel .btn{padding:5px 10px!important;font-size:12.5px!important}
+.cffm-drop{border:2px dashed var(--mt-border-strong,#d4d4d8);border-radius:var(--mt-radius,8px);background:var(--mt-panel,#fff);padding:28px 16px;text-align:center;color:var(--mt-ink-3,#71717a);cursor:pointer;transition:border-color .15s,background-color .15s}
+.cffm-drop:hover,.cffm-drop.over{border-color:var(--mt-primary,#2563eb);background:var(--mt-primary-soft,#eff6ff);color:var(--mt-primary,#2563eb)}
+.cffm-drop svg{width:34px;height:34px;margin-bottom:6px}
+.cffm-drop b{display:block;color:var(--mt-ink,#18181b);font-size:15px;margin-bottom:2px}
+.cffm-main.dragging .cffm-drop{border-color:var(--mt-primary,#2563eb);background:var(--mt-primary-soft,#eff6ff)}
+.cffm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.cffm-card{position:relative;display:flex;flex-direction:column;background:var(--mt-panel,#fff);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius,8px);overflow:hidden;transition:border-color .15s,box-shadow .2s,transform .2s}
+.cffm-card:hover{border-color:var(--mt-border-strong,#d4d4d8);box-shadow:0 8px 20px rgba(9,9,11,.07);transform:translateY(-2px)}
+.cffm-card.sel{border-color:var(--mt-primary,#2563eb);box-shadow:0 0 0 1px var(--mt-primary,#2563eb)}
+.cffm-card .ck{position:absolute;top:8px;left:8px;z-index:1;width:18px;height:18px;accent-color:var(--mt-primary,#2563eb);opacity:0;transition:opacity .15s}
+.cffm-card:hover .ck,.cffm-card.sel .ck,.cffm-card .ck:focus{opacity:1}
+.cffm-thumb{height:118px;display:grid;place-items:center;background:var(--mt-gray-50,#fafafa);border:0;border-bottom:1px solid var(--mt-border,#e4e4e7);padding:0;cursor:pointer;overflow:hidden;width:100%}
+.cffm-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .3s}
+.cffm-card:hover .cffm-thumb img{transform:scale(1.05)}
+.cffm-fi{width:50px;height:58px;border-radius:6px;display:grid;place-items:end center;padding-bottom:8px;font-size:11px;font-weight:700;letter-spacing:.03em;color:#fff;position:relative;background:#71717a}
+.cffm-fi::before{content:"";position:absolute;top:0;right:0;width:14px;height:14px;background:rgba(255,255,255,.35);border-bottom-left-radius:4px}
+.cffm-fi.pdf{background:#dc2626}.cffm-fi.img{background:#2563eb}.cffm-fi.video{background:#7c3aed}.cffm-fi.audio{background:#db2777}.cffm-fi.word{background:#1d4ed8}.cffm-fi.excel{background:#15803d}.cffm-fi.ppt{background:#ea580c}.cffm-fi.zip{background:#a16207}
+.cffm-fi.sm{width:30px;height:36px;font-size:8.5px;padding-bottom:5px;border-radius:4px}
+.cffm-fi.sm::before{width:9px;height:9px}
+.cffm-cb{padding:10px 12px;display:flex;align-items:flex-start;gap:6px}
+.cffm-cb>div{flex:1;min-width:0}
+.cffm-cb b{display:block;font-weight:500;font-size:13px;color:var(--mt-ink,#18181b);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cffm-cb small{display:block;font-size:12px;color:var(--mt-ink-3,#71717a)}
+.cffm-more{flex:none;border:0;background:none;width:26px;height:26px;border-radius:6px;cursor:pointer;color:var(--mt-ink-3,#71717a);font-size:16px;line-height:1}
+.cffm-more:hover{background:var(--mt-hover,#f4f4f5);color:var(--mt-ink,#18181b)}
+.cffm-table-wrap{background:var(--mt-panel,#fff);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius,8px);overflow:auto}
+.cffm-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px}
+.cffm-table th{text-align:left;padding:10px 12px;white-space:nowrap}
+.cffm-table td{padding:8px 12px;vertical-align:middle}
+.cffm-table tr.sel td{background:#eff6ff!important}
+.cffm-name{display:flex;align-items:center;gap:10px;min-width:200px;cursor:pointer}
+.cffm-name b{font-weight:500}
+.cffm-num{white-space:nowrap;color:var(--mt-ink-2,#52525b);font-variant-numeric:tabular-nums}
+.cffm-src{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11.5px;font-weight:500;background:var(--mt-sunken,#f4f4f5);color:var(--mt-ink-2,#52525b);white-space:nowrap}
+.cffm-empty{padding:38px 16px;text-align:center;color:var(--mt-ink-3,#71717a);background:var(--mt-panel,#fff);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius,8px)}
+.cffm-empty b{display:block;color:var(--mt-ink,#18181b);font-size:15px;margin-bottom:4px}
+.cffm-note{padding:12px 14px;border-radius:var(--mt-radius,8px);background:#fffbeb;border:1px solid #fde68a;color:#92400e;font-size:13px;line-height:1.5}
+.cffm-note b{color:#78350f}
+.cffm-state{font-size:13px;color:var(--mt-ink-3,#71717a)}.cffm-state.err{color:#b91c1c}
+.cffm-menu{position:fixed;z-index:13200;min-width:190px;padding:6px;background:var(--mt-panel,#fff);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius,8px);box-shadow:0 10px 28px rgba(9,9,11,.14);animation:cfxSlideDown .15s ease-out both}
+.cffm-menu button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;padding:8px 10px;border-radius:6px;font:inherit;font-size:13.5px;color:var(--mt-ink,#18181b);text-align:left;cursor:pointer}
+.cffm-menu button:hover{background:var(--mt-hover,#f4f4f5)}
+.cffm-menu button.danger{color:#b91c1c}
+.cffm-menu hr{border:0;border-top:1px solid var(--mt-border,#e4e4e7);margin:4px 0}
+.cffm-queue{position:fixed;right:20px;bottom:20px;z-index:13100;width:min(340px,calc(100vw - 40px));background:var(--mt-panel,#fff);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius-lg,10px);box-shadow:0 12px 32px rgba(9,9,11,.16);overflow:hidden;animation:cfxSlideUp .2s ease-out both}
+.cffm-queue header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--mt-border,#e4e4e7);font-weight:600;font-size:13.5px}
+.cffm-queue header button{border:0;background:none;font-size:18px;cursor:pointer;color:var(--mt-ink-3,#71717a)}
+.cffm-queue ul{list-style:none;margin:0;padding:6px 14px 10px;max-height:240px;overflow:auto}
+.cffm-queue li{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;border-bottom:1px solid var(--mt-gray-100,#f4f4f5)}
+.cffm-queue li:last-child{border-bottom:0}
+.cffm-queue li span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cffm-queue li em{font-style:normal;font-size:12px;white-space:nowrap}
+.cffm-queue li em.ok{color:#15803d}.cffm-queue li em.err{color:#b91c1c}.cffm-queue li em.run{color:#2563eb}
+.cffm-modal{position:fixed;inset:0;z-index:13000;display:grid;place-items:center;padding:20px;background:rgba(9,9,11,.55);backdrop-filter:blur(2px)}
+.cffm-modal[hidden]{display:none}
+.cffm-dialog{width:min(1000px,100%);max-height:88vh;display:flex;flex-direction:column;background:var(--mt-panel,#fff);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius-lg,10px);box-shadow:0 16px 40px rgba(9,9,11,.2);overflow:hidden;animation:cfxSlideUp .22s ease-out both}
+.cffm-dialog.small{width:min(480px,100%)}
+.cffm-dialog header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-bottom:1px solid var(--mt-border,#e4e4e7)}
+.cffm-dialog header b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cffm-dialog header div{display:flex;gap:6px;flex:none}
+.cffm-dialog .body{flex:1;min-height:0;overflow:auto;padding:16px}
+.cffm-dialog .body.view{padding:0;display:grid;place-items:center;background:var(--mt-gray-100,#f4f4f5);min-height:60vh}
+.cffm-dialog .body.view img{max-width:100%;max-height:78vh;object-fit:contain}
+.cffm-dialog .body.view iframe{width:100%;height:78vh;border:0;background:#fff}
+.cffm-dialog .body.view video{max-width:100%;max-height:78vh;background:#000}
+.cffm-dialog .body.view audio{width:min(520px,90%)}
+.cffm-dialog .body label{display:block;font-size:12.5px;font-weight:500;margin-bottom:6px}
+.cffm-dialog .body input,.cffm-dialog .body select{width:100%}
+.cffm-dialog .body p{margin:0 0 12px;font-size:13.5px;color:var(--mt-ink-2,#52525b);line-height:1.5}
+.cffm-dialog footer{display:flex;justify-content:flex-end;gap:8px;padding:12px 16px;border-top:1px solid var(--mt-border,#e4e4e7)}
+.cffm-link{display:flex;gap:6px}.cffm-link input{flex:1;font-size:12.5px}
+@media (max-width:900px){.cffm{grid-template-columns:1fr}.cffm-side{position:static}.cffm-tools input{width:100%}}
+@media (max-width:560px){.cffm-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.cffm-col-date,.cffm-col-folder{display:none}}
 </style>
 <script id="cf-files-module">(function(){'use strict';
-/* ---------- Kimlik ve yetki ---------- */
-const key=()=>[currentUser?.id,currentCompanyId,currentMembership?.role].join('|');
-const can=a=>{try{return !!currentUser&&!!currentCompanyId&&hasAppAction(a)}catch(e){return false}};
-const SOURCES={
-  service:{label:'Servis ekleri',short:'Servis',action:'service',bucket:'service-record-files'},
-  orders:{label:'Fatura / İrsaliye',short:'Fatura / İrsaliye',action:'orders',bucket:'operation-documents'},
-  organization:{label:'Organizasyon belgeleri',short:'Organizasyon',action:'organization',bucket:'organization-documents'}
-};
-const allowedSources=()=>Object.keys(SOURCES).filter(s=>can(SOURCES[s].action));
-const visible=()=>allowedSources().length>0;
-const PAGE=60,MAX_ROWS=1000;
-let epoch=0,lastKey='',files=[],errors=[],loaded=false,shown=PAGE,view='list',thumbUrls=new Map(),thumbQueue=[],thumbJobs=0,previewUrl=null,previewToken=0;
-try{view=localStorage.getItem('cfFilesView')==='grid'?'grid':'list'}catch(e){}
-
-/* ---------- Yardımcılar ---------- */
+/* ================= Ortak ================= */
 const $=id=>document.getElementById(id);
 const escH=s=>(typeof esc==='function'?esc(s):String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));
-const ICONS={
-  folder:'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',
-  service:'M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z',
-  orders:'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6M8 13h8M8 17h5',
-  organization:'M3 10h18M7 3v4M17 3v4M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z',
-  all:'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z'
-};
-const svg=k=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+ICONS[k]+'"/></svg>';
-function size(n){n=Number(n);if(!n||n<0)return '—';const u=['B','KB','MB','GB'];let i=0;while(n>=1024&&i<u.length-1){n/=1024;i++}return (i?n.toLocaleString('tr-TR',{maximumFractionDigits:1}):n)+' '+u[i]}
-function when(v){if(!v)return '—';const d=new Date(v);return isNaN(d)?'—':d.toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Europe/Istanbul'})}
-function extOf(name,mime){const m=String(name||'').toLowerCase().match(/\.([a-z0-9]{1,6})$/);if(m)return m[1];if(/pdf/.test(mime))return 'pdf';if(/png/.test(mime))return 'png';if(/jpe?g/.test(mime))return 'jpg';if(/webp/.test(mime))return 'webp';return ''}
-const IMG=new Set(['png','jpg','jpeg','webp','gif','heic','heif','avif']);
-function kindOf(f){const e=f.ext;if(e==='pdf'||/pdf/.test(f.mime))return 'pdf';if(IMG.has(e)||/^image\/(png|jpe?g|webp|gif|avif)$/.test(f.mime||''))return 'img';return 'other'}
-function safeName(n){return String(n||'dosya').replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_').slice(0,180)||'dosya'}
+const key=()=>[currentUser?.id,currentCompanyId,currentMembership?.role].join('|');
+const role=()=>currentMembership?.role||'';
+const can=a=>{try{return !!currentUser&&!!currentCompanyId&&hasAppAction(a)}catch(e){return false}};
+const BUCKET='company-files',MAX=50*1024*1024,QUOTA=1024*1024*1024;
+const canUpload=()=>!!currentUser&&!!currentCompanyId&&role()!=='viewer'&&ready;
+const canFolders=()=>['owner','admin','manager'].includes(role())&&ready;
+const canModify=f=>!!f&&!f.record&&(['owner','admin','manager'].includes(role())||f.uploaded_by===currentUser?.id);
+const ICON={upload:'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12',folder:'M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z',plus:'M12 5v14M5 12h14',all:'M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z',clock:'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2',paper:'M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9zM14 3v6h6',book:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5zM20 17v4H6.5',video:'M15 10l5-3v10l-5-3zM3 6h12v12H3z',music:'M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z',office:'M4 4h16v16H4zM8 8h8M8 12h8M8 16h5',image:'M4 5h16v14H4zM8.5 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM20 15l-5-5L5 19',link:'M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1',clip:'M21 12.5 12.5 21a5 5 0 0 1-7-7L14 5.5a3.5 3.5 0 0 1 5 5L10.5 19a2 2 0 0 1-3-3L15 8.5'};
+const svg=k=>'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+ICON[k]+'"/></svg>';
+const FOLDER_ICON={'kataloglar':'book','broşürler':'paper','videolar':'video','müzikler':'music','office dosyaları':'office','görseller':'image'};
+const folderIcon=n=>FOLDER_ICON[String(n).toLocaleLowerCase('tr-TR')]||'folder';
+function size(n){n=Number(n);if(!n||n<0)return '—';const u=['B','KB','MB','GB'];let i=0;while(n>=1024&&i<3){n/=1024;i++}return (i?n.toLocaleString('tr-TR',{maximumFractionDigits:1}):n)+' '+u[i]}
+function when(v){if(!v)return '—';const d=new Date(v);if(isNaN(d))return '—';const diff=(Date.now()-d)/1000;if(diff<60)return 'Az önce';if(diff<3600)return Math.floor(diff/60)+' dk önce';if(diff<86400)return Math.floor(diff/3600)+' saat önce';if(diff<7*86400)return Math.floor(diff/86400)+' gün önce';return d.toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'})}
+const extOf=n=>{const m=String(n||'').toLowerCase().match(/\.([a-z0-9]{1,6})$/);return m?m[1]:''};
+function kindOf(name,mime){const e=extOf(name);mime=mime||'';
+  if(e==='pdf'||/pdf/.test(mime))return 'pdf';
+  if(/^image\/(png|jpe?g|gif|webp|avif|bmp)$/.test(mime)||['png','jpg','jpeg','gif','webp','avif','bmp'].includes(e))return 'img';
+  if(/^video\//.test(mime)||['mp4','webm','mov','m4v','ogv'].includes(e))return 'video';
+  if(/^audio\//.test(mime)||['mp3','wav','ogg','m4a','aac','flac'].includes(e))return 'audio';
+  if(['doc','docx','odt','rtf'].includes(e))return 'word';if(['xls','xlsx','ods','csv'].includes(e))return 'excel';if(['ppt','pptx','odp'].includes(e))return 'ppt';
+  if(['zip','rar','7z'].includes(e))return 'zip';return 'other'}
+const LABEL={pdf:'PDF',img:'Görsel',video:'Video',audio:'Ses',word:'Word',excel:'Excel',ppt:'Sunum',zip:'Arşiv',other:'Dosya'};
+const fi=(f,sm)=>'<span class="cffm-fi '+kindOf(f.name,f.mime)+(sm?' sm':'')+'">'+escH((extOf(f.name)||'—').slice(0,4).toUpperCase())+'</span>';
+const safeName=n=>String(n||'dosya').replace(/[\\/:*?"<>|\u0000-\u001f]/g,'_').slice(0,180)||'dosya';
+function toast(t){const d=document.createElement('div');d.className='cfsm-toast';d.textContent=t;document.body.append(d);setTimeout(()=>d.remove(),2600)}
 
-/* ---------- Veri ---------- */
-async function pageAll(build){const out=[];for(let p=0;p<MAX_ROWS/500;p++){const r=await build().range(p*500,p*500+499);if(r.error)throw r.error;out.push(...(r.data||[]));if((r.data||[]).length<500)break}return out}
-async function loadService(company){
-  const rows=await pageAll(()=>sb.from('service_record_files').select('id,service_id,original_name,mime_type,extension,byte_size,storage_path,created_at').eq('company_id',company).is('removed_at',null).order('created_at',{ascending:false}));
-  const ids=[...new Set(rows.map(r=>r.service_id).filter(Boolean))],recs=new Map();
-  for(let i=0;i<ids.length;i+=200){const r=await sb.from('technical_service_records').select('id,service_number,customer_name,device_name').eq('company_id',company).in('id',ids.slice(i,i+200));if(!r.error)for(const x of r.data||[])recs.set(x.id,x)}
-  return rows.filter(r=>r.storage_path).map(r=>{const rec=recs.get(r.service_id);return {id:'s'+r.id,source:'service',name:r.original_name||'Servis eki',mime:r.mime_type||'',ext:(r.extension||extOf(r.original_name,r.mime_type)||'').toLowerCase(),size:r.byte_size,date:r.created_at,path:r.storage_path,recordId:r.service_id,recordTitle:rec?.service_number||'Servis kaydı',recordSub:[rec?.customer_name,rec?.device_name].filter(Boolean).join(' · ')}})
-}
-async function loadOrders(company){
-  const rows=await pageAll(()=>sb.from('operation_documents').select('*').eq('company_id',company).order('id',{ascending:false}));
-  const ready=rows.filter(r=>r.file_path&&(r.ready_at||r.status==='ready'));
-  const ids=[...new Set(ready.map(r=>r.order_id).filter(Boolean))],recs=new Map();
-  for(let i=0;i<ids.length;i+=200){const r=await sb.from('operation_orders').select('id,order_number,customer_name,proforma_number').eq('company_id',company).in('id',ids.slice(i,i+200));if(!r.error)for(const x of r.data||[])recs.set(x.id,x)}
-  return ready.map(r=>{const rec=recs.get(r.order_id);return {id:'o'+r.id,source:'orders',name:r.file_name||'Belge.pdf',mime:'application/pdf',ext:'pdf',size:r.file_size,date:r.ready_at||r.created_at,path:r.file_path,recordId:r.order_id,recordTitle:rec?.order_number||'Sipariş',recordSub:[rec?.customer_name,rec?.proforma_number].filter(Boolean).join(' · ')}})
-}
-async function loadOrganization(company){
-  const rows=await pageAll(()=>sb.from('event_organizations').select('id,title,city,details,updated_at,created_at').eq('company_id',company).order('id',{ascending:false}));
-  const out=[];
-  for(const r of rows){const d=r.details&&typeof r.details==='object'?r.details:{};
-    for(const [k,label] of [['ticket','Bilet'],['hotel','Otel rezervasyonu']]){const p=d[k+'_file'];if(typeof p!=='string'||!p.startsWith(company+'/')||p.includes('..'))continue;
-      out.push({id:'g'+r.id+k,source:'organization',name:label+' — '+(r.title||'Organizasyon')+'.pdf',mime:'application/pdf',ext:'pdf',size:null,date:r.updated_at||r.created_at,path:p,recordId:r.id,recordTitle:r.title||'Organizasyon',recordSub:r.city||''})}}
-  return out
-}
-const LOADERS={service:loadService,orders:loadOrders,organization:loadOrganization};
-async function load(){
-  const token=++epoch,k=key(),company=currentCompanyId,srcs=allowedSources();
-  resetThumbs();loaded=false;files=[];errors=[];shown=PAGE;
-  status('Dosyalar yükleniyor…');render();
-  const results=await Promise.all(srcs.map(async s=>{try{return {s,rows:await LOADERS[s](company)}}catch(e){return {s,error:e?.message||'Veri alınamadı'}}}));
+/* ================= Durum ================= */
+let ready=false,setupMissing=false,folders=[],files=[],records=[],recordsLoaded=false,view={kind:'all',id:''},mode='grid',sort='date',q='',selected=new Set(),epoch=0,lastKey='',thumbs=new Map(),thumbJob=0;
+try{mode=localStorage.getItem('cfFmView')==='list'?'list':'grid';sort=localStorage.getItem('cfFmSort')||'date'}catch(e){}
+
+/* ================= Veri ================= */
+async function loadAll(){
+  const token=++epoch,k=key(),company=currentCompanyId;state('Dosyalar yükleniyor…');
+  const fr=await sb.from('company_folders').select('id,name,sort_order').eq('company_id',company).order('sort_order').order('name');
   if(token!==epoch||k!==key())return;
-  for(const r of results){if(r.error)errors.push(SOURCES[r.s].label+': '+r.error);else files.push(...r.rows)}
-  loaded=true;status('');render();
+  if(fr.error){if(/company_folders|schema cache|does not exist/i.test(fr.error.message||'')||['PGRST205','42P01'].includes(fr.error.code)){setupMissing=true;ready=false;folders=[];files=[];state('');render();return}state('Klasörler okunamadı: '+fr.error.message,true);return}
+  setupMissing=false;ready=true;folders=fr.data||[];
+  if(!folders.length&&canFolders()){await seedFolders(company);if(token!==epoch)return;const again=await sb.from('company_folders').select('id,name,sort_order').eq('company_id',company).order('sort_order').order('name');folders=again.data||[]}
+  const out=[];for(let p=0;p<20;p++){const r=await sb.from('company_files').select('id,folder_id,name,mime_type,byte_size,storage_path,uploaded_by,created_at,updated_at').eq('company_id',company).order('created_at',{ascending:false}).range(p*500,p*500+499);if(r.error){state('Dosyalar okunamadı: '+r.error.message,true);return}out.push(...(r.data||[]));if((r.data||[]).length<500)break}
+  if(token!==epoch||k!==key())return;
+  files=out.map(f=>({...f,mime:f.mime_type,size:f.byte_size,date:f.created_at}));
+  if(view.kind==='folder'&&!folders.some(x=>x.id===view.id))view={kind:'all',id:''};
+  state('');render();
 }
+async function seedFolders(company){const defs=[['Kataloglar',10],['Broşürler',20],['Videolar',30],['Müzikler',40],['Office Dosyaları',50],['Görseller',60],['Diğer',90]];await sb.from('company_folders').upsert(defs.map(([name,sort_order])=>({company_id:company,name,sort_order})),{onConflict:'company_id,name',ignoreDuplicates:true})}
 
-/* ---------- Görünüm ---------- */
-const overlay=document.createElement('section');
-overlay.id='cfFilesOverlay';overlay.className='pr-page-view cf-files-overlay';overlay.hidden=true;
-overlay.innerHTML='<div class="pr-page-shell"><header class="pr-page-head"><div><small class="workspace-kicker">BELGELER • DOSYA YÖNETİMİ</small><h1>Dosyalar</h1><p>Servis kayıtları, siparişler ve organizasyonlara eklenen tüm dosyalar tek yerde.</p></div><div class="cf-files-head-actions"><button class="btn light" id="cfFilesRefresh" type="button">Yenile</button><button class="btn light" id="cfFilesClose" type="button">Ana sayfaya dön</button></div></header>'
- +'<div class="cf-files-stats" id="cfFilesStats"></div>'
- +'<div class="cf-files-toolbar"><input id="cfFilesSearch" type="search" placeholder="Dosya adı, kayıt no veya müşteri ara…" aria-label="Dosyalarda ara"><select id="cfFilesSource" aria-label="Kaynak"></select><select id="cfFilesType" aria-label="Dosya türü"><option value="">Tüm türler</option><option value="pdf">PDF belgeleri</option><option value="img">Görseller</option><option value="other">Diğer</option></select><select id="cfFilesSort" aria-label="Sıralama"><option value="new">En yeni</option><option value="old">En eski</option><option value="name">Ada göre (A–Z)</option><option value="size">Boyuta göre</option></select><div class="ui-switch" role="group" aria-label="Görünüm"><button type="button" data-cf-files-view="list">Liste</button><button type="button" data-cf-files-view="grid">Kart</button></div></div>'
- +'<p class="cf-files-status" id="cfFilesStatus" role="status" aria-live="polite"></p><div id="cfFilesContent"></div></div>';
-document.body.append(overlay);
-const preview=document.createElement('div');
-preview.className='cf-files-preview';preview.hidden=true;preview.setAttribute('role','dialog');preview.setAttribute('aria-modal','true');
-preview.innerHTML='<div class="cf-files-preview-card"><div class="cf-files-preview-head"><b id="cfFilesPreviewTitle">Önizleme</b><div class="cf-files-actions"><button class="btn light" type="button" id="cfFilesPreviewDownload">İndir</button><button class="btn light" type="button" id="cfFilesPreviewClose">Kapat</button></div></div><div class="cf-files-preview-body" id="cfFilesPreviewBody"></div></div>';
-document.body.append(preview);
-
-function status(t,err){const s=$('cfFilesStatus');if(!s)return;s.textContent=t;s.classList.toggle('err',!!err)}
-let filterSource='';
-function filtered(){
-  const q=($('cfFilesSearch').value||'').trim().toLocaleLowerCase('tr-TR'),type=$('cfFilesType').value,sort=$('cfFilesSort').value;
-  let list=files.filter(f=>(!filterSource||f.source===filterSource)&&(!type||kindOf(f)===type)&&(!q||[f.name,f.recordTitle,f.recordSub].join(' ').toLocaleLowerCase('tr-TR').includes(q)));
-  const by={new:(a,b)=>String(b.date||'').localeCompare(String(a.date||'')),old:(a,b)=>String(a.date||'').localeCompare(String(b.date||'')),name:(a,b)=>a.name.localeCompare(b.name,'tr'),size:(a,b)=>(Number(b.size)||0)-(Number(a.size)||0)}[sort];
-  return list.sort(by)
-}
-function renderStats(){
-  const srcs=allowedSources(),cell=(k,label,list,icon)=>'<button type="button" class="cf-files-stat" data-cf-files-src="'+k+'" aria-pressed="'+(filterSource===k)+'"><span class="cf-files-stat-icon">'+svg(icon)+'</span><span><small>'+escH(label)+'</small><b>'+(loaded?list.length:'—')+'</b><em>'+(loaded?size(list.reduce((s,f)=>s+(Number(f.size)||0),0)):'Yükleniyor')+'</em></span></button>';
-  let html=cell('','Tüm dosyalar',files,'all');
-  for(const s of srcs)html+=cell(s,SOURCES[s].label,files.filter(f=>f.source===s),s);
-  $('cfFilesStats').innerHTML=html;
-  const sel=$('cfFilesSource'),cur=filterSource;
-  sel.innerHTML='<option value="">Tüm kaynaklar</option>'+srcs.map(s=>'<option value="'+s+'">'+escH(SOURCES[s].label)+'</option>').join('');sel.value=cur;
-}
-function ficon(f){const k=kindOf(f);return '<span class="cf-files-ficon '+(k==='pdf'?'pdf':k==='img'?'img':'')+'">'+escH((f.ext||'dosya').slice(0,4).toUpperCase())+'</span>'}
-function srcBadge(f){return '<span class="cf-files-src '+f.source+'"><i></i>'+escH(SOURCES[f.source].short)+'</span>'}
-function actions(f){const k=kindOf(f);return '<div class="cf-files-actions">'+(k!=='other'?'<button class="btn light" type="button" data-cf-files-act="preview" data-id="'+escH(f.id)+'">Önizle</button>':'')+'<button class="btn light" type="button" data-cf-files-act="download" data-id="'+escH(f.id)+'">İndir</button><button class="btn light cf-files-act-rec" type="button" data-cf-files-act="record" data-id="'+escH(f.id)+'" title="İlgili kaydı aç">Kayda git</button></div>'}
-function render(){
-  if(overlay.hidden)return;
-  renderStats();
-  document.querySelectorAll('[data-cf-files-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.cfFilesView===view)));
-  const box=$('cfFilesContent');
-  if(!loaded){box.innerHTML='';return}
-  if(errors.length)status('Bazı kaynaklar okunamadı · '+errors.join(' · '),true);
-  const list=filtered(),page=list.slice(0,shown);
-  if(!list.length){box.innerHTML='<div class="cf-files-empty"><b>'+(files.length?'Eşleşen dosya bulunamadı':'Henüz dosya yok')+'</b>'+(files.length?'Arama veya filtreleri değiştirmeyi deneyin.':'Servis kayıtlarına, siparişlere veya organizasyonlara eklenen dosyalar burada listelenir.')+'</div>';return}
-  if(!errors.length)status(list.length+' dosya'+(list.length>page.length?' · ilk '+page.length+' gösteriliyor':''));
-  let html;
-  if(view==='grid'){
-    html='<div class="cf-files-grid">'+page.map(f=>{const k=kindOf(f);return '<article class="cf-files-card"><button type="button" class="cf-files-thumb" '+(k!=='other'?'data-cf-files-act="preview" ':'data-cf-files-act="download" ')+'data-id="'+escH(f.id)+'" aria-label="'+escH(f.name)+'">'+(k==='img'?'<img alt="" data-cf-thumb="'+escH(f.id)+'" hidden>':'')+ficon(f)+'</button><div class="cf-files-card-body"><b title="'+escH(f.name)+'">'+escH(f.name)+'</b>'+srcBadge(f)+'<small>'+escH(f.recordTitle)+' · '+size(f.size)+'</small><small>'+when(f.date)+'</small></div>'+actions(f)+'</article>'}).join('')+'</div>';
-  }else{
-    html='<div class="cf-files-table-wrap"><table class="cf-files-table data-table"><thead><tr><th>Dosya</th><th>Kaynak</th><th class="cf-col-rec">Kayıt</th><th class="cf-col-size">Boyut</th><th class="cf-col-date">Tarih</th><th aria-label="İşlemler"></th></tr></thead><tbody>'+page.map(f=>'<tr><td><div class="cf-files-name">'+ficon(f)+'<div><b>'+escH(f.name)+'</b><small>'+escH((f.ext||'').toUpperCase())+'</small></div></div></td><td>'+srcBadge(f)+'</td><td class="cf-col-rec"><div class="cf-files-rec">'+escH(f.recordTitle)+(f.recordSub?'<small>'+escH(f.recordSub)+'</small>':'')+'</div></td><td class="cf-files-num cf-col-size">'+size(f.size)+'</td><td class="cf-files-num cf-col-date">'+when(f.date)+'</td><td>'+actions(f)+'</td></tr>').join('')+'</tbody></table></div>';
-  }
-  if(list.length>page.length)html+='<div class="cf-files-more"><button class="btn light" type="button" id="cfFilesMore">Daha fazla göster ('+(list.length-page.length)+')</button></div>';
-  box.innerHTML=html;
-  if(view==='grid')queueThumbs(page.filter(f=>kindOf(f)==='img'));
-}
-
-/* ---------- Depolama erişimi (yalnızca indirme) ---------- */
-function findFile(id){return files.find(f=>f.id===id)}
-function validPath(f){return typeof f.path==='string'&&f.path.startsWith(currentCompanyId+'/')&&!f.path.includes('..')}
-async function fetchBlob(f){
-  if(!can(SOURCES[f.source].action))throw Error('Bu dosyaya erişim yetkiniz yok.');
-  if(!validPath(f))throw Error('Dosya yolu bu şirkete ait değil.');
-  const {data,error}=await sb.storage.from(SOURCES[f.source].bucket).download(f.path);
-  if(error||!data)throw Error(error?.message||'Dosya indirilemedi.');
-  return data
-}
-async function download(f){
-  const k=key();status('“'+f.name+'” indiriliyor…');
-  try{const blob=await fetchBlob(f);if(k!==key())return;const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=safeName(f.name);document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);status('')}
-  catch(e){if(k===key())status(e.message||'Dosya indirilemedi.',true)}
-}
-function closePreview(){previewToken++;preview.hidden=true;$('cfFilesPreviewBody').replaceChildren();if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null}}
-async function openPreview(f){
-  closePreview();const token=++previewToken,k=key(),kind=kindOf(f);
-  $('cfFilesPreviewTitle').textContent=f.name;$('cfFilesPreviewBody').innerHTML='<span class="muted">Yükleniyor…</span>';preview.hidden=false;
-  $('cfFilesPreviewDownload').onclick=()=>download(f);
-  try{
-    let blob=await fetchBlob(f);if(token!==previewToken||k!==key())return;
-    const body=$('cfFilesPreviewBody');
-    if(kind==='pdf'){
-      const head=await blob.slice(0,5).text();if(head!=='%PDF-')throw Error('Dosya geçerli bir PDF değil; indirip açabilirsiniz.');
-      blob=new Blob([blob],{type:'application/pdf'});previewUrl=URL.createObjectURL(blob);
-      const fr=document.createElement('iframe');fr.title=f.name;fr.src=previewUrl;body.replaceChildren(fr);
-    }else{
-      previewUrl=URL.createObjectURL(blob);const img=document.createElement('img');img.alt=f.name;img.src=previewUrl;
-      img.onerror=()=>{if(token===previewToken)body.innerHTML='<span class="muted">Bu görsel tarayıcıda gösterilemiyor; indirip açabilirsiniz.</span>'};body.replaceChildren(img);
-    }
-  }catch(e){if(token===previewToken)$('cfFilesPreviewBody').innerHTML='<span class="muted">'+escH(e.message||'Önizleme açılamadı.')+'</span>'}
-}
-function resetThumbs(){thumbQueue=[];for(const u of thumbUrls.values())if(u)URL.revokeObjectURL(u);thumbUrls.clear()}
-function applyThumb(id){const u=thumbUrls.get(id);if(!u)return;document.querySelectorAll('img[data-cf-thumb]').forEach(img=>{if(img.dataset.cfThumb===id){img.src=u;img.hidden=false;img.nextElementSibling?.remove()}})}
-function queueThumbs(list){for(const f of list.slice(0,48)){if(thumbUrls.has(f.id)){applyThumb(f.id);continue}if(!thumbQueue.includes(f))thumbQueue.push(f)}runThumbs()}
-function runThumbs(){const ep=epoch;while(thumbJobs<3&&thumbQueue.length){const f=thumbQueue.shift();if(thumbUrls.has(f.id))continue;thumbUrls.set(f.id,'');thumbJobs++;
-  (async()=>{try{if(Number(f.size)>8*1024*1024)return;const b=await fetchBlob(f);if(ep!==epoch)return;thumbUrls.set(f.id,URL.createObjectURL(b));applyThumb(f.id)}catch(e){}finally{thumbJobs--;runThumbs()}})()}}
-async function openRecord(f){
-  try{
-    if(f.source==='service'&&typeof editServiceRecord==='function'){closeFiles();await editServiceRecord(f.recordId);return}
-    if(f.source==='orders'&&typeof openOperationOrder==='function'){closeFiles();await appNavigate('orders');await openOperationOrder(f.recordId);return}
-    if(f.source==='organization'){closeFiles();await appNavigate('organization');return}
-  }catch(e){alert(e?.message||'Kayıt açılamadı.')}
-}
-
-/* ---------- Olaylar ---------- */
-function closeFiles(){overlay.hidden=true;closePreview()}
-overlay.addEventListener('click',e=>{
-  const v=e.target.closest('[data-cf-files-view]');if(v){view=v.dataset.cfFilesView;try{localStorage.setItem('cfFilesView',view)}catch(_){};render();return}
-  const s=e.target.closest('[data-cf-files-src]');if(s){filterSource=s.dataset.cfFilesSrc;shown=PAGE;render();return}
-  if(e.target.closest('#cfFilesMore')){shown+=PAGE;render();return}
-  const a=e.target.closest('[data-cf-files-act]');if(!a)return;const f=findFile(a.dataset.id);if(!f)return;
-  ({preview:openPreview,download,record:openRecord})[a.dataset.cfFilesAct]?.(f);
-});
-let searchTimer=0;
-$('cfFilesSearch').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>{shown=PAGE;render()},180)});
-$('cfFilesSource').addEventListener('change',e=>{filterSource=e.target.value;shown=PAGE;render()});
-$('cfFilesType').addEventListener('change',()=>{shown=PAGE;render()});
-$('cfFilesSort').addEventListener('change',()=>{shown=PAGE;render()});
-$('cfFilesRefresh').onclick=()=>load();
-$('cfFilesClose').onclick=()=>{closeFiles();appNavigate('home')};
-$('cfFilesPreviewClose').onclick=closePreview;
-preview.addEventListener('click',e=>{if(e.target===preview)closePreview()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!preview.hidden)closePreview()});
-
-window.cfOpenFiles=async function(){
-  if(!visible()){alert('Dosyalar ekranını görüntüleme yetkiniz yok.');return}
-  if(typeof setMobileMenu==='function')setMobileMenu(false);
-  closeAllCepFirmaViews();
-  overlay.hidden=false;overlay.scrollTop=0;
-  document.querySelectorAll('.ds-nav button,.md-menu button').forEach(b=>b.classList.toggle('active','cfFilesNav' in b.dataset));
-  if(!loaded||lastLoadKey!==key()){lastLoadKey=key();await load()}else render();
+/* ---- Kayıt ekleri (salt okunur, önceki Dosyalar sayfası) ---- */
+const REC={
+  service:{label:'Servis eki',action:'service',bucket:'service-record-files'},
+  orders:{label:'Fatura / İrsaliye',action:'orders',bucket:'operation-documents'},
+  organization:{label:'Organizasyon',action:'organization',bucket:'organization-documents'}
 };
-let lastLoadKey='';
+async function pageAll(build){const out=[];for(let p=0;p<4;p++){const r=await build().range(p*500,p*500+499);if(r.error)throw r.error;out.push(...(r.data||[]));if((r.data||[]).length<500)break}return out}
+async function loadRecords(){
+  const company=currentCompanyId,k=key(),out=[];
+  if(can('service'))try{const rows=await pageAll(()=>sb.from('service_record_files').select('id,service_id,original_name,mime_type,byte_size,storage_path,created_at').eq('company_id',company).is('removed_at',null).order('created_at',{ascending:false}));const ids=[...new Set(rows.map(r=>r.service_id))],m=new Map();if(ids.length){const r=await sb.from('technical_service_records').select('id,service_number,customer_name').eq('company_id',company).in('id',ids.slice(0,300));for(const x of r.data||[])m.set(x.id,x)}for(const r of rows)if(r.storage_path)out.push({id:'s'+r.id,record:'service',recordId:r.service_id,name:r.original_name||'Servis eki',mime:r.mime_type,size:r.byte_size,date:r.created_at,storage_path:r.storage_path,sub:[m.get(r.service_id)?.service_number,m.get(r.service_id)?.customer_name].filter(Boolean).join(' · ')})}catch(e){}
+  if(can('orders'))try{const rows=await pageAll(()=>sb.from('operation_documents').select('*').eq('company_id',company).order('id',{ascending:false}));for(const r of rows)if(r.file_path&&(r.ready_at||r.status==='ready'))out.push({id:'o'+r.id,record:'orders',recordId:r.order_id,name:r.file_name||'Belge.pdf',mime:'application/pdf',size:r.file_size,date:r.ready_at||r.created_at,storage_path:r.file_path,sub:'Sipariş belgesi'})}catch(e){}
+  if(can('organization'))try{const rows=await pageAll(()=>sb.from('event_organizations').select('id,title,details,updated_at').eq('company_id',company).order('id',{ascending:false}));for(const r of rows){const d=r.details||{};for(const [kk,l] of [['ticket','Bilet'],['hotel','Otel rezervasyonu']]){const p=d[kk+'_file'];if(typeof p==='string'&&p.startsWith(company+'/')&&!p.includes('..'))out.push({id:'g'+r.id+kk,record:'organization',recordId:r.id,name:l+' — '+(r.title||'Organizasyon')+'.pdf',mime:'application/pdf',size:null,date:r.updated_at,storage_path:p,sub:r.title||''})}}}catch(e){}
+  if(k!==key())return;records=out;recordsLoaded=true;
+}
 
-/* ---------- Menü bağlantısı (mevcut kodu değiştirmeden sarmalar) ---------- */
+/* ================= Depolama erişimi ================= */
+function bucketOf(f){return f.record?REC[f.record].bucket:BUCKET}
+function pathOk(f){return typeof f.storage_path==='string'&&f.storage_path.startsWith(currentCompanyId+'/')&&!f.storage_path.includes('..')}
+async function signed(f,opts){if(!pathOk(f))throw Error('Dosya yolu bu şirkete ait değil.');const {data,error}=await sb.storage.from(bucketOf(f)).createSignedUrl(f.storage_path,opts?.expires||3600,opts?.download?{download:safeName(f.name)}:undefined);if(error||!data?.signedUrl)throw Error(error?.message||'Bağlantı oluşturulamadı.');return data.signedUrl}
+async function blob(f){if(!pathOk(f))throw Error('Dosya yolu bu şirkete ait değil.');const {data,error}=await sb.storage.from(bucketOf(f)).download(f.storage_path);if(error||!data)throw Error(error?.message||'Dosya indirilemedi.');return data}
+async function download(f){
+  try{let url;try{url=await signed(f,{download:true,expires:300})}catch(e){const b=await blob(f);url=URL.createObjectURL(b);setTimeout(()=>URL.revokeObjectURL(url),5000)}
+    const a=document.createElement('a');a.href=url;a.download=safeName(f.name);a.rel='noopener';document.body.append(a);a.click();a.remove()}
+  catch(e){alert('İndirilemedi: '+(e.message||e))}
+}
+
+/* ================= Arayüz iskeleti ================= */
+const overlay=document.createElement('section');overlay.id='cfFilesOverlay';overlay.className='pr-page-view cf-files-overlay';overlay.hidden=true;
+overlay.innerHTML='<div class="pr-page-shell"><header class="pr-page-head"><div><small class="workspace-kicker">BELGELER • DOSYA YÖNETİMİ</small><h1>Dosyalar</h1><p>Kataloglar, broşürler, videolar ve şirket dosyaları tek yerde.</p></div><button class="btn light" id="cffmClose" type="button">Ana sayfaya dön</button></header>'
+ +'<div class="cffm"><aside class="cffm-side" id="cffmSide"></aside><div class="cffm-main" id="cffmMain"><div class="cffm-top"><div class="cffm-crumb" id="cffmCrumb"></div><div class="cffm-tools"><input type="search" id="cffmSearch" placeholder="Dosya ara…" aria-label="Dosya ara"><select id="cffmSort" aria-label="Sırala"><option value="date">En yeni</option><option value="name">Ada göre</option><option value="size">Boyuta göre</option><option value="type">Türe göre</option></select><div class="cffm-seg" role="group" aria-label="Görünüm"><button type="button" data-cffm-mode="grid">Kart</button><button type="button" data-cffm-mode="list">Liste</button></div></div></div><div id="cffmSel"></div><p class="cffm-state" id="cffmState" role="status" aria-live="polite"></p><div id="cffmBody"></div></div></div>'
+ +'<input type="file" id="cffmInput" multiple hidden></div>';
+document.body.append(overlay);
+const modal=document.createElement('div');modal.className='cffm-modal';modal.hidden=true;document.body.append(modal);
+let modalUrl=null;
+function closeModal(){modal.hidden=true;modal.replaceChildren();if(modalUrl){URL.revokeObjectURL(modalUrl);modalUrl=null}}
+modal.addEventListener('click',e=>{if(e.target===modal||e.target.closest('[data-close]'))closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!modal.hidden)closeModal();closeMenu()}});
+function state(t,err){const s=$('cffmState');if(!s)return;s.textContent=t||'';s.classList.toggle('err',!!err)}
+
+/* ================= Görünüm ================= */
+function list(){
+  let l;if(view.kind==='records')l=records;else if(view.kind==='recent')l=files.slice().sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,30);else if(view.kind==='folder')l=files.filter(f=>f.folder_id===view.id);else l=files;
+  const qq=q.trim().toLocaleLowerCase('tr-TR');if(qq)l=l.filter(f=>(f.name+' '+(f.sub||'')).toLocaleLowerCase('tr-TR').includes(qq));
+  const by={date:(a,b)=>String(b.date||'').localeCompare(String(a.date||'')),name:(a,b)=>a.name.localeCompare(b.name,'tr'),size:(a,b)=>(Number(b.size)||0)-(Number(a.size)||0),type:(a,b)=>kindOf(a.name,a.mime).localeCompare(kindOf(b.name,b.mime))||a.name.localeCompare(b.name,'tr')}[sort];
+  return view.kind==='recent'&&sort==='date'?l:l.slice().sort(by);
+}
+const folderName=id=>folders.find(f=>f.id===id)?.name||'—';
+function renderSide(){
+  const used=files.reduce((s,f)=>s+(Number(f.size)||0),0),cnt=id=>files.filter(f=>f.folder_id===id).length;
+  const nav=(kind,id,ic,label,count)=>'<button type="button" data-cffm-view="'+kind+'" data-id="'+escH(id||'')+'" aria-current="'+(view.kind===kind&&(view.id||'')===(id||''))+'"><span class="ic">'+svg(ic)+'</span><span class="l">'+escH(label)+'</span>'+(count!=null?'<b>'+count+'</b>':'')+(kind==='folder'&&canFolders()?'<span class="fm" role="button" tabindex="0" data-cffm-fmenu="'+escH(id)+'" aria-label="'+escH(label)+' klasör işlemleri">⋯</span>':'')+'</button>';
+  let h='';
+  if(ready)h+='<div class="cffm-box cffm-actions"><button type="button" class="btn primary" id="cffmUploadBtn"'+(canUpload()?'':' disabled title="Yükleme yetkiniz yok"')+'>'+svg('upload').replace('<svg','<svg style="width:15px;height:15px;margin-right:6px"')+'Yükle</button><button type="button" class="btn light" id="cffmNewFolder"'+(canFolders()?'':' disabled title="Klasör oluşturma yetkisi yöneticilerde"')+'>+ Klasör</button></div>';
+  h+='<div class="cffm-box"><h4>Hızlı erişim</h4><div class="cffm-nav">'+(ready?nav('all','','all','Tüm dosyalar',files.length)+nav('recent','','clock','Son yüklenenler',null):'')+nav('records','','clip','Kayıt ekleri',recordsLoaded?records.length:null)+'</div></div>';
+  if(ready)h+='<div class="cffm-box"><h4>Klasörler'+(canFolders()?'<button type="button" id="cffmNewFolder2">+ Yeni</button>':'')+'</h4><div class="cffm-nav">'+(folders.length?folders.map(f=>nav('folder',f.id,folderIcon(f.name),f.name,cnt(f.id))).join(''):'<p class="cffm-state">Klasör yok.</p>')+'</div></div>';
+  if(ready)h+='<div class="cffm-box cffm-store"><h4>Depolama</h4><b>'+(used?size(used):'0 B')+'</b> <small style="display:inline">kullanıldı</small><div class="cffm-bar"><i style="width:'+Math.min(100,used/QUOTA*100).toFixed(1)+'%"></i></div><small>'+files.length+' dosya · dosya başına en fazla 50 MB</small></div>';
+  $('cffmSide').innerHTML=h;
+}
+function renderCrumb(){
+  const t=view.kind==='records'?'Kayıt ekleri':view.kind==='recent'?'Son yüklenenler':view.kind==='folder'?folderName(view.id):'Tüm dosyalar';
+  $('cffmCrumb').innerHTML='<span>Dosyalar</span><span>›</span><b>'+escH(t)+'</b>';
+  document.querySelectorAll('[data-cffm-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.cffmMode===mode)));
+  $('cffmSort').value=sort;
+}
+function renderSel(){
+  const box=$('cffmSel');const n=selected.size;if(!n){box.innerHTML='';return}
+  const sel=files.filter(f=>selected.has(f.id)),mod=sel.every(canModify);
+  box.innerHTML='<div class="cffm-sel"><b>'+n+' dosya seçili</b><button type="button" class="btn light" data-cffm-bulk="download">İndir</button>'+(mod?'<button type="button" class="btn light" data-cffm-bulk="move">Taşı</button><button type="button" class="btn light" data-cffm-bulk="delete">Sil</button>':'')+'<button type="button" class="btn light" data-cffm-bulk="clear">Seçimi kaldır</button></div>';
+}
+function render(){
+  if(overlay.hidden)return;renderSide();renderCrumb();
+  const body=$('cffmBody');let h='';
+  if(setupMissing){
+    if(view.kind!=='records'){view={kind:'records',id:''};renderSide();renderCrumb()}
+    h+='<div class="cffm-note"><b>Dosya yükleme için bir kerelik kurulum gerekiyor.</b><br>Supabase SQL Editor’de <b>dosyalar-kurulum.sql</b> dosyasını çalıştırın. Bu sırada aşağıdaki <b>Kayıt ekleri</b> listesinden servis, sipariş ve organizasyon dosyalarına erişebilirsiniz.</div>';
+  }
+  const l=list();
+  if(view.kind==='records'&&!recordsLoaded){body.innerHTML=h+'<p class="cffm-state">Kayıt ekleri yükleniyor…</p>';loadRecords().then(()=>{if(view.kind==='records')render()});return}
+  if(view.kind==='records')h+='<p class="cffm-state" style="margin:0">Servis kayıtlarına, siparişlere ve organizasyonlara eklenen dosyalar. Bu dosyalar kendi kayıtlarından yönetilir.</p>';
+  if(canUpload()&&view.kind!=='records')h+='<div class="cffm-drop" id="cffmDrop" role="button" tabindex="0">'+svg('upload')+'<b>Dosyaları buraya sürükleyin</b>veya seçmek için tıklayın'+(view.kind==='folder'?' · “'+escH(folderName(view.id))+'” klasörüne yüklenir':' · türüne göre uygun klasöre yerleşir')+'</div>';
+  if(!l.length)h+='<div class="cffm-empty"><b>'+(q?'Eşleşen dosya yok':'Bu klasör boş')+'</b>'+(q?'Aramayı değiştirmeyi deneyin.':(view.kind==='records'?'Henüz kayıtlara eklenmiş dosya yok.':'İlk dosyanızı yükleyin.'))+'</div>';
+  else if(mode==='grid'){
+    h+='<div class="cffm-grid">'+l.map(f=>{const k=kindOf(f.name,f.mime),s=selected.has(f.id);return '<article class="cffm-card'+(s?' sel':'')+'" data-id="'+escH(f.id)+'">'+(f.record?'':'<input type="checkbox" class="ck" data-cffm-check="'+escH(f.id)+'"'+(s?' checked':'')+' aria-label="'+escH(f.name)+' seç">')+'<button type="button" class="cffm-thumb" data-cffm-open="'+escH(f.id)+'" aria-label="'+escH(f.name)+' aç">'+(k==='img'&&thumbs.get(f.id)?'<img alt="" src="'+escH(thumbs.get(f.id))+'">':fi(f))+'</button><div class="cffm-cb"><div><b title="'+escH(f.name)+'">'+escH(f.name)+'</b><small>'+(f.record?escH(REC[f.record].label)+(f.sub?' · '+escH(f.sub):''):size(f.size)+' · '+when(f.date))+'</small></div><button type="button" class="cffm-more" data-cffm-menu="'+escH(f.id)+'" aria-label="İşlemler">⋯</button></div></article>'}).join('')+'</div>';
+  }else{
+    const all=l.filter(f=>!f.record);const allSel=all.length&&all.every(f=>selected.has(f.id));
+    h+='<div class="cffm-table-wrap"><table class="cffm-table data-table"><thead><tr><th style="width:36px">'+(view.kind==='records'?'':'<input type="checkbox" data-cffm-all aria-label="Tümünü seç"'+(allSel?' checked':'')+'>')+'</th><th>Ad</th><th class="cffm-col-folder">'+(view.kind==='records'?'Kaynak':'Klasör')+'</th><th>Boyut</th><th class="cffm-col-date">Tarih</th><th aria-label="İşlemler"></th></tr></thead><tbody>'
+      +l.map(f=>'<tr class="'+(selected.has(f.id)?'sel':'')+'"><td>'+(f.record?'':'<input type="checkbox" data-cffm-check="'+escH(f.id)+'"'+(selected.has(f.id)?' checked':'')+' aria-label="'+escH(f.name)+' seç">')+'</td><td><div class="cffm-name" data-cffm-open="'+escH(f.id)+'">'+fi(f,true)+'<div><b>'+escH(f.name)+'</b>'+(f.sub?'<br><small class="cffm-state">'+escH(f.sub)+'</small>':'')+'</div></div></td><td class="cffm-col-folder"><span class="cffm-src">'+escH(f.record?REC[f.record].label:folderName(f.folder_id))+'</span></td><td class="cffm-num">'+size(f.size)+'</td><td class="cffm-num cffm-col-date">'+when(f.date)+'</td><td style="text-align:right"><button type="button" class="cffm-more" data-cffm-menu="'+escH(f.id)+'" aria-label="İşlemler">⋯</button></td></tr>').join('')+'</tbody></table></div>';
+  }
+  body.innerHTML=h;renderSel();
+  if(mode==='grid')loadThumbs(l.filter(f=>kindOf(f.name,f.mime)==='img'&&!thumbs.has(f.id)).slice(0,60));
+}
+async function loadThumbs(l){
+  const job=++thumbJob;const own=l.filter(f=>!f.record),rec=l.filter(f=>f.record);
+  try{if(own.length){const {data}=await sb.storage.from(BUCKET).createSignedUrls(own.map(f=>f.storage_path),3600);if(job!==thumbJob)return;(data||[]).forEach((d,i)=>{if(d?.signedUrl)thumbs.set(own[i].id,d.signedUrl)})}}catch(e){}
+  for(const f of rec){try{thumbs.set(f.id,await signed(f,{expires:3600}))}catch(e){thumbs.set(f.id,'')}if(job!==thumbJob)return}
+  if(job===thumbJob&&mode==='grid'&&!overlay.hidden)document.querySelectorAll('.cffm-card').forEach(c=>{const u=thumbs.get(c.dataset.id);const t=c.querySelector('.cffm-thumb');if(u&&t&&!t.querySelector('img'))t.innerHTML='<img alt="" src="'+escH(u)+'">'});
+}
+
+/* ================= Yükleme ================= */
+function targetFolder(file){
+  if(view.kind==='folder')return view.id;
+  const k=kindOf(file.name,file.type),pick=n=>folders.find(f=>f.name.toLocaleLowerCase('tr-TR')===n)?.id;
+  return (k==='video'&&pick('videolar'))||(k==='audio'&&pick('müzikler'))||(k==='img'&&pick('görseller'))||(['word','excel','ppt'].includes(k)&&pick('office dosyaları'))||pick('diğer')||folders[0]?.id;
+}
+let queueEl=null;
+function queue(items){
+  if(!queueEl){queueEl=document.createElement('div');queueEl.className='cffm-queue';document.body.append(queueEl)}
+  queueEl.innerHTML='<header><span id="cffmQTitle">Yükleniyor…</span><button type="button" aria-label="Kapat">×</button></header><ul>'+items.map((it,i)=>'<li><span title="'+escH(it.file.name)+'">'+escH(it.file.name)+'</span><em id="cffmQ'+i+'" class="'+(it.error?'err':'run')+'">'+(it.error?escH(it.error):'Bekliyor')+'</em></li>').join('')+'</ul>';
+  queueEl.querySelector('header button').onclick=()=>{queueEl.remove();queueEl=null};
+}
+async function upload(fileList){
+  if(!canUpload()){alert('Dosya yükleme yetkiniz yok.');return}
+  if(!folders.length){alert('Önce bir klasör oluşturulmalı.');return}
+  const items=[...fileList].map(file=>({file,error:file.size>MAX?'50 MB sınırını aşıyor':(!file.size?'Boş dosya':'')}));if(!items.length)return;
+  queue(items);const k=key(),company=currentCompanyId;let ok=0,fail=0;
+  for(let i=0;i<items.length;i++){
+    const it=items[i],mark=(t,c)=>{const e=$('cffmQ'+i);if(e){e.textContent=t;e.className=c}};
+    if(it.error){fail++;continue}
+    if(k!==key()){mark('İptal','err');fail++;continue}
+    const folder=targetFolder(it.file),e=extOf(it.file.name),path=company+'/'+folder+'/'+crypto.randomUUID()+(e?'.'+e:'');
+    mark('Yükleniyor…','run');
+    try{
+      const up=await sb.storage.from(BUCKET).upload(path,it.file,{contentType:it.file.type||'application/octet-stream',upsert:false,cacheControl:'3600'});
+      if(up.error)throw up.error;
+      const ins=await sb.from('company_files').insert({company_id:company,folder_id:folder,name:it.file.name.slice(0,200),mime_type:it.file.type||null,byte_size:it.file.size,storage_path:path,uploaded_by:currentUser.id}).select('id').single();
+      if(ins.error){await sb.storage.from(BUCKET).remove([path]);throw ins.error}
+      ok++;mark('✓ '+folderName(folder),'ok');
+    }catch(err){fail++;mark(/exceeded|too large|413/i.test(err?.message||'')?'Boyut sınırı aşıldı':'Hata: '+(err?.message||'yüklenemedi').slice(0,40),'err')}
+  }
+  const t=$('cffmQTitle');if(t)t.textContent=ok+' dosya yüklendi'+(fail?' · '+fail+' hata':'');
+  if(ok)await loadAll();if(queueEl&&!fail)setTimeout(()=>{queueEl?.remove();queueEl=null},4000);
+}
+
+/* ================= Önizleme, paylaşım, düzenleme ================= */
+async function preview(f){
+  const k=kindOf(f.name,f.mime);
+  if(!['img','pdf','video','audio'].includes(k)){download(f);return}
+  modal.innerHTML='<div class="cffm-dialog"><header><b>'+escH(f.name)+'</b><div><button type="button" class="btn light" id="cffmPvDl">İndir</button><button type="button" class="btn light" data-close>Kapat</button></div></header><div class="body view" id="cffmPv"><span class="cffm-state">Yükleniyor…</span></div></div>';modal.hidden=false;
+  $('cffmPvDl').onclick=()=>download(f);
+  try{
+    const box=$('cffmPv');
+    if(k==='pdf'){const b=await blob(f);if((await b.slice(0,5).text())!=='%PDF-')throw Error('Dosya geçerli bir PDF değil; indirip açın.');modalUrl=URL.createObjectURL(new Blob([b],{type:'application/pdf'}));box.innerHTML='<iframe title="'+escH(f.name)+'"></iframe>';box.querySelector('iframe').src=modalUrl}
+    else{const u=await signed(f,{expires:3600});if(k==='img')box.innerHTML='<img alt="'+escH(f.name)+'">';else if(k==='video')box.innerHTML='<video controls playsinline preload="metadata"></video>';else box.innerHTML='<audio controls preload="metadata"></audio>';box.firstChild.src=u}
+  }catch(e){const box=$('cffmPv');if(box)box.innerHTML='<span class="cffm-state err">'+escH(e.message||'Önizleme açılamadı.')+'</span>'}
+}
+function dialog(title,bodyHtml,okLabel,onOk,danger){
+  modal.innerHTML='<div class="cffm-dialog small"><header><b>'+escH(title)+'</b></header><div class="body">'+bodyHtml+'</div><footer><button type="button" class="btn light" data-close>Vazgeç</button>'+(okLabel?'<button type="button" class="btn '+(danger?'light':'primary')+'" id="cffmOk"'+(danger?' style="color:#b91c1c;border-color:#fecaca"':'')+'>'+escH(okLabel)+'</button>':'')+'</footer></div>';modal.hidden=false;
+  const ok=$('cffmOk');if(ok)ok.onclick=async()=>{ok.disabled=true;try{if(await onOk()!==false)closeModal()}catch(e){alert(e.message||e)}finally{if(ok.isConnected)ok.disabled=false}};
+  setTimeout(()=>modal.querySelector('input,select')?.focus(),50);
+  modal.querySelector('input')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('cffmOk')?.click()}});
+}
+async function share(f){
+  let url;try{url=await signed(f,{expires:7*86400})}catch(e){alert('Bağlantı oluşturulamadı: '+e.message);return}
+  dialog('Paylaşım bağlantısı','<p><b>'+escH(f.name)+'</b> için 7 gün geçerli bir indirme bağlantısı oluşturuldu. Bağlantıya sahip <b>herkes</b> dosyayı açabilir; yalnızca güvendiğiniz kişilerle paylaşın.</p><div class="cffm-link"><input id="cffmLink" readonly value="'+escH(url)+'"><button type="button" class="btn primary" id="cffmCopy">Kopyala</button></div>',null);
+  $('cffmCopy').onclick=async()=>{const i=$('cffmLink');i.select();try{await navigator.clipboard.writeText(i.value);toast('Bağlantı kopyalandı')}catch(e){document.execCommand('copy');toast('Bağlantı kopyalandı')}};
+}
+function rename(f){
+  dialog('Yeniden adlandır','<label for="cffmName">Dosya adı</label><input id="cffmName" maxlength="200" value="'+escH(f.name)+'">','Kaydet',async()=>{
+    let n=$('cffmName').value.trim();if(!n)return false;const e=extOf(f.name);if(e&&!extOf(n))n+='.'+e;
+    const {error}=await sb.from('company_files').update({name:n.slice(0,200)}).eq('company_id',currentCompanyId).eq('id',f.id);if(error)throw Error('Ad değiştirilemedi: '+error.message);
+    f.name=n;render();toast('Ad değiştirildi');});
+}
+function move(list){
+  dialog(list.length>1?list.length+' dosyayı taşı':'Taşı','<label for="cffmTo">Hedef klasör</label><select id="cffmTo">'+folders.map(x=>'<option value="'+escH(x.id)+'">'+escH(x.name)+'</option>').join('')+'</select>','Taşı',async()=>{
+    const to=$('cffmTo').value;const ids=list.map(f=>f.id);const {error}=await sb.from('company_files').update({folder_id:to}).eq('company_id',currentCompanyId).in('id',ids);if(error)throw Error('Taşınamadı: '+error.message);
+    list.forEach(f=>f.folder_id=to);selected.clear();render();toast(list.length+' dosya “'+folderName(to)+'” klasörüne taşındı');});
+}
+function remove(list){
+  dialog(list.length>1?list.length+' dosyayı sil':'Dosyayı sil','<p>'+(list.length>1?'<b>'+list.length+' dosya</b>':'<b>'+escH(list[0].name)+'</b>')+' kalıcı olarak silinecek. Bu işlem geri alınamaz.</p>'+(list.length>1?'<p style="max-height:140px;overflow:auto">• '+list.map(f=>escH(f.name)).join('<br>• ')+'</p>':''),'Kalıcı olarak sil',async()=>{
+    const done=[],fail=[];
+    for(const f of list){try{const d=await sb.from('company_files').delete().eq('company_id',currentCompanyId).eq('id',f.id).select('id');if(d.error)throw d.error;if(!d.data?.length)throw Error('yetki yok');await sb.storage.from(BUCKET).remove([f.storage_path]);done.push(f.id)}catch(e){fail.push(f.name+': '+(e.message||e))}}
+    files=files.filter(f=>!done.includes(f.id));done.forEach(id=>selected.delete(id));render();
+    if(fail.length)alert('Silinemeyenler:\n• '+fail.join('\n• '));else toast(done.length+' dosya silindi');},true);
+}
+function newFolder(){
+  dialog('Yeni klasör','<label for="cffmName">Klasör adı</label><input id="cffmName" maxlength="60" placeholder="Örn. Fuar 2027">','Oluştur',async()=>{
+    const n=$('cffmName').value.trim().replace(/\s+/g,' ');if(!n)return false;if(folders.some(f=>f.name.toLocaleLowerCase('tr-TR')===n.toLocaleLowerCase('tr-TR')))throw Error('Bu adla bir klasör zaten var.');
+    const {data,error}=await sb.from('company_folders').insert({company_id:currentCompanyId,name:n,sort_order:100}).select('id,name,sort_order').single();if(error)throw Error('Klasör oluşturulamadı: '+error.message);
+    folders.push(data);view={kind:'folder',id:data.id};render();});
+}
+function folderMenu(id,anchor){
+  const f=folders.find(x=>x.id===id);if(!f)return;const n=files.filter(x=>x.folder_id===id).length;
+  menu(anchor,[['Yeniden adlandır',()=>dialog('Klasörü yeniden adlandır','<label for="cffmName">Klasör adı</label><input id="cffmName" maxlength="60" value="'+escH(f.name)+'">','Kaydet',async()=>{const v=$('cffmName').value.trim().replace(/\s+/g,' ');if(!v)return false;const {error}=await sb.from('company_folders').update({name:v}).eq('company_id',currentCompanyId).eq('id',id);if(error)throw Error(/duplicate|unique/i.test(error.message)?'Bu adla bir klasör zaten var.':error.message);f.name=v;render()})],
+    ['Klasörü sil',()=>{if(n){alert('Klasörde '+n+' dosya var. Önce dosyaları taşıyın veya silin.');return}dialog('Klasörü sil','<p><b>'+escH(f.name)+'</b> klasörü silinecek.</p>','Sil',async()=>{const {error}=await sb.from('company_folders').delete().eq('company_id',currentCompanyId).eq('id',id);if(error)throw Error('Silinemedi: '+error.message);folders=folders.filter(x=>x.id!==id);if(view.id===id)view={kind:'all',id:''};render()},true)},true]]);
+}
+let menuEl=null;
+function closeMenu(){menuEl?.remove();menuEl=null}
+function menu(anchor,items){
+  closeMenu();menuEl=document.createElement('div');menuEl.className='cffm-menu';menuEl.setAttribute('role','menu');
+  items.forEach(it=>{if(it==='-'){menuEl.append(document.createElement('hr'));return}const b=document.createElement('button');b.type='button';b.setAttribute('role','menuitem');b.textContent=it[0];if(it[2])b.className='danger';b.onclick=()=>{closeMenu();it[1]()};menuEl.append(b)});
+  document.body.append(menuEl);const r=anchor.getBoundingClientRect(),w=menuEl.offsetWidth,h=menuEl.offsetHeight;
+  menuEl.style.left=Math.max(8,Math.min(innerWidth-w-8,r.right-w))+'px';menuEl.style.top=(r.bottom+h+8>innerHeight?Math.max(8,r.top-h-4):r.bottom+4)+'px';
+  menuEl.querySelector('button')?.focus();
+}
+document.addEventListener('click',e=>{if(menuEl&&!menuEl.contains(e.target)&&!e.target.closest('[data-cffm-menu],[data-cffm-fmenu]'))closeMenu()});
+function fileMenu(f,anchor){
+  const k=kindOf(f.name,f.mime),items=[[['img','pdf','video','audio'].includes(k)?'Önizle':'Aç',()=>preview(f)],['İndir',()=>download(f)]];
+  if(!f.record)items.push(['Paylaşım bağlantısı',()=>share(f)]);
+  if(f.record)items.push(['Kayda git',()=>openRecord(f)]);
+  if(canModify(f))items.push('-',['Yeniden adlandır',()=>rename(f)],['Taşı',()=>move([f])],['Sil',()=>remove([f]),true]);
+  menu(anchor,items);
+}
+async function openRecord(f){overlay.hidden=true;try{if(f.record==='service')await editServiceRecord(f.recordId);else if(f.record==='orders'){await appNavigate('orders');await openOperationOrder(f.recordId)}else await appNavigate('organization')}catch(e){alert(e.message||'Kayıt açılamadı.')}}
+const find=id=>files.find(f=>f.id===id)||records.find(f=>f.id===id);
+
+/* ================= Olaylar ================= */
+overlay.addEventListener('click',e=>{
+  const t=e.target;
+  const fm=t.closest('[data-cffm-fmenu]');if(fm){e.stopPropagation();folderMenu(fm.dataset.cffmFmenu,fm);return}
+  const v=t.closest('[data-cffm-view]');if(v){view={kind:v.dataset.cffmView,id:v.dataset.id||''};selected.clear();render();return}
+  const m=t.closest('[data-cffm-mode]');if(m){mode=m.dataset.cffmMode;try{localStorage.setItem('cfFmView',mode)}catch(_){}render();return}
+  if(t.closest('#cffmUploadBtn')||t.closest('#cffmDrop')){if(canUpload())$('cffmInput').click();return}
+  if(t.closest('#cffmNewFolder,#cffmNewFolder2')){newFolder();return}
+  const mn=t.closest('[data-cffm-menu]');if(mn){const f=find(mn.dataset.cffmMenu);if(f)fileMenu(f,mn);return}
+  if(t.matches('[data-cffm-check],[data-cffm-all]'))return;
+  const o=t.closest('[data-cffm-open]');if(o){const f=find(o.dataset.cffmOpen);if(f)preview(f);return}
+  const b=t.closest('[data-cffm-bulk]');if(b){const sel=files.filter(f=>selected.has(f.id)),a=b.dataset.cffmBulk;
+    if(a==='clear'){selected.clear();render()}else if(a==='download'){sel.forEach((f,i)=>setTimeout(()=>download(f),i*400))}else if(a==='move')move(sel);else if(a==='delete')remove(sel);return}
+});
+overlay.addEventListener('change',e=>{
+  const c=e.target.closest('[data-cffm-check]');if(c){c.checked?selected.add(c.dataset.cffmCheck):selected.delete(c.dataset.cffmCheck);render();return}
+  if(e.target.matches('[data-cffm-all]')){const l=list().filter(f=>!f.record);l.forEach(f=>e.target.checked?selected.add(f.id):selected.delete(f.id));render();return}
+  if(e.target.id==='cffmInput'){const fl=e.target.files;if(fl?.length)upload(fl);e.target.value=''}
+  if(e.target.id==='cffmSort'){sort=e.target.value;try{localStorage.setItem('cfFmSort',sort)}catch(_){}render()}
+});
+overlay.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('#cffmDrop,[data-cffm-fmenu]')){e.preventDefault();e.target.click()}});
+let st=0;overlay.addEventListener('input',e=>{if(e.target.id==='cffmSearch'){clearTimeout(st);st=setTimeout(()=>{q=e.target.value;render()},150)}});
+/* sürükle-bırak: ana alanın tamamı */
+const main=overlay.querySelector('#cffmMain');let dragDepth=0;
+main.addEventListener('dragenter',e=>{if(!canUpload()||![...(e.dataTransfer?.types||[])].includes('Files'))return;e.preventDefault();dragDepth++;main.classList.add('dragging')});
+main.addEventListener('dragover',e=>{if(!canUpload()||![...(e.dataTransfer?.types||[])].includes('Files'))return;e.preventDefault();e.dataTransfer.dropEffect='copy'});
+main.addEventListener('dragleave',()=>{dragDepth=Math.max(0,dragDepth-1);if(!dragDepth)main.classList.remove('dragging')});
+main.addEventListener('drop',e=>{if(!canUpload())return;e.preventDefault();dragDepth=0;main.classList.remove('dragging');if(e.dataTransfer?.files?.length)upload(e.dataTransfer.files)});
+$('cffmClose').onclick=()=>{overlay.hidden=true;appNavigate('home')};
+
+/* ================= Açma ve menü ================= */
+const visible=()=>!!currentUser&&!!currentCompanyId;
+window.cfOpenFiles=async function(){
+  if(!visible())return;if(typeof setMobileMenu==='function')setMobileMenu(false);closeAllCepFirmaViews();overlay.hidden=false;overlay.scrollTop=0;
+  document.querySelectorAll('.ds-nav button,.md-menu button').forEach(b=>b.classList.toggle('active','cfFilesNav' in b.dataset));
+  selected.clear();render();await loadAll();if(!recordsLoaded)loadRecords().then(()=>{if(!overlay.hidden)renderSide()});
+};
 function layout(){
-  const allowed=visible();
+  const ok=visible()&&role()!=='';
   for(const nav of document.querySelectorAll('.ds-nav,.md-menu')){
     let b=nav.querySelector('[data-cf-files-nav]');
-    if(!b){b=document.createElement('button');b.type='button';b.dataset.cfFilesNav='';b.className=nav.matches('.ds-nav')?'ds-btn':'';
-      b.innerHTML='<span class="'+(nav.matches('.ds-nav')?'ds-icon':'mi')+'">'+svg('folder')+'</span><span>Dosyalar</span>';b.onclick=()=>cfOpenFiles();
-    }
+    if(!b){b=document.createElement('button');b.type='button';b.dataset.cfFilesNav='';b.className=nav.matches('.ds-nav')?'ds-btn':'';b.innerHTML='<span class="'+(nav.matches('.ds-nav')?'ds-icon':'mi')+'">'+svg('folder')+'</span><span>Dosyalar</span>';b.onclick=()=>cfOpenFiles()}
     const rep=nav.querySelector('[data-cf-report-nav]');if(rep){if(b.nextElementSibling!==rep)nav.insertBefore(b,rep)}else if(nav.lastElementChild!==b)nav.append(b);
-    b.hidden=!allowed;if(!overlay.hidden&&allowed)b.classList.add('active')}
-  if(lastKey!==key()){lastKey=key();epoch++;files=[];errors=[];loaded=false;lastLoadKey='';resetThumbs();closeFiles();const c=$('cfFilesContent');if(c)c.replaceChildren()}
+    b.hidden=!ok;if(!overlay.hidden&&ok)b.classList.add('active')}
+  if(lastKey!==key()){lastKey=key();epoch++;files=[];folders=[];records=[];recordsLoaded=false;ready=false;setupMissing=false;thumbs.clear();selected.clear();view={kind:'all',id:''};overlay.hidden=true;closeModal()}
 }
-if(typeof applyRoleNavigation==='function'){const roleBase=applyRoleNavigation;applyRoleNavigation=function(){const r=roleBase.apply(this,arguments);layout();return r}}
-if(typeof pnRefresh==='function'){const pnBase=pnRefresh;pnRefresh=function(){const r=pnBase.apply(this,arguments);layout();return r}}
-if(typeof closeAllCepFirmaViews==='function'){const closeBase=closeAllCepFirmaViews;closeAllCepFirmaViews=function(){closeFiles();return closeBase.apply(this,arguments)}}
+if(typeof applyRoleNavigation==='function'){const base=applyRoleNavigation;applyRoleNavigation=function(){const r=base.apply(this,arguments);layout();return r}}
+if(typeof pnRefresh==='function'){const base=pnRefresh;pnRefresh=function(){const r=base.apply(this,arguments);layout();return r}}
+if(typeof closeAllCepFirmaViews==='function'){const base=closeAllCepFirmaViews;closeAllCepFirmaViews=function(){overlay.hidden=true;closeModal();closeMenu();return base.apply(this,arguments)}}
 layout();
 })();</script>
 
@@ -6840,6 +6984,142 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-cfcat-edit
 /* ---------- katalog yüklendiğinde ---------- */
 if(typeof uiCatalogueDecorate==='function'){const base=uiCatalogueDecorate;uiCatalogueDecorate=function(){const r=base.apply(this,arguments);try{ensureField();datalist();ensureFilter()}catch(e){console.warn(e)}return r}}
 ensureField();
+})();</script>
+
+<!-- ==========================================================================
+     CepFirma — Ayarlar düzeltmeleri
+     * Şirket logosunu kaldırma (Ayarları Kaydet ile kaydedilir; onaylanmış eski
+       proformalar logolarını korur, logo dosyası silinmez).
+     * Kaşe ve imzayı kaldırma (sunucu işlemi: kase-imza-kaldir.sql).
+     * "Bildirimler" sekmesine basınca arkadaki ayar ekranının boş kalması.
+     Kaldırmak için id değeri cf-settings-fix-module olan betik bloğunu silmeniz yeterlidir.
+     ========================================================================== -->
+<style id="cf-settings-fix-style">
+.cfsf-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.cfsf-danger{color:#b91c1c!important;border-color:#fecaca!important}
+.cfsf-danger:hover{background:#fef2f2!important}
+.cfsf-note{margin-top:6px;font-size:12.5px;color:#b45309}
+</style>
+<script id="cf-settings-fix-module">(function(){'use strict';
+const $=id=>document.getElementById(id);
+const admin=()=>['owner','admin'].includes(currentMembership?.role);
+function toast(t,kind){try{if(typeof showToast==='function'){showToast(t,kind||'success');return}}catch(e){}alert(t)}
+
+/* ---------------- 1) Logo kaldırma ---------------- */
+let removeLogo=false;
+function logoUi(){
+  const input=$('logo');if(!input)return;
+  let row=$('cfsfLogoRow');
+  if(!row){row=document.createElement('div');row.id='cfsfLogoRow';row.className='cfsf-row';
+    row.innerHTML='<button type="button" class="btn light cfsf-danger" id="cfsfLogoRemove">Logoyu kaldır</button><span class="cfsf-note" id="cfsfLogoNote" hidden>Logo kaldırılacak. Kaydetmek için alttaki <b>Ayarları Kaydet</b>’e basın.</span>';
+    input.parentElement.append(row);
+    $('cfsfLogoRemove').onclick=()=>{
+      if(!admin()){alert('Logoyu yalnızca şirket sahibi veya yönetici kaldırabilir.');return}
+      if(!confirm('Şirket logosu kaldırılsın mı?\n\nDeğişiklik “Ayarları Kaydet” ile kaydedilir. Daha önce onaylanmış proformalar kendi logolarını korur.'))return;
+      removeLogo=true;window._companyLogo='';try{setupLogo()}catch(e){}try{render()}catch(e){}logoUi();
+    };
+    input.addEventListener('change',()=>{if(removeLogo){removeLogo=false;logoUi()}});
+  }
+  const has=!!window._companyLogo||removeLogo;
+  $('cfsfLogoRemove').hidden=!admin()||!has||removeLogo;
+  $('cfsfLogoNote').hidden=!removeLogo;
+}
+if(window.cfCompanyLogos){
+  const L=window.cfCompanyLogos;
+  const basePayload=L.payload;L.payload=async function(){if(removeLogo)return {logo_path:null,logo_data:null};return basePayload.apply(this,arguments)};
+  const baseCommitted=L.committed;L.committed=function(){const r=baseCommitted.apply(this,arguments);if(removeLogo){removeLogo=false;setTimeout(logoUi,0)}return r};
+  const baseRestore=L.restorePreview;L.restorePreview=function(){removeLogo=false;const r=baseRestore.apply(this,arguments);setTimeout(logoUi,0);return r};
+}
+/* Ayarlar kaydedilmeden kapatılırsa kaldırma isteği iptal olur ve önizleme geri gelir */
+if(typeof closeSettings==='function'){const base=closeSettings;closeSettings=function(){if(removeLogo){removeLogo=false;try{window.cfCompanyLogos?.restorePreview()}catch(e){}}return base.apply(this,arguments)}}
+if(typeof openSettings==='function'){const base=openSettings;openSettings=function(){removeLogo=false;const r=base.apply(this,arguments);Promise.resolve(r).then(()=>{logoUi();signingUi()});return r}}
+if(typeof loadCompanySettings==='function'){const base=loadCompanySettings;loadCompanySettings=async function(){const r=await base.apply(this,arguments);try{logoUi()}catch(e){}return r}}
+
+/* ---------------- 2) Kaşe ve imzayı kaldırma ---------------- */
+let signingBusy=false;
+function hasSigning(){try{return !!(signingUpload&&(signingUpload.stamp||signingUpload.signature))}catch(e){return false}}
+function signingUi(){
+  const save=$('saveSigningAssetsBtn');if(!save)return;
+  let b=$('cfsfSigningRemove');
+  if(!b){b=document.createElement('button');b.type='button';b.id='cfsfSigningRemove';b.className='btn light cfsf-danger';b.textContent='Kaşe ve imzayı kaldır';save.insertAdjacentElement('afterend',b);b.style.marginLeft='8px';b.onclick=removeSigning}
+  b.hidden=!(typeof isProformaApprover==='function'&&isProformaApprover())||!hasSigning();
+}
+async function removeSigning(){
+  if(signingBusy)return;
+  if(!(typeof isProformaApprover==='function'&&isProformaApprover())){alert('Kaşe ve imzayı yalnızca şirket sahibi veya yönetici kaldırabilir.');return}
+  if(!confirm('Kayıtlı kaşe ve imza kaldırılsın mı?\n\n• Daha önce onaylanmış proformalar kendi kaşe/imza kopyasını korur.\n• Yeni kaşe ve imza yükleyene kadar yeni onaylarda kaşe/imza kullanılamaz; onay işlemi bu nedenle hata verebilir.'))return;
+  signingBusy=true;const b=$('cfsfSigningRemove');if(b)b.disabled=true;
+  try{
+    const {error}=await sb.rpc('delete_proforma_signing_assets',{p_company_id:currentCompanyId});
+    if(error){if(['PGRST202','42883'].includes(error.code)||/function|schema cache/i.test(error.message||''))throw Error('Kaldırma özelliği için bir kerelik kurulum gerekiyor: Supabase’de kase-imza-kaldir.sql dosyasını çalıştırın.');throw error}
+    if(typeof loadSigningAssets==='function')await loadSigningAssets();
+    const msg=$('signingAssetsMessage');if(msg)msg.textContent='Kaşe ve imza kaldırıldı. Yeni onaylar için yeniden yükleyin.';
+    toast('Kaşe ve imza kaldırıldı');
+  }catch(e){alert(e.message||'Kaşe ve imza kaldırılamadı.')}
+  finally{signingBusy=false;if(b)b.disabled=false;signingUi()}
+}
+if(typeof loadSigningAssets==='function'){const base=loadSigningAssets;loadSigningAssets=async function(){const r=await base.apply(this,arguments);try{signingUi()}catch(e){}return r}}
+if(typeof saveSigningAssets==='function'){const base=saveSigningAssets;saveSigningAssets=async function(){const r=await base.apply(this,arguments);try{signingUi()}catch(e){}return r}}
+
+/* ---------------- 3) "Bildirimler" sekmesi ekranı boşaltmasın ---------------- */
+document.addEventListener('click',e=>{
+  const t=e.target.closest('#cfNotifySettingsTab');if(!t)return;
+  const prev=[...document.querySelectorAll('#uiSettingsTabs button[data-key]')].find(b=>b.getAttribute('aria-pressed')==='true');
+  if(prev)setTimeout(()=>{prev.click();t.setAttribute('aria-pressed','false')},30);
+},true);
+
+/* Sekme değişince düğmeleri güncel tut */
+document.addEventListener('click',e=>{if(e.target.closest('#uiSettingsTabs'))setTimeout(()=>{logoUi();signingUi()},50)});
+setTimeout(()=>{try{logoUi();signingUi()}catch(e){}},0);
+})();</script>
+
+<!-- ==========================================================================
+     CepFirma — Açık / koyu tema (Metis "theme switch")
+     Üst çubuktaki ay/güneş düğmesiyle değişir; tercih bu cihazda hatırlanır.
+     Koyu tema yalnızca ekranda uygulanır: PDF / baskı çıktıları her zaman açık
+     renktedir. Görseller, videolar, logolar ve belge önizlemeleri ters çevrilmez.
+     Kaldırmak için id değeri cf-dark-style olan stil ve cf-dark-module olan betik
+     bloklarını (ve <head> içindeki cf-dark-boot betiğini) silmeniz yeterlidir.
+     ========================================================================== -->
+<style id="cf-dark-style">
+@media screen{
+html[data-cf-theme="dark"]{filter:invert(.9) hue-rotate(180deg);background:#fff}
+/* ters çevrilmemesi gerekenler: çifte ters çevirme ile asıl renklerine döner */
+html[data-cf-theme="dark"] :is(img,video,canvas,iframe,picture,embed,object,.pr-page,.paper,#prPrintRoot,#prInlinePreview,.cfct-img,.cffm-thumb img,.pi-thumb,.ui-logo-preview,.cf-files-thumb,.cfb-donut,.cf-donut,.service-donut,.cfx-keep){filter:invert(1) hue-rotate(180deg)}
+/* zaten çevrilmiş bir kabuğun içindeki görseli tekrar çevirme */
+html[data-cf-theme="dark"] :is(.pr-page,.paper,#prPrintRoot,#prInlinePreview,.cfct-img,.pi-thumb,.ui-logo-preview,.cf-files-thumb) :is(img,video,canvas,iframe){filter:none}
+/* koyu zeminde gölgeler hale gibi görünmesin */
+html[data-cf-theme="dark"] body :is(.cfb-stat,.cf-files-stat,.cf-users-stat,.dash-card,.hd-metric,.hd-op,.home-stock-stat,.home-fx-card,.archive-stat,.crm-metric,.service-summary-card,.ops-stage,.cffm-card,.btn):hover{box-shadow:none!important}
+html[data-cf-theme="dark"] .cfv-bar,html[data-cf-theme="dark"] .cfsm-toast{filter:invert(1) hue-rotate(180deg)}
+}
+@media print{html[data-cf-theme="dark"]{filter:none!important}}
+.cf-theme-btn{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:var(--mt-radius,8px);border:1px solid transparent;background:transparent;color:var(--mt-ink-2,#52525b);cursor:pointer;transition:background-color .15s,color .15s,transform .2s}
+.cf-theme-btn:hover{background:var(--mt-hover,#f4f4f5);color:var(--mt-ink,#18181b)}
+.cf-theme-btn svg{width:18px;height:18px}
+.cf-theme-btn:active{transform:rotate(-20deg) scale(.95)}
+.cf-theme-btn .moon{display:block}.cf-theme-btn .sun{display:none}
+html[data-cf-theme="dark"] .cf-theme-btn .moon{display:none}html[data-cf-theme="dark"] .cf-theme-btn .sun{display:block}
+.mobile-appbar .cf-theme-btn{width:38px;height:38px;border:1px solid var(--mt-border,#e4e4e7)}
+</style>
+<script id="cf-dark-module">(function(){'use strict';
+const KEY='cfTheme';
+const get=()=>{try{return localStorage.getItem(KEY)==='dark'?'dark':'light'}catch(e){return 'light'}};
+function apply(mode){if(window.cfPdfRoute)mode='light';document.documentElement.setAttribute('data-cf-theme',mode);document.querySelectorAll('.cf-theme-btn').forEach(b=>{b.setAttribute('aria-pressed',String(mode==='dark'));b.title=mode==='dark'?'Açık temaya geç':'Koyu temaya geç';b.setAttribute('aria-label',b.title)})}
+function set(mode){try{localStorage.setItem(KEY,mode)}catch(e){}apply(mode)}
+const ICON='<svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+function button(){const b=document.createElement('button');b.type='button';b.className='cf-theme-btn';b.innerHTML=ICON;b.onclick=()=>set(get()==='dark'?'light':'dark');return b}
+function mount(){
+  const top=document.querySelector('.dash-top-actions');
+  if(top&&!top.querySelector('.cf-theme-btn')){const bell=top.querySelector('[aria-label="Bildirimler"]');bell?top.insertBefore(button(),bell):top.append(button())}
+  const app=document.querySelector('.mobile-appbar');
+  if(app&&!app.querySelector('.cf-theme-btn')){const last=app.lastElementChild;app.insertBefore(button(),last)}
+  apply(get());
+}
+/* üst çubuk sonradan yeniden çizilirse düğmeyi geri koy */
+new MutationObserver(()=>{if(!document.querySelector('.dash-top-actions .cf-theme-btn'))mount()}).observe(document.body,{childList:true,subtree:true});
+window.addEventListener('storage',e=>{if(e.key===KEY)apply(get())});
+window.cfSetTheme=set;
+mount();
 })();</script>
 
 <style id="cf-metis-theme">

@@ -1,17 +1,26 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-18.1)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-18.3)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
 `app.html` içinde ayrı, kaldırılabilir bloklar olarak eklenmiştir.
 
-## Yükleme öncesi tek adım (yapıldı)
+## Veritabanı adımları
 
-Ürün kategorileri için veritabanına bir sütun eklendi:
-`veritabani/2026-11-18-urun-kategori.sql` — Supabase SQL Editor'de **çalıştırıldı**.
-Başka bir ortama (ör. test veritabanı) kuruluyorsa bu dosya orada da bir kez çalıştırılmalıdır.
+Supabase SQL Editor'de **çalıştırıldı**. Başka bir ortama (ör. test veritabanı) kuruluyorsa
+bu dosyalar orada da birer kez çalıştırılmalıdır:
+
+1. `veritabani/2026-11-18-urun-kategori.sql` — ürünlere kategori sütunu.
+2. `veritabani/2026-11-18-dosyalar.sql` — dosya yöneticisi: `company_folders`, `company_files`
+   tabloları, özel `company-files` depolama alanı (dosya başına 50 MB), erişim kuralları ve
+   hazır klasörler. **(çalıştırıldı)**
+3. `veritabani/2026-11-18-kase-imza-kaldir.sql` — Ayarlar > Kaşe ve İmza'da **kaldırma**
+   işlemi için sunucu fonksiyonu (yalnızca şirket sahibi / yönetici). **(çalıştırıldı)**
 
 ## Görünüm
 
+- **Açık / koyu tema:** üst çubuktaki ay / güneş düğmesi; tercih cihazda hatırlanır.
+  Koyu tema yalnızca ekranda uygulanır, PDF / baskı çıktıları açık renk kalır; görseller,
+  logolar ve belge önizlemeleri ters çevrilmez (blok: `cf-dark-module`, `cf-dark-boot`).
 - **Metis teması:** beyaz sol menü, nötr gri tonlar, ince çizgili kartlar, Inter yazı tipi,
   Metis butonları, form alanları, tablolar ve sekmeler (blok: `cf-metis-theme`).
 - **Metis efektleri:** özet kartlarında yükselme, butonlarda hafif kalkma, sayfa / pencere /
@@ -35,8 +44,12 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Yeni sayfalar
 
-- **Dosyalar:** servis ekleri, fatura / irsaliye PDF'leri, organizasyon belgeleri tek yerde;
-  önizleme, indirme, kayda gitme (salt okunur).
+- **Dosyalar (Metis dosya yöneticisi):** klasörler (Kataloglar, Broşürler, Videolar, Müzikler,
+  Office Dosyaları, Görseller, Diğer + yöneticilerin açtığı klasörler), sürükle-bırak çoklu
+  yükleme (türüne göre otomatik klasör), görsel / PDF / video / ses önizleme, indirme,
+  7 gün geçerli **paylaşım bağlantısı**, yeniden adlandırma, taşıma, toplu işlem, kart / liste
+  görünümü, arama ve kullanılan alan. "Kayıt ekleri" bölümü servis, sipariş ve organizasyon
+  dosyalarını listeler. Görüntüleyici rolü yükleyemez; dosyayı yükleyen ya da yöneticiler silebilir.
 - **Ekip (kullanıcılar):** üye listesi, rol dağılımı, çevrimiçi durum, bekleyen davetler;
   rol değiştirme ve çıkarma uygulamanın mevcut kurallarıyla.
 - **Analitik** (Raporlar içinde sekme): gelir trendi, satış hunisi, en çok satan ürünler,
@@ -58,6 +71,12 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Hata düzeltmeleri
 
+- **Bildirimler:** onaylanmış proformalar için "İncelemenizi bekliyor" bildirimleri okunmamış
+  olarak kalıyor ve zildeki sayıyı şişiriyordu — artık belge onay beklemiyorsa gösterilmez.
+- **Ayarlar > Şirket logosu:** kaldırma eklendi ("Ayarları Kaydet" ile kaydedilir; onaylanmış
+  eski proformalar logolarını korur, logo dosyası silinmez).
+- **Ayarlar > Kaşe ve İmza:** kaldırma eklendi (sunucu fonksiyonu: yukarıda 3. adım).
+- **Ayarlar > Bildirimler sekmesi:** tıklanınca arkadaki ayar ekranı boş kalıyordu — düzeltildi.
 - Katalogdaki **marka ve stok filtreleri hiç süzmüyordu** (bir CSS kuralı gizlenen satırları
   gösteriyordu) — düzeltildi.
 - Raporlar menü öğesi açıkken **vurgulanmıyordu** — düzeltildi.
@@ -70,7 +89,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-18.1">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-18.3">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
