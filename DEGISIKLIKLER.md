@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-18.5)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-18.7)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -15,6 +15,10 @@ bu dosyalar orada da birer kez çalıştırılmalıdır:
    hazır klasörler. **(çalıştırıldı)**
 3. `veritabani/2026-11-18-kase-imza-kaldir.sql` — Ayarlar > Kaşe ve İmza'da **kaldırma**
    işlemi için sunucu fonksiyonu (yalnızca şirket sahibi / yönetici). **(çalıştırıldı)**
+4. `veritabani/2026-11-18-plan-katilimcilar.sql` — plan / etkinliklerde **birden fazla katılımcı**
+   (`calendar_events.participant_ids`). **(çalıştırıldı)**
+5. `veritabani/2026-11-18-mesajlar.sql` — **Mesajlar** sayfası: `company_messages`,
+   `company_message_reads` tabloları, erişim kuralları ve anlık mesaj (Realtime).
 
 ## Görünüm
 
@@ -52,6 +56,16 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Yeni sayfalar
 
+- **Mesajlar:** ekip içi yazışma — "Genel" kanal (tüm ekip) ve kişiye özel sohbetler, anında
+  düşen mesajlar, menüde okunmamış sayısı, kişi arama, eski mesajları yükleme
+  (blok: `cf-messages-module`).
+- **QR ile stok:** ürün tablosunda her ürüne "QR" düğmesi (etiket + yazdırma), katalogda
+  "QR etiketleri" (listelenen ürünlerin A4 etiket sayfası) ve "QR okut" (kamera). Etiket telefonun
+  kendi kamerasıyla okutulunca CepFirma açılır ve ürünün stok giriş / çıkış penceresi gelir
+  (`app.html?stok=ÜRÜN_NO`; blok: `cf-qrstock-module`).
+- **Günlük Plan (Takvim > Günlük plan):** seçilen günün sade bilgi ekranı — saat, tür, yer,
+  sorumlu, katılımcılar, notlar ve durum (bekliyor / devam ediyor / gecikti / tamamlandı);
+  önceki / sonraki gün, "Sadece benim" filtresi, plandan forma geçiş.
 - **Dosyalar (Metis dosya yöneticisi):** klasörler (Kataloglar, Broşürler, Videolar, Müzikler,
   Office Dosyaları, Görseller, Diğer + yöneticilerin açtığı klasörler), sürükle-bırak çoklu
   yükleme (türüne göre otomatik klasör), görsel / PDF / video / ses önizleme, indirme,
@@ -66,6 +80,20 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Geliştirilen sayfalar
 
+- **Plan / etkinlik — Hızlı ziyaret (il içi):** formun üstünde "Hızlı ziyaret" / "Detaylı plan"
+  seçimi. Hızlı modda yalnızca ne yapılacak (Klinik ziyareti, Demo, Tarama hizmeti, Kurulum,
+  Servis…), klinik / müşteri, ilçe, gün (Bugün / Yarın…) ve saat sorulur; ulaşım, otel, transfer
+  alanları gizlenir, plan yalnızca takvime yazılır. Başlık kendiliğinden oluşur
+  ("Hakan Uzun Diş Kliniği – Demo"). Yeni türler: Demo, Tarama Hizmeti.
+- **Ana sayfa — Bugünün planım:** kişinin bugünkü planları, yarının özeti, "+ Hızlı ziyaret" ve
+  "Günlük plan" düğmeleri (blok: `cf-quickplan-module`).
+- **Plan / etkinlik:** sorumlu çalışan + birden fazla katılımcı seçimi (yeşil = sorumlu, mavi =
+  katılımcı); Personel alanı seçilenlerle otomatik dolar. Sorumlu ve katılımcılara "Size sorumlu
+  olarak atandı / Katılımcı olarak eklendiniz" bildirimi gider, plan İşlerim ekranına düşer.
+- **Giriş / kayıt:** şifre alanlarında göster / gizle (göz) düğmesi.
+- **Sevkiyat:** kargo takip numarası girilen sevkiyatta "Müşteriye kargo bilgisini gönder" —
+  müşterinin e-postasına firma, takip numarası ve (Yurtiçi, UPS, DHL için) takip bağlantısı
+  içeren hazır bir e-posta taslağı açar (blok: `cf-plans-module`).
 - **Ürünler:** Metis tarzı tablo (görsel, kategori, fiyat + KDV, stok rozeti, sıralama,
   sayfalama), özet kartları, stok sağlığı ve kategori dağılımı, tablodan **± Stok**
   (giriş / satış / demo / iade / sayım düzeltme) ve **kategori** atama. "Klasik görünüm" korunur.
@@ -79,6 +107,10 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Hata düzeltmeleri
 
+- **Bildirimler:** şirkete sonradan katılan kişi, kendisi katılmadan önce oluşmuş ortak
+  bildirimleri (stok, onay, sipariş, talep) artık görmez; sınır `company_members.created_at`.
+- **Proforma IBAN:** banka satırı hesabın para birimiyle başlar (`TL IBAN`, `EUR IBAN`, `USD IBAN`);
+  "TR" eksik girilmiş 24 haneli IBAN'lara TR eklenir ve 4'lü gruplar halinde yazılır.
 - **Bildirimler:** onaylanmış proformalar için "İncelemenizi bekliyor" bildirimleri okunmamış
   olarak kalıyor ve zildeki sayıyı şişiriyordu — artık belge onay beklemiyorsa gösterilmez.
 - **Ayarlar > Şirket logosu:** kaldırma eklendi ("Ayarları Kaydet" ile kaydedilir; onaylanmış
@@ -97,7 +129,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-18.5">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-18.7">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
