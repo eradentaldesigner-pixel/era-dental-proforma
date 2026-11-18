@@ -1,4 +1,4 @@
-<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-18.19"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
+<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-18.20"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
 #prPrintRoot.cf-pdf-capture{display:block!important;visibility:visible!important;position:fixed!important;left:-12000px!important;top:0!important;right:auto!important;bottom:auto!important;width:210mm!important;padding:0!important;margin:0!important;max-height:none!important;overflow:visible!important;background:white!important;z-index:-1!important}#prPrintRoot.cf-pdf-capture .pr-page{margin:0!important;box-shadow:none!important;zoom:1!important;transform:none!important}
 html.cf-native-pdf-route #authGate{display:none!important}html.cf-native-pdf-route body{padding:0!important;margin:0!important;background:#f6f8fc!important}html.cf-native-pdf-route body>*:not(.auth-shell):not(#cfPdfRouteStatus):not(#prPrintRoot):not(script):not(style):not(iframe):not(.html2canvas-container):not([style*="visibility: hidden"]){display:none!important}#cfPdfRouteStatus{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:#f6f8fc;color:#193450;font:16px system-ui;padding:24px;text-align:center}#cfPdfRouteStatus h1{font-size:22px;margin:0}#cfPdfRouteStatus button,#cfPdfRouteStatus a{font:14px system-ui;padding:12px 18px;background:white;border:1px solid #d9e4f2;border-radius:9px;color:#075cc5;text-decoration:none;cursor:pointer}
 }
@@ -8681,7 +8681,7 @@ async function showSummary(x){const list=await people();const nm=id=>list.find(p
   $('cfpsActions').innerHTML='<button type="button" class="btn light" id="cfpsDay">Günlük planda gör</button>'+(editable?'<button type="button" class="btn light" id="cfpsEdit">Düzenle</button>':'')+'<button type="button" class="btn primary" id="cfpsOk">Tamam</button>';
   $('cfpsOk').onclick=close;$('cfpsDay').onclick=()=>{close();window.cfOpenDayPlan?.(String(x.event_date).slice(0,10))};
   if($('cfpsEdit'))$('cfpsEdit').onclick=async()=>{close();calendarCursor=new Date(String(x.event_date).slice(0,10)+'T12:00:00');await appNavigate('calendar');try{if(!calendarEvents.some(v=>String(v.id)===String(x.id)))calendarEvents.push(x)}catch(_){}$('calId').value='';editCalendarEvent(x.id)};
-  window.cfPlanSummaryOpen=String(x.id);back.hidden=false;setTimeout(()=>$('cfpsOk')?.focus(),30);window.cfAvatar?.refresh?.()}
+  window.cfPlanCardExtras?.(x,{editable,assigned:isAssigned(x)});window.cfPlanSummaryOpen=String(x.id);back.hidden=false;setTimeout(()=>$('cfpsOk')?.focus(),30);window.cfAvatar?.refresh?.()}
 window.cfShowPlanSummary=showSummary;
 /* =================== Bildirimden doğrudan plan kartı =================== */
 async function planById(id){let x=null;try{x=(window.calendarEvents||calendarEvents||[]).find(v=>String(v.id)===String(id))}catch(_){}if(!x){const r=await sb.from('calendar_events').select('*').eq('company_id',currentCompanyId).eq('id',id).maybeSingle();if(r.error||!r.data)return null;x=r.data}return x}
@@ -8785,7 +8785,7 @@ async function markRead(list){if(!list.length||!currentUser)return;const now=new
 
 /* ---------- çizim ---------- */
 function item(x){const me=currentUser.id,lead=x.assigned_user_id===me;const from=people.find(p=>p.id===x.created_by)?.name||'Bir yönetici';const what=LABEL[x.event_type]||x.event_type||'Plan';const pp=window.cfPlanParts?window.cfPlanParts(x):{clinic:x.title};const title=window.cfPlanTitle?window.cfPlanTitle(x):(pp.clinic?pp.clinic+' – '+what:what);const when=window.cfPlanWhen?window.cfPlanWhen(x.event_date,x.start_time,x.end_time):x.event_date;const place=[x.location,x.city].filter(Boolean).join(', ');const trip=!!(x.travel_required||x.organization_plan?.enabled||x.organization_plan?.scope==='outstation');
-  return '<button type="button" class="cfin-item'+(unread(x)?' unread':'')+'" data-id="'+escH(x.id)+'"><span class="cfin-av" data-cf-avatar="'+escH(x.created_by)+'">'+escH(initials(from))+'</span><div><span class="cfin-from"><b>'+escH(from)+'</b> size bir iş atadı</span><span class="cfin-title">'+escH(title)+'</span><span class="cfin-meta"><span class="cfin-type" style="--cfin-c:'+(COLORS[x.event_type]||'#71717a')+'"><i></i>'+escH(when)+'</span>'+(place?'<span>📍 '+escH(place)+'</span>':'')+'</span></div><div class="cfin-side"><time>'+escH(ago(x.created_at||x.updated_at))+'</time>'+(x.completed_at?'<span class="cfin-tag done">Tamamlandı</span>':'')+(trip?'<span class="cfin-tag trip">Seyahat</span>':'')+'<span class="cfin-tag'+(lead?' lead':'')+'">'+(lead?'Sorumlu':'Katılımcı')+'</span></div></button>'}
+  return '<button type="button" class="cfin-item'+(unread(x)?' unread':'')+'" data-id="'+escH(x.id)+'"><span class="cfin-av" data-cf-avatar="'+escH(x.created_by)+'">'+escH(initials(from))+'</span><div><span class="cfin-from"><b>'+escH(from)+'</b> size bir iş atadı</span><span class="cfin-title">'+escH(title)+'</span><span class="cfin-meta"><span class="cfin-type" style="--cfin-c:'+(COLORS[x.event_type]||'#71717a')+'"><i></i>'+escH(when)+'</span>'+(place?'<span>📍 '+escH(place)+'</span>':'')+'</span></div><div class="cfin-side"><time>'+escH(ago(x.created_at||x.updated_at))+'</time>'+(x.completed_at?'<span class="cfin-tag done">Tamamlandı</span>':'')+(trip?'<span class="cfin-tag trip">Seyahat</span>':'')+(window.cfResponseTag&&!x.completed_at?window.cfResponseTag(x.id):'')+'<span class="cfin-tag'+(lead?' lead':'')+'">'+(lead?'Sorumlu':'Katılımcı')+'</span></div></button>'}
 function paint(){const list=$('cfinList');if(!list)return;const t=today();const st=$('cfinState');st.className='cfin-state';st.textContent='';
   let src=rows.slice();if(filter==='unread')src=src.filter(unread);if(filter==='upcoming')src=src.filter(x=>String(x.event_date).slice(0,10)>=t&&!x.completed_at);if(filter==='past')src=src.filter(x=>String(x.event_date).slice(0,10)<t||x.completed_at);
   const up=src.filter(x=>String(x.event_date).slice(0,10)>=t&&!x.completed_at).sort((a,b)=>(String(a.event_date)+String(a.start_time||'')).localeCompare(String(b.event_date)+String(b.start_time||'')));
@@ -8804,6 +8804,117 @@ window.cfInbox={refresh:()=>load(true),markReadId:id=>{const x=rows.find(v=>Stri
 let tick=0,last='';new MutationObserver(()=>{if(tick)return;tick=setTimeout(()=>{tick=0;navButtons();const k=ident();if(currentUser&&currentCompanyId&&k!==last){last=k;rows=[];reads=new Map();load(true)}},300)}).observe(document.body,{childList:true,subtree:true});
 setInterval(()=>{if(currentUser&&currentCompanyId&&document.visibilityState==='visible')load(true)},60000);
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&currentUser&&currentCompanyId)load(true)});
+})();</script>
+<!-- ==========================================================================
+     CepFirma — Görev kabul / red ve konum linki
+     * Atanan kişi iş kartında "Kabul et" / "Reddet" (sebep zorunlu) seçer; yanıt
+       işi atayan kişiye uygulama içi bildirim ve telefon bildirimi olarak gider.
+     * İşi atayan kişi kartta ve plan formunda kimin kabul / red ettiğini görür;
+       reddedilen işi başka birine atar.
+     * Plan formunda "Konum linki" (Google Maps vb. bağlantı ya da adresten oluştur);
+       atanan kişi kartta "Haritada aç" ile konuma gider.
+     veritabani/2026-11-18-gorev-yanit.sql gerekir; çalıştırılmadıysa bu alanlar
+     görünmez, uygulamanın geri kalanı etkilenmez.
+     Kaldırmak için id değeri cf-respond-style olan stil ve cf-respond-module olan
+     betik bloklarını silmeniz yeterlidir.
+     ========================================================================== -->
+<style id="cf-respond-style">
+.cfrs-box{margin:12px 20px 0;padding:14px;border-radius:10px;border:1px solid var(--mt-border,#e4e4e7);background:var(--mt-gray-50,#fafafa)}
+.cfrs-box h4{margin:0 0 10px;font-size:14px;font-weight:600}
+.cfrs-btns{display:flex;gap:8px;flex-wrap:wrap}
+html:not(#cfm) body:not(#cfm) .cfrs-ok{background:#16a34a!important;border-color:#16a34a!important;color:#fff!important}
+html:not(#cfm) body:not(#cfm) .cfrs-no{background:#fff!important;border:1px solid #fca5a5!important;color:#b91c1c!important}
+.cfrs-reason{display:grid;gap:8px;margin-top:10px}
+.cfrs-reason textarea{width:100%;min-height:70px;resize:vertical}
+.cfrs-status{display:flex;align-items:flex-start;gap:10px;font-size:14px}
+.cfrs-status b{font-weight:600}
+.cfrs-status .dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700;flex:none;margin-top:1px}
+.cfrs-status.ok .dot{background:#16a34a}.cfrs-status.no .dot{background:#dc2626}.cfrs-status.wait .dot{background:#a1a1aa}
+.cfrs-status small{display:block;color:var(--mt-ink-3,#71717a);font-size:12.5px;margin-top:2px;white-space:pre-wrap}
+.cfrs-list{display:grid;gap:10px}
+.cfrs-msg{font-size:13px;margin:8px 0 0;min-height:16px;color:var(--mt-ink-3,#71717a)}.cfrs-msg.err{color:#b91c1c}
+.cfrs-map{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:8px;background:#eff6ff;color:#1d4ed8!important;font-weight:600;font-size:13px;text-decoration:none!important;border:1px solid #bfdbfe}
+.cfrs-map:hover{background:#dbeafe}
+/* plan formu: konum linki */
+.cfrs-loc{grid-column:1/-1}
+.cfrs-loc-row{display:flex;gap:8px;flex-wrap:wrap}
+.cfrs-loc-row input{flex:1;min-width:200px}
+.cfrs-loc small{display:block;margin-top:4px;font-size:12px;color:var(--mt-ink-3,#71717a)}
+.cfrs-form-resp{grid-column:1/-1;padding:12px;border:1px dashed var(--mt-border,#e4e4e7);border-radius:10px}
+.cfrs-form-resp h4{margin:0 0 8px;font-size:13px;font-weight:600}
+.cfin-tag.ok{background:#dcfce7;color:#15803d}.cfin-tag.no{background:#fee2e2;color:#b91c1c}.cfin-tag.wait{background:#fef3c7;color:#b45309}
+html[data-cf-theme="dark"] .cfrs-status .dot{filter:invert(1) hue-rotate(180deg)}
+</style>
+<script id="cf-respond-module">(function(){'use strict';
+const $=id=>document.getElementById(id);
+const escH=s=>(typeof esc==='function'?esc(s):String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])));
+const ident=()=>[currentUser?.id,currentCompanyId].join('|');
+const fmt=v=>v?new Date(v).toLocaleString('tr-TR',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}):'';
+const safeUrl=u=>{try{const x=new URL(String(u||'').trim());return /^https?:$/.test(x.protocol)?x.href:''}catch(_){return ''}};
+const mapsSearch=q=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);
+let probe={k:'',resp:false,loc:false},mine=new Map(),mineKey='';
+
+/* ---------- kurulum var mı? ---------- */
+async function ready(){const k=currentCompanyId||'';if(probe.k===k)return probe;const [a,b]=await Promise.all([sb.from('calendar_assignment_responses').select('id').limit(1),sb.from('calendar_events').select('location_url').eq('company_id',currentCompanyId).limit(1)]);probe={k,resp:!a.error,loc:!b.error};return probe}
+async function loadMine(force){const k=ident();if(!currentUser||(!force&&mineKey===k))return;const p=await ready();if(!p.resp)return;const r=await sb.from('calendar_assignment_responses').select('event_id,status,reason,responded_at').eq('company_id',currentCompanyId).eq('user_id',currentUser.id).order('responded_at',{ascending:false}).limit(500);if(r.error||k!==ident())return;mine=new Map((r.data||[]).map(x=>[String(x.event_id),x]));mineKey=k}
+window.cfMyResponse=id=>mine.get(String(id))||null;
+async function responsesFor(id){const p=await ready();if(!p.resp)return [];const r=await sb.from('calendar_assignment_responses').select('user_id,status,reason,responded_at').eq('event_id',id);return r.error?[]:(r.data||[])}
+async function people(){try{return window.cfPeople?await window.cfPeople():[]}catch(_){return []}}
+
+/* ---------- yanıt kaydet + işi atayana bildir ---------- */
+async function respond(x,status,reason){const p=await ready();if(!p.resp)throw Error('Görev yanıtı için veritabanı kurulumu gerekli (gorev-yanit.sql).');
+  const r=await sb.from('calendar_assignment_responses').upsert({event_id:x.id,company_id:x.company_id||currentCompanyId,user_id:currentUser.id,status,reason:status==='rejected'?reason:null},{onConflict:'event_id,user_id'}).select('event_id,status,reason,responded_at').single();
+  if(r.error)throw r.error;mine.set(String(x.id),r.data);
+  sb.functions.invoke('cepfirma-push',{body:{action:'respond',event_id:x.id}}).catch(()=>{});
+  window.cfInbox?.refresh?.();return r.data}
+
+/* ---------- iş kartı eklentileri ---------- */
+window.cfPlanCardExtras=async(x,o)=>{const body=$('cfpsBody'),actions=$('cfpsActions');if(!body||!actions)return;const p=await ready().catch(()=>({}));
+  /* konum */
+  const url=safeUrl(x.location_url);const q=[x.location,x.organization_plan?.address,x.city].filter(Boolean).join(', ');
+  const loc=url?'<a class="cfrs-map" href="'+escH(url)+'" target="_blank" rel="noopener noreferrer">📍 Haritada aç</a>':(q?'<a class="cfrs-map" href="'+escH(mapsSearch(q))+'" target="_blank" rel="noopener noreferrer">📍 Haritada ara</a>':'');
+  if(loc){const row=document.createElement('div');row.className='cfps-row';row.innerHTML='<dt>Konum</dt><dd>'+loc+'</dd>';const after=[...body.querySelectorAll('.cfps-row')].find(r=>/Nerede|Adres/.test(r.firstElementChild?.textContent||''));after?after.after(row):body.prepend(row)}
+  if(!p.resp)return;
+  const box=document.createElement('div');box.className='cfrs-box';actions.before(box);
+  if(o.assigned&&!o.editable){await loadMine();paintMine(box,x)}
+  else if(o.editable){const list=await responsesFor(x.id);const ppl=await people();const nm=id=>ppl.find(v=>v.id===id)?.name||'Çalışan';const targets=[x.assigned_user_id,...(x.participant_ids||[])].filter((v,i,a)=>v&&a.indexOf(v)===i&&v!==x.created_by);if(!targets.length){box.remove();return}
+    box.innerHTML='<h4>Görev yanıtları</h4><div class="cfrs-list">'+targets.map(id=>{const r=list.find(v=>v.user_id===id);return statusHtml(r,nm(id))}).join('')+'</div>'+(list.some(r=>r.status==='rejected')?'<p class="cfrs-msg">Reddedilen işi başka birine atamak için "Düzenle"ye basıp sorumlu / katılımcıyı değiştirin.</p>':'')}
+  else box.remove()};
+function statusHtml(r,name){if(!r)return '<div class="cfrs-status wait"><span class="dot">…</span><div><b>'+escH(name)+'</b> · yanıt bekleniyor</div></div>';if(r.status==='accepted')return '<div class="cfrs-status ok"><span class="dot">✓</span><div><b>'+escH(name)+'</b> · kabul etti<small>'+escH(fmt(r.responded_at))+'</small></div></div>';return '<div class="cfrs-status no"><span class="dot">✕</span><div><b>'+escH(name)+'</b> · reddetti<small>Sebep: '+escH(r.reason||'—')+' · '+escH(fmt(r.responded_at))+'</small></div></div>'}
+function paintMine(box,x){const r=mine.get(String(x.id));
+  if(r){box.innerHTML='<h4>Yanıtınız</h4>'+statusHtml(r,'Siz')+'<div class="cfrs-btns" style="margin-top:10px"><button type="button" class="btn light" data-cfrs-change>Yanıtı değiştir</button></div>';box.querySelector('[data-cfrs-change]').onclick=()=>ask(box,x);return}
+  ask(box,x)}
+function ask(box,x){box.innerHTML='<h4>Bu görevi kabul ediyor musunuz?</h4><div class="cfrs-btns"><button type="button" class="btn cfrs-ok" data-cfrs-yes>✓ Kabul et</button><button type="button" class="btn cfrs-no" data-cfrs-no>✕ Reddet</button></div><div class="cfrs-reason" hidden><label for="cfrsReason">Reddetme sebebi</label><textarea id="cfrsReason" maxlength="1000" placeholder="Örn: O gün başka bir kurulumdayım, cihaz arızalı…"></textarea><div class="cfrs-btns"><button type="button" class="btn primary" data-cfrs-send>Reddi gönder</button><button type="button" class="btn light" data-cfrs-cancel>Vazgeç</button></div></div><p class="cfrs-msg" role="status" aria-live="polite"></p>';
+  const msg=(t,err)=>{const m=box.querySelector('.cfrs-msg');m.textContent=t;m.classList.toggle('err',!!err)};const lock=on=>box.querySelectorAll('button,textarea').forEach(b=>b.disabled=on);
+  const done=async(status,reason)=>{lock(true);msg('Gönderiliyor…');try{await respond(x,status,reason);paintMine(box,x);showToast?.(status==='accepted'?'Görevi kabul ettiniz. İşi atayan kişiye bildirildi.':'Görevi reddettiniz. İşi atayan kişiye bildirildi.','success')}catch(e){lock(false);msg('Gönderilemedi: '+(e.message||'bağlantıyı kontrol edin'),true)}};
+  box.querySelector('[data-cfrs-yes]').onclick=()=>done('accepted');
+  box.querySelector('[data-cfrs-no]').onclick=()=>{box.querySelector('.cfrs-reason').hidden=false;box.querySelector('#cfrsReason').focus()};
+  box.querySelector('[data-cfrs-cancel]').onclick=()=>{box.querySelector('.cfrs-reason').hidden=true;msg('')};
+  box.querySelector('[data-cfrs-send]').onclick=()=>{const t=box.querySelector('#cfrsReason').value.trim();if(t.length<3){msg('Lütfen reddetme sebebini yazın (en az 3 karakter).',true);box.querySelector('#cfrsReason').focus();return}done('rejected',t)}}
+
+/* ---------- plan formu: konum linki ve yanıtlar ---------- */
+let curId='';
+function mountForm(){const city=$('calCity');if(!city||$('cfrsLoc'))return;const holder=city.closest('.calendar-form > div')||city.parentElement;
+  const d=document.createElement('div');d.id='cfrsLoc';d.className='cfrs-loc';d.hidden=true;d.innerHTML='<label for="cfrsLocUrl">Konum linki</label><div class="cfrs-loc-row"><input id="cfrsLocUrl" type="url" inputmode="url" placeholder="Google Maps bağlantısını yapıştırın" autocomplete="off" data-lpignore="true" data-1p-ignore data-form-type="other"><button type="button" class="btn light" id="cfrsLocMake">Adresten oluştur</button><a class="btn light" id="cfrsLocOpen" target="_blank" rel="noopener noreferrer">Aç</a></div><small>Görevli kişi kartta "Haritada aç" ile bu konuma gider.</small>';
+  holder.after(d);const r=document.createElement('div');r.id='cfrsFormResp';r.className='cfrs-form-resp';r.hidden=true;d.after(r);
+  const inp=$('cfrsLocUrl'),open=$('cfrsLocOpen');const upd=()=>{const u=safeUrl(inp.value);open.href=u||'#';open.toggleAttribute('aria-disabled',!u);open.style.opacity=u?'1':'.5';open.style.pointerEvents=u?'auto':'none'};inp.addEventListener('input',upd);
+  $('cfrsLocMake').onclick=()=>{const q=[$('cfqWhere')?.value||$('calLocation')?.value,$('orgAddress')?.value,$('calCity')?.value].map(v=>String(v||'').trim()).filter(Boolean).join(', ');const who=$('cfqWho')?.value?.trim();const query=[who,q].filter(Boolean).join(', ');if(!query){alert('Önce klinik / müşteri adını veya ilçe / adresi yazın.');return}inp.value=mapsSearch(query);upd()};upd()}
+async function onOpen(){mountForm();const p=await ready().catch(()=>({}));const d=$('cfrsLoc');if(!d)return;d.hidden=!p.loc;const id=$('calId')?.value||'';curId=id;const x=id?(window.calendarEvents||calendarEvents||[]).find(v=>String(v.id)===String(id)):null;const inp=$('cfrsLocUrl');inp.value=x?.location_url||'';inp.dispatchEvent(new Event('input'));
+  const rbox=$('cfrsFormResp');rbox.hidden=true;if(!p.resp||!x)return;const list=await responsesFor(x.id);if(curId!==id)return;const ppl=await people();const nm=uid=>ppl.find(v=>v.id===uid)?.name||'Çalışan';const targets=[x.assigned_user_id,...(x.participant_ids||[])].filter((v,i,a)=>v&&a.indexOf(v)===i&&v!==x.created_by);if(!targets.length)return;rbox.innerHTML='<h4>Görev yanıtları</h4><div class="cfrs-list">'+targets.map(uid=>statusHtml(list.find(v=>v.user_id===uid),nm(uid))).join('')+'</div>';rbox.hidden=false}
+const baseExtra=window.cfCalExtraPayload;window.cfCalExtraPayload=()=>{const out=typeof baseExtra==='function'?baseExtra():{};if(probe.loc&&$('cfrsLoc')){const u=safeUrl($('cfrsLocUrl')?.value);out.location_url=u||null}return out};
+let wasOpen=false;new MutationObserver(()=>{const m=$('calendarModal');const open=!!m?.classList.contains('open');if(open&&!wasOpen)setTimeout(onOpen,120);wasOpen=open}).observe(document.body,{subtree:true,attributes:true,attributeFilter:['class']});
+
+/* ---------- işi atayana uygulama içi bildirim ---------- */
+const baseAssign=window.cfAssignNotices;
+window.cfAssignNotices=async(company,user,today,add)=>{if(typeof baseAssign==='function')await baseAssign(company,user,today,add);const p=await ready();if(!p.resp)return;
+  const since=new Date(Date.now()-14*864e5).toISOString();const r=await sb.from('calendar_assignment_responses').select('id,event_id,user_id,status,reason,responded_at,calendar_events!inner(id,title,event_type,event_date,start_time,end_time,created_by)').eq('company_id',company).eq('calendar_events.created_by',user).neq('user_id',user).gte('responded_at',since).order('responded_at',{ascending:false}).limit(60);if(r.error)return;
+  const ppl=await people();const nm=id=>ppl.find(v=>v.id===id)?.name||'Bir çalışan';
+  for(const x of r.data||[]){const ev=x.calendar_events||{};const title=window.cfPlanTitle?window.cfPlanTitle(ev):(ev.title||'Plan');const when=window.cfPlanWhen?window.cfPlanWhen(ev.event_date,ev.start_time,ev.end_time):'';
+    add({key:'calendar-response:'+x.id+':'+x.status+':'+x.responded_at,category:'calendar',id:x.event_id,date:ev.event_date,title:nm(x.user_id)+(x.status==='accepted'?' görevi kabul etti':' görevi reddetti'),detail:[title,when,x.status==='rejected'&&x.reason?'Sebep: '+x.reason:''].filter(Boolean).join(' · '),occurredAt:x.responded_at})}};
+
+/* ---------- Gelen İşler etiketi ---------- */
+window.cfResponseTag=id=>{if(!probe.resp)return '';const r=mine.get(String(id));if(!r)return '<span class="cfin-tag wait">Yanıt bekliyor</span>';return r.status==='accepted'?'<span class="cfin-tag ok">Kabul ettiniz</span>':'<span class="cfin-tag no">Reddettiniz</span>'};
+let last='';new MutationObserver(()=>{const k=ident();if(currentUser&&currentCompanyId&&k!==last){last=k;probe.k='';loadMine(true).then(()=>window.cfInbox?.refresh?.())}}).observe(document.body,{childList:true,subtree:true});
 })();</script>
 <!-- ==========================================================================
      CepFirma — Metis yazı ölçüleri
