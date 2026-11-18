@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-18.13)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-18.15)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -19,6 +19,8 @@ bu dosyalar orada da birer kez çalıştırılmalıdır:
    (`calendar_events.participant_ids`). **(çalıştırıldı)**
 5. `veritabani/2026-11-18-mesajlar.sql` — **Mesajlar** sayfası: `company_messages`,
    `company_message_reads` tabloları, erişim kuralları ve anlık mesaj (Realtime).
+6. `veritabani/2026-11-18-profil-fotografi.sql` — **profil fotoğrafı**: `avatars` depolama alanı
+   (özel, 2 MB) ve `user_avatars` tablosu; fotoğrafı yalnızca aynı şirkettekiler görür.
 
 ## Görünüm
 
@@ -80,6 +82,21 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Geliştirilen sayfalar
 
+- **Sneat bileşenleri (Metis görünümü korunarak):**
+  - **Profil fotoğrafı:** Ayarlar'da "Profil fotoğrafı" kartı (yükle / kaldır, otomatik kare kırpma);
+    fotoğraf üst çubukta, sol menüde, Ekip, Mesajlar ve plan katılımcılarında görünür
+    (blok: `cf-avatar-module`).
+  - **Grafikler (ApexCharts 3.54.1, MIT, dosyaya gömülü):** ana sayfa ve Analitik'te "Belge özeti"
+    (son 6 ay proforma / teklif sütun grafiği) ve "Proforma durumu" (halka grafik).
+  - **Extended UI:** ince özel kaydırma çubukları, metin ayırıcı (`.cf-divider`).
+  - **Bildirimler ve ipuçları:** ikonlu, kapatılabilir bildirim kartları; ikon düğmelerinde
+    koyu baloncuk ipucu (blok: `cf-sneatui-module`).
+- **Takvim — yeni görünüm (Sneat tarzı, FullCalendar):** solda + Yeni Plan, küçük ay takvimi
+  (planlı günler noktalı), renkli tür filtreleri ve "Sadece benim planlarım"; sağda Ay / Hafta /
+  Gün / Ajanda. Boş güne veya saate tıklayınca (sürükleyerek saat aralığı seçilebilir) yeni plan,
+  plana tıklayınca plan formu açılır; yetkili kişi planı sürükleyip bırakarak tarih / saat
+  değiştirebilir. Telefonda Ajanda görünümüyle açılır. "Klasik görünüm" ile eski takvime dönülür.
+  FullCalendar 6.1.15 (MIT) dosyaya gömülü (blok: `cf-fc-style` / `cf-fullcalendar-lib` / `cf-fc-module`).
 - **Hızlı belge (teklif / proforma) — yan yana görünüm:** geniş ekranda solda form ve belge özeti,
   sağda belgenin canlı önizlemesi (yarı yarıya); yazdıkça güncellenir. Üstteki "Yan yana"
   düğmesiyle açılıp kapanır (blok: `cf-split-style` / `cf-split-module`).
@@ -152,7 +169,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-18.13">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-18.15">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
