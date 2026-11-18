@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-18.15)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-18.19)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -21,6 +21,9 @@ bu dosyalar orada da birer kez çalıştırılmalıdır:
    `company_message_reads` tabloları, erişim kuralları ve anlık mesaj (Realtime).
 6. `veritabani/2026-11-18-profil-fotografi.sql` — **profil fotoğrafı**: `avatars` depolama alanı
    (özel, 2 MB) ve `user_avatars` tablosu; fotoğrafı yalnızca aynı şirkettekiler görür.
+7. `veritabani/2026-11-18-plan-yetki.sql` — **plan düzenleme yetkisi**: planı yalnızca oluşturan
+   kişi ve şirket sahibi / yöneticisi değiştirir veya siler; atanan kişiler yalnızca "tamamlandı"
+   durumunu ve seyahat hazırlık maddelerini işaretleyebilir (veritabanı tetikleyicisi).
 
 ## Görünüm
 
@@ -58,6 +61,11 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Yeni sayfalar
 
+- **Gelen İşler:** başkasının size atadığı planlar mesaj kutusu gibi listelenir — atayanın fotoğrafı,
+  "… size bir iş atadı", iş ("Dentopol – Tarama hizmeti"), zaman, yer, Sorumlu / Katılımcı / Seyahat etiketi.
+  Okunmamışlar kalın ve menüde kırmızı rozetle; Tümü / Okunmamış / Yaklaşan / Geçmiş sekmeleri; dokununca
+  salt okunur plan kartı. Bildirimden açılan atama Gelen İşler'in üstünde kart olarak açılır; okundu bilgisi
+  bildirim zili ile ortak (blok: `cf-inbox-module`).
 - **Mesajlar:** ekip içi yazışma — "Genel" kanal (tüm ekip) ve kişiye özel sohbetler, anında
   düşen mesajlar, menüde okunmamış sayısı, kişi arama, eski mesajları yükleme
   (blok: `cf-messages-module`).
@@ -82,6 +90,21 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Geliştirilen sayfalar
 
+- **Bildirimden doğrudan plan kartı:** atanan kişi bildirime dokununca takvim sayfası açılmadan, mesaj
+  gibi bir kartta işi görür (ne, ne zaman, nerede, kimler, not, seyahat). Plana atanmış kişi yönetici olsa
+  bile planı yalnızca oluşturan düzenler. Telefon bildirimi `app.html?plan=NO` ile doğrudan kartı açar
+  (`cepfirma-push.ts` yeniden Deploy edilmeli).
+- **Telefona plan ataması bildirimi (uygulama kapalıyken):** plan kaydedilince yeni eklenen sorumlu /
+  katılımcılara telefon bildirimi gider: "CepFirma — Dentopol – Tarama hizmeti / Yarın 10:00 · Beykoz ·
+  Sorumlu olarak atandınız". Sunucu fonksiyonu `supabase-fonksiyon/cepfirma-push.ts` güncellendi
+  (yeni `assign` işlemi; mevcut hatırlatma ve test bildirimleri aynen çalışır). Supabase > Edge Functions >
+  cepfirma-push içine yapıştırılıp Deploy edilmelidir.
+- **Plan özeti ve konuyla ilgili bildirimler:** plana atanan kişi bildirime / plana tıklayınca
+  düzenleme formu yerine salt okunur "Plan özeti" görür (ne, ne zaman, nerede, sorumlu, katılımcılar,
+  not, seyahat planı: ulaşım, gidiş / dönüş, otel, transfer, hazırlık). Bildirim metni:
+  "Dentopol – Tarama hizmeti · Yarın 10:00 · Beykoz · Sorumlu olarak atandınız"; seyahatlerde
+  "Seyahat" ibaresi. Uygulama açıkken yeni atamada cihazda "CepFirma" başlıklı bildirim
+  (izin verildiyse). Takvimde sürükle-bırak yalnızca oluşturan / yönetici için (blok: `cf-plansum-module`).
 - **Sneat bileşenleri (Metis görünümü korunarak):**
   - **Profil fotoğrafı:** Ayarlar'da "Profil fotoğrafı" kartı (yükle / kaldır, otomatik kare kırpma);
     fotoğraf üst çubukta, sol menüde, Ekip, Mesajlar ve plan katılımcılarında görünür
@@ -169,7 +192,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-18.15">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-18.19">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
