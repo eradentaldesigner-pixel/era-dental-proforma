@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-18.4)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-18.5)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -21,7 +21,11 @@ bu dosyalar orada da birer kez çalıştırılmalıdır:
 - **Metis menü ve üst çubuk ayrıntıları:** menüde Metis'in Bootstrap Icons ikonları, renkli menü
   rozetleri (onay bekleyen belgeler kırmızı, açık servisler mavi, yeni özellikler yeşil "Yeni"),
   üst çubukta tam ekran düğmesi, Ctrl+K ile arama, logo yüklenemezse Metis tarzı marka kutusu
-  (blok: `cf-metisui-module`; ikonlar jsDelivr üzerinden `bootstrap-icons@1.11.3`).
+  (blok: `cf-metisui-module`; ikonlar Bootstrap Icons 1.11.3 (MIT) SVG olarak dosyaya gömülü,
+  internet bağlantısı gerektirmez — üst çubuktaki tam ekran, bildirim ve rehber ikonları dahil).
+- **Metis yazı ölçüleri:** sayfa başlıkları 20px/600, kart başlıkları 15px/600, özet kartı değeri
+  26px/600 ve etiketi 11px büyük harf, menü / buton / form alanı / tablo hücresi 14px, tablo
+  başlıkları büyük harf. PDF belge şablonlarına dokunmaz (blok: `cf-typography-style`).
 - **Açık / koyu tema:** üst çubuktaki ay / güneş düğmesi; tercih cihazda hatırlanır.
   Koyu tema yalnızca ekranda uygulanır, PDF / baskı çıktıları açık renk kalır; görseller,
   logolar ve belge önizlemeleri ters çevrilmez (blok: `cf-dark-module`, `cf-dark-boot`).
@@ -93,7 +97,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-18.4">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-18.5">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
