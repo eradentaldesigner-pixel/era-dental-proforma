@@ -1,4 +1,4 @@
-<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-18.21"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
+<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-18.22"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
 #prPrintRoot.cf-pdf-capture{display:block!important;visibility:visible!important;position:fixed!important;left:-12000px!important;top:0!important;right:auto!important;bottom:auto!important;width:210mm!important;padding:0!important;margin:0!important;max-height:none!important;overflow:visible!important;background:white!important;z-index:-1!important}#prPrintRoot.cf-pdf-capture .pr-page{margin:0!important;box-shadow:none!important;zoom:1!important;transform:none!important}
 html.cf-native-pdf-route #authGate{display:none!important}html.cf-native-pdf-route body{padding:0!important;margin:0!important;background:#f6f8fc!important}html.cf-native-pdf-route body>*:not(.auth-shell):not(#cfPdfRouteStatus):not(#prPrintRoot):not(script):not(style):not(iframe):not(.html2canvas-container):not([style*="visibility: hidden"]){display:none!important}#cfPdfRouteStatus{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:#f6f8fc;color:#193450;font:16px system-ui;padding:24px;text-align:center}#cfPdfRouteStatus h1{font-size:22px;margin:0}#cfPdfRouteStatus button,#cfPdfRouteStatus a{font:14px system-ui;padding:12px 18px;background:white;border:1px solid #d9e4f2;border-radius:9px;color:#075cc5;text-decoration:none;cursor:pointer}
 }
@@ -8181,8 +8181,8 @@ html:not(#cfm) body:not(#cfm) main.wrap.cf-quick-editor.cf-split:not(.cf-quick-p
 }
 .cf-split-label{display:none}
 main.cf-split .cf-split-label{display:flex}
-.cf-split-toggle{display:none}
-@media screen and (min-width:1200px){.cf-split-toggle{display:inline-flex}}
+html:not(#cfm) body:not(#cfm) .cf-split-toggle{display:none!important}
+@media screen and (min-width:1200px){html:not(#cfm) body:not(#cfm) .cf-split-toggle{display:inline-flex!important}}
 .cf-split-toggle[aria-pressed="true"]{background:#eff6ff!important;border-color:#3b82f6!important;color:#1d4ed8!important}
 @media print{.cf-split-label,.cf-split-toggle{display:none!important}}
 </style>
@@ -8193,7 +8193,7 @@ const set=v=>{try{localStorage.setItem(KEY,v?'on':'off')}catch(_){}};
 function rescale(){window.dispatchEvent(new Event('resize'))}
 let lastFill=0;function fill(){if(Date.now()-lastFill<2000)return;lastFill=Date.now();setTimeout(()=>{try{if(typeof render==='function'&&!document.querySelector('#prInlinePreview .pr-page'))render()}catch(_){}},300)}
 function apply(){const main=document.querySelector('main.wrap.cf-quick-editor');if(!main)return;const on=get();if(on&&main.offsetParent&&!document.querySelector('#prInlinePreview .pr-page'))fill();if(main.classList.contains('cf-split')!==on){main.classList.toggle('cf-split',on);setTimeout(rescale,60)}
-  const b=document.querySelector('.cf-split-toggle');if(b){b.setAttribute('aria-pressed',String(on));b.title=on?'Önizlemeyi gizle':'Belgeyi yanda göster'}}
+  const b=document.querySelector('.cf-split-toggle');if(b){const p=String(on),t=on?'Önizlemeyi gizle':'Belgeyi yanda göster';if(b.getAttribute('aria-pressed')!==p)b.setAttribute('aria-pressed',p);if(b.title!==t&&b.dataset.cfTipTitle!==t)b.title=t}}
 function mount(){const main=document.querySelector('main.wrap.cf-quick-editor');if(!main)return;
   const scroll=main.querySelector(':scope > .paper-scroll');if(scroll&&!scroll.querySelector('.cf-split-label')){const l=document.createElement('div');l.className='cf-split-label';l.innerHTML='<b>Canlı önizleme</b><span>Yazdıkça güncellenir · son hali PDF ile aynıdır</span>';scroll.prepend(l)}
   const head=main.querySelector('.quote-editor-head');if(head&&!head.querySelector('.cf-split-toggle')){const b=document.createElement('button');b.type='button';b.className='btn light cf-split-toggle';b.textContent='Yan yana';b.onclick=()=>{set(!get());apply()};const pv=head.querySelector('#cfQuickPreview');if(pv)pv.before(b);else head.append(b)}
@@ -8686,6 +8686,8 @@ window.cfShowPlanSummary=showSummary;
 /* =================== Bildirimden doğrudan plan kartı =================== */
 async function planById(id){let x=null;try{x=(window.calendarEvents||calendarEvents||[]).find(v=>String(v.id)===String(id))}catch(_){}if(!x){const r=await sb.from('calendar_events').select('*').eq('company_id',currentCompanyId).eq('id',id).maybeSingle();if(r.error||!r.data)return null;x=r.data}return x}
 /* bildirime tıklanınca: plana atanmış kişi için takvim sayfası açılmadan kart gösterilir */
+/* uygulama açıkken telefon bildirimine dokunulunca (push-sw.js → cepfirma-open-plan) */
+if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{if(e.data?.type!=='cepfirma-open-plan')return;const id=String(e.data.plan||'');if(!/^\d{1,18}$/.test(id)||!currentUser||!currentCompanyId)return;try{closeMobileNotifications?.()}catch(_){}document.getElementById('notifyPanel')?.classList.remove('open');window.cfOpenPlanCard(id,true).then(ok=>{if(!ok)showToast?.('Plan bulunamadı veya silinmiş.','warning')})});
 window.cfOpenPlanCard=async(id,always)=>{const x=await planById(id);if(!x)return false;if(!always&&canEdit(x))return false;/* atanan iş: arkada Gelen İşler açık olsun */if(isAssigned(x)&&!canEdit(x)&&window.cfOpenInbox)await window.cfOpenInbox();await showSummary(x);window.cfInbox?.markReadId(x.id);return true};
 /* telefon bildirimi bağlantısı: app.html?plan=42 */
 (function(){const id=new URLSearchParams(location.search).get('plan');if(!id||!/^\d+$/.test(id))return;let tries=0;const go=async()=>{if(typeof currentUser!=='undefined'&&currentUser&&currentCompanyId){const u=new URL(location.href);u.searchParams.delete('plan');u.searchParams.delete('notifications');history.replaceState(null,'',u);setTimeout(async()=>{document.getElementById('mobileNotifyShell')?.classList.remove('open');try{closeMobileNotifications?.()}catch(_){}if(!await window.cfOpenPlanCard(id,true))showToast?.('Plan bulunamadı veya silinmiş.','warning')},700);return}if(++tries<600)setTimeout(go,1000)};setTimeout(go,800)})();
@@ -8967,6 +8969,9 @@ html:not(#cfm) body:not(#cfm) #customerOverlay #customerDetailInline{width:100%!
 .cfps-actions .btn{flex:1 1 auto;min-height:46px}
 .cfrs-btns .btn{flex:1 1 140px;min-height:46px}
 @keyframes cfmSheet{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}
+/* ---- plan formu: Kaydet düğmesi her zaman altta görünür ---- */
+html:not(#cfm) body:not(#cfm) #calendarModal .calendar-card>.actions{position:sticky!important;bottom:-18px;z-index:5;background:var(--mt-panel,#fff)!important;margin:12px -18px -18px!important;padding:12px 18px calc(16px + env(safe-area-inset-bottom,0px))!important;border-top:1px solid var(--mt-border,#e4e4e7);box-shadow:0 -6px 16px rgba(0,0,0,.06);display:flex!important;gap:8px;flex-wrap:wrap;align-items:center}
+html:not(#cfm) body:not(#cfm) #calendarModal .calendar-card>.actions .btn{flex:1 1 auto;min-height:46px}
 /* ---- dokunma hedefleri ---- */
 html:not(#cfm) body:not(#cfm) .cfin-item,html:not(#cfm) body:not(#cfm) .cfmsg-thread{min-height:60px}
 html:not(#cfm) body:not(#cfm) .cfmsg{height:calc(100vh - 230px - env(safe-area-inset-bottom,0px))!important;min-height:380px}
@@ -8997,16 +9002,16 @@ function mountNav(){const nav=$('cfMobileNav');if(!nav)return;
 function setCount(b,n){let c=b.querySelector('.cfm-count');if(!n){c?.remove();return}if(!c){c=document.createElement('i');c.className='cfm-count';b.append(c)}const t=n>99?'99+':String(n);if(c.textContent!==t)c.textContent=t}
 function paintNav(){const nav=$('cfMobileNav');if(!nav)return;const inbox=nav.querySelector('[data-key="inbox"]'),msg=nav.querySelector('[data-key="messages"][data-cfm]');if(inbox)setCount(inbox,window.cfInboxUnread||0);if(msg)setCount(msg,window.cfMsgUnread||0);
   const inboxOpen=$('cfInboxOverlay')&&!$('cfInboxOverlay').hidden,msgOpen=$('cfMessagesOverlay')&&!$('cfMessagesOverlay').hidden;
-  if(inboxOpen||msgOpen){nav.querySelectorAll('button').forEach(b=>{const on=(inboxOpen&&b===inbox)||(msgOpen&&b===msg);b.classList.toggle('active',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')})}
-  else{[inbox,msg].forEach(b=>{if(b){b.classList.remove('active');b.removeAttribute('aria-current')}})}}
+  if(inboxOpen||msgOpen){nav.querySelectorAll('button').forEach(b=>{const on=(inboxOpen&&b===inbox)||(msgOpen&&b===msg);if(b.classList.contains('active')!==on)b.classList.toggle('active',on);if(on&&b.getAttribute('aria-current')!=='page')b.setAttribute('aria-current','page');else if(!on&&b.hasAttribute('aria-current'))b.removeAttribute('aria-current')})}
+  else{[inbox,msg].forEach(b=>{if(b){if(b.classList.contains('active'))b.classList.remove('active');if(b.hasAttribute('aria-current'))b.removeAttribute('aria-current')}})}}
 
 /* ---------- tablolar → kartlar ---------- */
 const TABLES='.customer-table,.cfct-table,.service-table,.cf-users-table,.cfh-table';
-function cardTables(){document.querySelectorAll(TABLES).forEach(t=>{if(t.closest('.pr-page,.paper,#prPrintRoot,#prInlinePreview'))return;t.classList.add('cf-rt');const heads=[...(t.tHead?.rows[0]?.cells||[])].map(th=>(th.textContent||'').replace(/[↑↓↕⇅▲▼]/g,'').trim());
+function cardTables(){document.querySelectorAll(TABLES).forEach(t=>{if(t.closest('.pr-page,.paper,#prPrintRoot,#prInlinePreview'))return;if(!t.classList.contains('cf-rt'))t.classList.add('cf-rt');const heads=[...(t.tHead?.rows[0]?.cells||[])].map(th=>(th.textContent||'').replace(/[↑↓↕⇅▲▼]/g,'').trim());
   for(const tr of t.tBodies[0]?.rows||[]){if(tr.dataset.cfRt===String(tr.cells.length)+'|'+heads.length&&!tr.querySelector('td:not([data-cf-rt-done])'))continue;tr.dataset.cfRt=String(tr.cells.length)+'|'+heads.length;
     [...tr.cells].forEach((td,i)=>{td.dataset.cfRtDone='1';if(td.colSpan>1)return;const label=heads[i]||'';const hasCtl=!!td.querySelector('button,a.btn,select,input:not([type=checkbox])');const empty=!td.textContent.trim()&&!td.querySelector('img,svg,button,input,select');
       td.classList.toggle('cf-rt-main',i===(heads[0]===''||/^(no|#|seç)?$/i.test(heads[0])&&tr.cells.length>2?1:0));td.classList.toggle('cf-rt-actions',!label&&!td.classList.contains('cf-rt-main')&&(hasCtl||!!td.querySelector('a')||!!td.textContent.trim()));td.classList.toggle('cf-rt-empty',empty&&!hasCtl);
-      if(label&&!td.classList.contains('cf-rt-main'))td.dataset.label=label;else delete td.dataset.label})}})}
+      if(label&&!td.classList.contains('cf-rt-main')){if(td.dataset.label!==label)td.dataset.label=label}else if('label' in td.dataset)delete td.dataset.label})}})}
 
 /* telefonda kısa yer tutucu */
 function shortPlaceholders(){if(!mobile())return;const ta=$('cfmsgText');if(ta&&ta.placeholder.length>20)ta.placeholder='Mesaj yazın…'}
