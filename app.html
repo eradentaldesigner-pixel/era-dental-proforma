@@ -1,4 +1,4 @@
-<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-18.20"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
+<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-18.21"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
 #prPrintRoot.cf-pdf-capture{display:block!important;visibility:visible!important;position:fixed!important;left:-12000px!important;top:0!important;right:auto!important;bottom:auto!important;width:210mm!important;padding:0!important;margin:0!important;max-height:none!important;overflow:visible!important;background:white!important;z-index:-1!important}#prPrintRoot.cf-pdf-capture .pr-page{margin:0!important;box-shadow:none!important;zoom:1!important;transform:none!important}
 html.cf-native-pdf-route #authGate{display:none!important}html.cf-native-pdf-route body{padding:0!important;margin:0!important;background:#f6f8fc!important}html.cf-native-pdf-route body>*:not(.auth-shell):not(#cfPdfRouteStatus):not(#prPrintRoot):not(script):not(style):not(iframe):not(.html2canvas-container):not([style*="visibility: hidden"]){display:none!important}#cfPdfRouteStatus{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:#f6f8fc;color:#193450;font:16px system-ui;padding:24px;text-align:center}#cfPdfRouteStatus h1{font-size:22px;margin:0}#cfPdfRouteStatus button,#cfPdfRouteStatus a{font:14px system-ui;padding:12px 18px;background:white;border:1px solid #d9e4f2;border-radius:9px;color:#075cc5;text-decoration:none;cursor:pointer}
 }
@@ -8915,6 +8915,103 @@ window.cfAssignNotices=async(company,user,today,add)=>{if(typeof baseAssign==='f
 /* ---------- Gelen İşler etiketi ---------- */
 window.cfResponseTag=id=>{if(!probe.resp)return '';const r=mine.get(String(id));if(!r)return '<span class="cfin-tag wait">Yanıt bekliyor</span>';return r.status==='accepted'?'<span class="cfin-tag ok">Kabul ettiniz</span>':'<span class="cfin-tag no">Reddettiniz</span>'};
 let last='';new MutationObserver(()=>{const k=ident();if(currentUser&&currentCompanyId&&k!==last){last=k;probe.k='';loadMine(true).then(()=>window.cfInbox?.refresh?.())}}).observe(document.body,{childList:true,subtree:true});
+})();</script>
+<!-- ==========================================================================
+     CepFirma — Mobil uygulama görünümü
+     * Alt sekme çubuğu: Ana Sayfa · Gelen İşler · Takvim · Mesajlar · Menü
+       (Gelen İşler ve Mesajlar'da okunmamış sayısı). Teklifler menüde "Belgeler".
+     * Telefonda tablolar kart görünümüne geçer (Müşteriler, Ürünler, Servis, Ekip,
+       Veri Kontrolü); yatay kaydırma ve taşma kalmaz.
+     * Plan kartı ve QR penceresi telefonda alttan açılan sayfa (bottom sheet).
+     * Menüden açılan sayfalarda menü kapanır (Mesajlar / Gelen İşler hatası).
+     * iPhone alt çentiği (safe area) ve sayfa alt boşlukları.
+     Kaldırmak için id değeri cf-mobile-style olan stil ve cf-mobile-module olan
+     betik bloklarını silmeniz yeterlidir.
+     ========================================================================== -->
+<style id="cf-mobile-style">
+@media (max-width:767px){
+/* ---- alt sekme çubuğu ---- */
+html:not(#cfm) body:not(#cfm) #cfMobileNav{display:grid!important;grid-template-columns:repeat(5,1fr)!important;padding-bottom:env(safe-area-inset-bottom,0)!important}
+html:not(#cfm) body:not(#cfm) #cfMobileNav>button[data-key="records"]{display:none!important}
+html:not(#cfm) body:not(#cfm) #cfMobileNav>button{position:relative;min-width:0}
+html:not(#cfm) body:not(#cfm) #cfMobileNav>button span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+#cfMobileNav .cfm-count{position:absolute;top:4px;left:calc(50% + 6px);min-width:17px;height:17px;padding:0 5px;border-radius:999px;background:#ef4444;color:#fff;font-size:10.5px;font-weight:700;line-height:17px;text-align:center;font-style:normal;box-shadow:0 0 0 2px var(--mt-panel,#fff)}
+/* sayfa içeriği alt çubuğun altında kalmasın */
+html:not(#cfm) body:not(#cfm) .pr-page-view,html:not(#cfm) body:not(#cfm) .dashboard-overlay,html:not(#cfm) body:not(#cfm) #calendarOverlay,html:not(#cfm) body:not(#cfm) #customerOverlay,html:not(#cfm) body:not(#cfm) #catalogOverlay,html:not(#cfm) body:not(#cfm) #serviceOverlay,html:not(#cfm) body:not(#cfm) #crmOverlay,html:not(#cfm) body:not(#cfm) #archiveOverlay,html:not(#cfm) body:not(#cfm) #ordersOverlay,html:not(#cfm) body:not(#cfm) #settingsOverlay{padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+/* özet kartı etiketleri iki satırı geçmesin */
+html:not(#cfm) body:not(#cfm) .hd-metric small,html:not(#cfm) body:not(#cfm) .hd-metric span>span:first-child:not(:only-child){font-size:10px!important;letter-spacing:.04em!important;line-height:1.25!important}
+html:not(#cfm) body:not(#cfm) .hd-metric b,html:not(#cfm) body:not(#cfm) .hd-metric strong{font-size:22px!important}
+/* ---- tablolar → kartlar ---- */
+html:not(#cfm) body:not(#cfm) table.cf-rt{display:block!important;width:100%!important;min-width:0!important;border:0!important;background:transparent!important}
+html:not(#cfm) body:not(#cfm) table.cf-rt>colgroup,html:not(#cfm) body:not(#cfm) table.cf-rt>thead{display:none!important}
+html:not(#cfm) body:not(#cfm) table.cf-rt>tbody{display:grid!important;gap:10px;width:100%!important}
+html:not(#cfm) body:not(#cfm) table.cf-rt>tbody>tr{display:grid!important;grid-template-columns:minmax(0,1fr);gap:6px;background:var(--mt-panel,#fff)!important;border:1px solid var(--mt-border,#e4e4e7)!important;border-radius:12px!important;padding:12px 14px!important;box-shadow:none!important;width:100%!important;height:auto!important}
+html:not(#cfm) body:not(#cfm) table.cf-rt>tbody>tr>td{display:flex!important;align-items:flex-start;justify-content:space-between;gap:12px;padding:0!important;border:0!important;width:auto!important;min-width:0!important;max-width:none!important;text-align:right!important;font-size:14px!important;white-space:normal!important;overflow-wrap:anywhere;background:transparent!important}
+html:not(#cfm) body:not(#cfm) table.cf-rt>tbody>tr>td[data-label]::before{content:attr(data-label);flex:none;max-width:45%;text-align:left;font-size:12px;font-weight:500;color:var(--mt-ink-3,#71717a);text-transform:none;letter-spacing:0;padding-top:2px}
+html:not(#cfm) body:not(#cfm) table.cf-rt>tbody>tr>td.cf-rt-main{display:block!important;text-align:left!important;font-size:15px!important;font-weight:600;padding-bottom:4px!important;border-bottom:1px solid var(--mt-border,#e4e4e7)!important;margin-bottom:2px}
+html:not(#cfm) body:not(#cfm) table.cf-rt>tbody>tr>td.cf-rt-main::before{display:none!important}
+html:not(#cfm) body:not(#cfm) table.cf-rt>tbody>tr>td.cf-rt-actions{justify-content:flex-end!important;flex-wrap:wrap;padding-top:4px!important}
+html:not(#cfm) body:not(#cfm) table.cf-rt>tbody>tr>td.cf-rt-actions::before{display:none!important}
+html:not(#cfm) body:not(#cfm) table.cf-rt>tbody>tr>td.cf-rt-empty{display:none!important}
+html:not(#cfm) body:not(#cfm) table.cf-rt>tbody>tr>td[colspan]{display:block!important;text-align:center!important}
+html:not(#cfm) body:not(#cfm) table.cf-rt>tbody>tr.is-selected,html:not(#cfm) body:not(#cfm) table.cf-rt>tbody>tr.selected{border-color:#3b82f6!important;box-shadow:0 0 0 2px rgba(59,130,246,.15)!important}
+html:not(#cfm) body:not(#cfm) :is(.cfct-scroll,.customer-list,.service-list,.cf-users-table-wrap){overflow:visible!important;max-width:100%!important;border:0!important;background:transparent!important}
+/* müşteri ayrıntısı telefonda tam genişlik */
+html:not(#cfm) body:not(#cfm) #customerOverlay .customer-body{display:block!important;width:100%!important;max-width:100%!important}
+html:not(#cfm) body:not(#cfm) #customerOverlay #customerDetailInline{width:100%!important;max-width:100%!important;min-width:0!important}
+/* ---- alttan açılan sayfalar (bottom sheet) ---- */
+.cfps-back,.cfqr-back{place-items:end center!important;padding:0!important}
+.cfps,.cfqr{width:100%!important;max-width:100%!important;border-radius:18px 18px 0 0!important;max-height:92vh!important;padding-bottom:env(safe-area-inset-bottom,0);animation:cfmSheet .22s ease}
+.cfps::before,.cfqr::before{content:"";display:block;width:40px;height:4px;border-radius:999px;background:#d4d4d8;margin:8px auto 0}
+.cfps-actions{position:sticky;bottom:0;background:var(--mt-panel,#fff);border-top:1px solid var(--mt-border,#e4e4e7)}
+.cfps-actions .btn{flex:1 1 auto;min-height:46px}
+.cfrs-btns .btn{flex:1 1 140px;min-height:46px}
+@keyframes cfmSheet{from{transform:translateY(40px);opacity:.6}to{transform:none;opacity:1}}
+/* ---- dokunma hedefleri ---- */
+html:not(#cfm) body:not(#cfm) .cfin-item,html:not(#cfm) body:not(#cfm) .cfmsg-thread{min-height:60px}
+html:not(#cfm) body:not(#cfm) .cfmsg{height:calc(100vh - 230px - env(safe-area-inset-bottom,0px))!important;min-height:380px}
+html:not(#cfm) body:not(#cfm) .cfmsg-compose textarea{font-size:16px!important}
+/* sohbet açılınca: üst ve alt çubuk arasında tam ekran (uygulama gibi) */
+html:not(#cfm) body:not(#cfm) .cfmsg.thread-open{position:fixed!important;top:66px;bottom:calc(76px + env(safe-area-inset-bottom,0px));left:0;right:0;height:auto!important;min-height:0!important;border:0!important;border-radius:0!important;z-index:11400}
+html:not(#cfm) body:not(#cfm) .cfmsg.thread-open .cfmsg-top{padding:10px 12px}
+html:not(#cfm) body:not(#cfm) .cfmsg.thread-open .cfmsg-compose{padding:8px 10px}
+html:not(#cfm) body:not(#cfm) .cfmsg-compose .btn{min-width:48px}
+}
+</style>
+<script id="cf-mobile-module">(function(){'use strict';
+const $=id=>document.getElementById(id);
+const mobile=()=>window.matchMedia('(max-width:767px)').matches;
+const closeMenu=()=>{try{if(typeof setMobileMenu==='function')setMobileMenu(false)}catch(_){}};
+window.closeMobileDrawer=closeMenu;
+
+/* ---------- menüden açılan sayfalarda menüyü kapat ---------- */
+document.addEventListener('click',e=>{const b=e.target.closest?.('.md-menu > button');if(b)setTimeout(closeMenu,0)},true);
+
+/* ---------- alt sekme çubuğu ---------- */
+const IC={inbox:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 13h4l2 3h4l2-3h4"/><path d="M5.5 5h13L21 13v6H3v-6z"/></svg>',messages:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/><path d="M8.5 10.5h7M8.5 13.5h4.5"/></svg>'};
+function tab(key,label,open){const b=document.createElement('button');b.type='button';b.dataset.key=key;b.dataset.cfm='1';b.innerHTML=IC[key]+'<span>'+label+'</span>';b.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();closeMenu();open()},true);return b}
+function mountNav(){const nav=$('cfMobileNav');if(!nav)return;
+  if(!nav.querySelector('[data-key="inbox"]')){const home=nav.querySelector('[data-key="home"]');const t=tab('inbox','Gelen İşler',()=>window.cfOpenInbox?.());home?home.after(t):nav.prepend(t)}
+  if(!nav.querySelector('[data-key="messages"][data-cfm]')){const cal=nav.querySelector('[data-key="calendar"]');const t=tab('messages','Mesajlar',()=>window.cfOpenMessages?.());const menu=nav.querySelector('[data-key="menu"]');if(menu)menu.before(t);else nav.append(t)}
+  paintNav()}
+function setCount(b,n){let c=b.querySelector('.cfm-count');if(!n){c?.remove();return}if(!c){c=document.createElement('i');c.className='cfm-count';b.append(c)}const t=n>99?'99+':String(n);if(c.textContent!==t)c.textContent=t}
+function paintNav(){const nav=$('cfMobileNav');if(!nav)return;const inbox=nav.querySelector('[data-key="inbox"]'),msg=nav.querySelector('[data-key="messages"][data-cfm]');if(inbox)setCount(inbox,window.cfInboxUnread||0);if(msg)setCount(msg,window.cfMsgUnread||0);
+  const inboxOpen=$('cfInboxOverlay')&&!$('cfInboxOverlay').hidden,msgOpen=$('cfMessagesOverlay')&&!$('cfMessagesOverlay').hidden;
+  if(inboxOpen||msgOpen){nav.querySelectorAll('button').forEach(b=>{const on=(inboxOpen&&b===inbox)||(msgOpen&&b===msg);b.classList.toggle('active',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')})}
+  else{[inbox,msg].forEach(b=>{if(b){b.classList.remove('active');b.removeAttribute('aria-current')}})}}
+
+/* ---------- tablolar → kartlar ---------- */
+const TABLES='.customer-table,.cfct-table,.service-table,.cf-users-table,.cfh-table';
+function cardTables(){document.querySelectorAll(TABLES).forEach(t=>{if(t.closest('.pr-page,.paper,#prPrintRoot,#prInlinePreview'))return;t.classList.add('cf-rt');const heads=[...(t.tHead?.rows[0]?.cells||[])].map(th=>(th.textContent||'').replace(/[↑↓↕⇅▲▼]/g,'').trim());
+  for(const tr of t.tBodies[0]?.rows||[]){if(tr.dataset.cfRt===String(tr.cells.length)+'|'+heads.length&&!tr.querySelector('td:not([data-cf-rt-done])'))continue;tr.dataset.cfRt=String(tr.cells.length)+'|'+heads.length;
+    [...tr.cells].forEach((td,i)=>{td.dataset.cfRtDone='1';if(td.colSpan>1)return;const label=heads[i]||'';const hasCtl=!!td.querySelector('button,a.btn,select,input:not([type=checkbox])');const empty=!td.textContent.trim()&&!td.querySelector('img,svg,button,input,select');
+      td.classList.toggle('cf-rt-main',i===(heads[0]===''||/^(no|#|seç)?$/i.test(heads[0])&&tr.cells.length>2?1:0));td.classList.toggle('cf-rt-actions',!label&&!td.classList.contains('cf-rt-main')&&(hasCtl||!!td.querySelector('a')||!!td.textContent.trim()));td.classList.toggle('cf-rt-empty',empty&&!hasCtl);
+      if(label&&!td.classList.contains('cf-rt-main'))td.dataset.label=label;else delete td.dataset.label})}})}
+
+/* telefonda kısa yer tutucu */
+function shortPlaceholders(){if(!mobile())return;const ta=$('cfmsgText');if(ta&&ta.placeholder.length>20)ta.placeholder='Mesaj yazın…'}
+let t=0;new MutationObserver(()=>{if(t)return;t=setTimeout(()=>{t=0;mountNav();cardTables();shortPlaceholders()},200)}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','class']});
+setInterval(paintNav,3000);mountNav();cardTables();
 })();</script>
 <!-- ==========================================================================
      CepFirma — Metis yazı ölçüleri
