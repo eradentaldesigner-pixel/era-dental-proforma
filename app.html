@@ -1,4 +1,4 @@
-<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-18.3"><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
+<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-18.4"><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
 #prPrintRoot.cf-pdf-capture{display:block!important;visibility:visible!important;position:fixed!important;left:-12000px!important;top:0!important;right:auto!important;bottom:auto!important;width:210mm!important;padding:0!important;margin:0!important;max-height:none!important;overflow:visible!important;background:white!important;z-index:-1!important}#prPrintRoot.cf-pdf-capture .pr-page{margin:0!important;box-shadow:none!important;zoom:1!important;transform:none!important}
 html.cf-native-pdf-route #authGate{display:none!important}html.cf-native-pdf-route body{padding:0!important;margin:0!important;background:#f6f8fc!important}html.cf-native-pdf-route body>*:not(.auth-shell):not(#cfPdfRouteStatus):not(#prPrintRoot):not(script):not(style):not(iframe):not(.html2canvas-container):not([style*="visibility: hidden"]){display:none!important}#cfPdfRouteStatus{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:#f6f8fc;color:#193450;font:16px system-ui;padding:24px;text-align:center}#cfPdfRouteStatus h1{font-size:22px;margin:0}#cfPdfRouteStatus button,#cfPdfRouteStatus a{font:14px system-ui;padding:12px 18px;background:white;border:1px solid #d9e4f2;border-radius:9px;color:#075cc5;text-decoration:none;cursor:pointer}
 }
@@ -6702,6 +6702,7 @@ function visibleKeys(){
 }
 /* Bu öğelerin görünürlüğünü biz yönetiriz; diğerlerinde yalnızca gizleriz, kendi kuralları geçerli kalır */
 const MANAGED=new Set(['home','calendar','customers','crm','catalog','service','orders','organization','archive','offers','users','presence','reports','health','settings']);
+window.cfNavKey=keyOf;
 const LABEL={archive:'Belgeler',offers:'Belgeler',catalog:'Ürünler',service:'Servis',orders:'Siparişler',organization:'Seyahatler',users:'Ekip',presence:'Ekip',settings:'Ayarlar',personal:'Ayarlar'};
 const GROUPS=[
   ['ÇALIŞMA ALANI',['home','calendar','requests']],
@@ -7091,6 +7092,8 @@ html[data-cf-theme="dark"] :is(.pr-page,.paper,#prPrintRoot,#prInlinePreview,.cf
 /* koyu zeminde gölgeler hale gibi görünmesin */
 html[data-cf-theme="dark"] body :is(.cfb-stat,.cf-files-stat,.cf-users-stat,.dash-card,.hd-metric,.hd-op,.home-stock-stat,.home-fx-card,.archive-stat,.crm-metric,.service-summary-card,.ops-stage,.cffm-card,.btn):hover{box-shadow:none!important}
 html[data-cf-theme="dark"] .cfv-bar,html[data-cf-theme="dark"] .cfsm-toast{filter:invert(1) hue-rotate(180deg)}
+/* Metis koyu temasındaki gibi dolgun renkler: marka, rozetler, ana düğmeler */
+html[data-cf-theme="dark"] :is(.cfui-mark,.cfui-badge,.btn.primary,.cfnav-new>summary,.cfui-badge){filter:invert(1) hue-rotate(180deg)}
 }
 @media print{html[data-cf-theme="dark"]{filter:none!important}}
 .cf-theme-btn{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:var(--mt-radius,8px);border:1px solid transparent;background:transparent;color:var(--mt-ink-2,#52525b);cursor:pointer;transition:background-color .15s,color .15s,transform .2s}
@@ -7120,6 +7123,113 @@ new MutationObserver(()=>{if(!document.querySelector('.dash-top-actions .cf-them
 window.addEventListener('storage',e=>{if(e.key===KEY)apply(get())});
 window.cfSetTheme=set;
 mount();
+})();</script>
+
+<!-- ==========================================================================
+     CepFirma — Metis arayüz ayrıntıları
+     * Menüde Metis'in Bootstrap Icons ikonları
+     * Menü rozetleri (onay bekleyen belgeler, açık servisler, "Yeni")
+     * Üst çubukta tam ekran düğmesi, Ctrl+K ile arama, Metis ikonları
+     * Logo dosyası yüklenemezse Metis tarzı marka kutusu
+     Kaldırmak için id değeri cf-metisui-style olan stil ve cf-metisui-module olan
+     betik bloklarını silmeniz yeterlidir.
+     ========================================================================== -->
+<style id="cf-metisui-style">
+/* ikonlar */
+html:not(#cfm) body:not(#cfm) .desktop-side .ds-btn .ds-icon,html:not(#cfm) body:not(#cfm) .mobile-drawer .md-menu .mi{display:inline-grid;place-items:center;width:22px;min-width:22px;height:22px;font-size:17px;line-height:1}
+html:not(#cfm) body:not(#cfm) .desktop-side .ds-btn .ds-icon .bi,html:not(#cfm) body:not(#cfm) .mobile-drawer .md-menu .mi .bi{font-size:17px;line-height:1;display:block}
+html:not(#cfm) body:not(#cfm) .desktop-side .ds-btn{gap:12px!important;padding-top:9px!important;padding-bottom:9px!important;font-size:14px!important}
+html:not(#cfm) body:not(#cfm) .desktop-side .ds-btn.active .ds-icon{color:var(--mt-primary,#2563eb)!important}
+/* rozetler */
+.cfui-badge{margin-left:auto;flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;padding:0 7px;border-radius:999px;font-size:11px;font-weight:600;line-height:1;color:#fff;font-style:normal;letter-spacing:.01em}
+.cfui-badge.red{background:#dc2626}.cfui-badge.green{background:#16a34a}.cfui-badge.blue{background:#2563eb}.cfui-badge.amber{background:#d97706}
+.desktop-side .ds-btn .cfui-badge{margin-right:2px}
+/* üst çubuk */
+.cfui-top-btn{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:var(--mt-radius,8px);border:1px solid transparent;background:transparent;color:var(--mt-ink-2,#52525b);cursor:pointer;font-size:17px;transition:background-color .15s,color .15s}
+.cfui-top-btn:hover{background:var(--mt-hover,#f4f4f5);color:var(--mt-ink,#18181b)}
+html:not(#cfm) body:not(#cfm) .dash-top-actions .dash-icon-button .bi{font-size:17px;line-height:1}
+html:not(#cfm) body:not(#cfm) .dash-search kbd{font-family:var(--mt-font,system-ui)!important;font-size:11px!important;padding:2px 6px!important}
+/* marka kutusu (logo dosyası yoksa) */
+.cfui-mark{flex:none;width:34px;height:34px;border-radius:8px;background:#2563eb;color:#fff;display:grid;place-items:center;font-weight:700;font-size:19px;letter-spacing:-.02em;box-shadow:0 2px 6px rgba(37,99,235,.35)}
+html:not(#cfm) body:not(#cfm) .desktop-side .ds-brand{display:flex;align-items:center;gap:10px}
+html:not(#cfm) body:not(#cfm) .desktop-side .ds-brand span{color:#1e3a8a!important}
+html[data-cf-theme="dark"] .desktop-side .ds-brand span{color:#1e3a8a!important}
+</style>
+<script id="cf-metisui-module">(function(){'use strict';
+/* ---------- Bootstrap Icons (Metis'in ikon seti) ---------- */
+if(!document.getElementById('cfui-bi')){const l=document.createElement('link');l.id='cfui-bi';l.rel='stylesheet';l.href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css';document.head.append(l)}
+const ICON={home:'speedometer2',calendar:'calendar-event',requests:'inbox',customers:'people',crm:'chat-dots',archive:'file-earmark-text',offers:'file-earmark-text',catalog:'box',stock:'box',service:'tools',orders:'bag-check',organization:'airplane',users:'person-badge',presence:'person-badge',team:'person-badge',reports:'graph-up',analytics:'graph-up',files:'folder',health:'shield-check',settings:'gear',personal:'gear',security:'shield-lock',guide:'question-circle',logout:'box-arrow-right',work:'list-check',newOffer:'plus-circle'};
+const keyOf=b=>{try{return typeof window.cfNavKey==='function'?window.cfNavKey(b):''}catch(e){return ''}};
+const textKey=b=>{const t=b.textContent.trim();return t.startsWith('Başlangıç Rehberi')?'guide':t.startsWith('Çıkış Yap')?'logout':''};
+function setIcon(b,k){const name=ICON[k];if(!name)return;const box=b.querySelector(':scope > .ds-icon, :scope > .mi');if(!box)return;const cls='bi bi-'+name;const cur=box.firstElementChild;if(cur&&cur.tagName==='I'&&cur.className===cls)return;box.innerHTML='<i class="'+cls+'" aria-hidden="true"></i>'}
+
+/* ---------- Rozetler ---------- */
+let counts={archive:null,service:null},lastFetch=0,fetching=false;
+const NEW_UNTIL=Date.parse('2026-12-31T23:59:59+03:00');
+function badgeFor(k){
+  if(k==='archive'&&counts.archive>0)return ['red',counts.archive>99?'99+':String(counts.archive),'Onay bekleyen proforma'];
+  if(k==='service'&&counts.service>0)return ['blue',String(counts.service),'Açık servis kaydı'];
+  if((k==='files'||k==='health')&&Date.now()<NEW_UNTIL)return ['green','Yeni','Yeni özellik'];
+  return null;
+}
+function setBadge(b,k){
+  const want=badgeFor(k);let el=b.querySelector(':scope > .cfui-badge');
+  if(!want){if(el)el.remove();return}
+  if(!el){el=document.createElement('i');el.className='cfui-badge';b.append(el)}
+  const cls='cfui-badge '+want[0];if(el.className!==cls)el.className=cls;if(el.textContent!==want[1])el.textContent=want[1];if(el.title!==want[2])el.title=want[2];
+}
+async function fetchCounts(force){
+  if(fetching||!currentUser||!currentCompanyId)return;if(!force&&Date.now()-lastFetch<120000)return;fetching=true;lastFetch=Date.now();
+  const company=currentCompanyId,role=currentMembership?.role,can=a=>{try{return hasAppAction(a)}catch(e){return false}};
+  try{
+    const jobs=[];
+    if(['owner','admin'].includes(role)&&can('archive'))jobs.push(sb.from('proformas').select('id',{count:'exact',head:true}).eq('company_id',company).is('deleted_at',null).eq('approval_state','pending').then(r=>{counts.archive=r.error?null:r.count}));else counts.archive=null;
+    if(can('service'))jobs.push(sb.from('technical_service_records').select('id',{count:'exact',head:true}).eq('company_id',company).in('status',['waiting','following']).then(r=>{counts.service=r.error?null:r.count}));else counts.service=null;
+    await Promise.all(jobs);
+  }catch(e){}finally{fetching=false;if(company===currentCompanyId)decorate()}
+}
+
+/* ---------- Menüyü süsle ---------- */
+let busy=false;
+function decorate(){
+  if(busy)return;busy=true;
+  try{
+    document.querySelectorAll('.ds-nav > button, .md-menu > button, .desktop-side > button').forEach(b=>{const k=keyOf(b)||textKey(b);if(!k)return;setIcon(b,k);if(b.closest('.ds-nav,.md-menu'))setBadge(b,k)});
+    topbar();brand();
+  }finally{busy=false}
+}
+let t=0;const obs=new MutationObserver(()=>{if(busy)return;clearTimeout(t);t=setTimeout(decorate,60)});
+function watch(){document.querySelectorAll('.ds-nav,.md-menu,.dash-top-actions').forEach(n=>{if(!n.dataset.cfuiWatched){n.dataset.cfuiWatched='1';obs.observe(n,{childList:true,subtree:true})}})}
+
+/* ---------- Üst çubuk: tam ekran, ikonlar, Ctrl+K ---------- */
+function fsIcon(){return document.fullscreenElement?'fullscreen-exit':'arrows-fullscreen'}
+function topbar(){
+  const bar=document.querySelector('.dash-top-actions');if(!bar)return;
+  if(document.fullscreenEnabled&&!bar.querySelector('.cfui-fs')){const b=document.createElement('button');b.type='button';b.className='cfui-top-btn cfui-fs';b.title='Tam ekranı aç/kapat';b.setAttribute('aria-label','Tam ekranı aç/kapat');b.innerHTML='<i class="bi bi-'+fsIcon()+'" aria-hidden="true"></i>';b.onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch(e){}};const bell=bar.querySelector('[aria-label="Bildirimler"]');bell?bar.insertBefore(b,bell):bar.append(b)}
+  const bell=bar.querySelector('.dash-icon-button[aria-label="Bildirimler"]');if(bell){const svg=bell.querySelector(':scope > svg');if(svg){svg.outerHTML='<i class="bi bi-bell" aria-hidden="true"></i>'}}
+  const guide=[...bar.querySelectorAll('.dash-icon-button')].find(x=>/rehber/i.test(x.getAttribute('aria-label')||x.title||''));if(guide){const svg=guide.querySelector(':scope > svg');if(svg)svg.outerHTML='<i class="bi bi-question-circle" aria-hidden="true"></i>'}
+  const input=document.querySelector('.dash-search input');if(input&&!input.dataset.cfuiK){input.dataset.cfuiK='1';input.placeholder=(input.placeholder||'Ara…').replace(/…$/,'')+'… (Ctrl+K)';const kbd=input.parentElement.querySelector('kbd');if(kbd)kbd.textContent='Ctrl K'}
+}
+document.addEventListener('fullscreenchange',()=>{const i=document.querySelector('.cfui-fs i');if(i)i.className='bi bi-'+fsIcon()});
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&!e.altKey&&(e.key==='k'||e.key==='K')){const i=[...document.querySelectorAll('.dash-search input')].find(x=>x.offsetParent!==null);if(i){e.preventDefault();i.focus();i.select()}}});
+
+/* ---------- Marka kutusu ---------- */
+function brand(){
+  document.querySelectorAll('.ds-brand img, .m-brand img, .md-logo img').forEach(img=>{
+    if(img.dataset.cfuiBrand)return;img.dataset.cfuiBrand='1';
+    const swap=()=>{if(img.dataset.cfuiSwapped)return;img.dataset.cfuiSwapped='1';const m=document.createElement('span');m.className='cfui-mark';m.textContent='C';m.setAttribute('aria-hidden','true');img.replaceWith(m)};
+    if(img.complete&&img.naturalWidth===0&&img.getAttribute('src'))swap();else img.addEventListener('error',swap,{once:true});
+  });
+}
+
+/* ---------- Bağlantı ---------- */
+if(typeof pnRefresh==='function'){const base=pnRefresh;pnRefresh=function(){const r=base.apply(this,arguments);setTimeout(()=>{watch();decorate();fetchCounts()},0);return r}}
+if(typeof applyRoleNavigation==='function'){const base=applyRoleNavigation;applyRoleNavigation=function(){const r=base.apply(this,arguments);setTimeout(()=>{watch();decorate();fetchCounts(true)},0);return r}}
+setInterval(()=>{if(document.visibilityState==='visible')fetchCounts()},120000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')fetchCounts()});
+/* belge onay durumu değişince sayaç güncellensin */
+if(window.cfNotificationCenter&&typeof window.cfNotificationCenter.refresh==='function'){const base=window.cfNotificationCenter.refresh;window.cfNotificationCenter.refresh=function(){const r=base.apply(this,arguments);fetchCounts(true);return r}}
+watch();decorate();setTimeout(()=>fetchCounts(true),1500);
 })();</script>
 
 <style id="cf-metis-theme">
