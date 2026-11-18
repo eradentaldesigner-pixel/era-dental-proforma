@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-18.8)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-18.13)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -80,6 +80,13 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Geliştirilen sayfalar
 
+- **Hızlı belge (teklif / proforma) — yan yana görünüm:** geniş ekranda solda form ve belge özeti,
+  sağda belgenin canlı önizlemesi (yarı yarıya); yazdıkça güncellenir. Üstteki "Yan yana"
+  düğmesiyle açılıp kapanır (blok: `cf-split-style` / `cf-split-module`).
+- **Ödeme şartları:** Peşin, %30 + %70, Bonus 6 Taksit, Leasing hazır düğmeleri kaldırıldı; şartlar
+  elle yazılır (blok: `cf-terms-style`).
+- **Ticari açıklama:** "Ticari açıklamayı notlara ekle" düğmesi firmanın 5 maddelik standart
+  metnini ekler ("Siparişin kesinleşmesi, müşteri onayının yazılı olarak iletilmesiyle…").
 - **Plan / etkinlik — Hızlı ziyaret (il içi):** formun üstünde "Hızlı ziyaret" / "Detaylı plan"
   seçimi. Hızlı modda yalnızca ne yapılacak (Klinik ziyareti, Demo, Tarama hizmeti, Kurulum,
   Servis…), klinik / müşteri, ilçe, gün (Bugün / Yarın…) ve saat sorulur; ulaşım, otel, transfer
@@ -107,6 +114,16 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Hata düzeltmeleri
 
+- **QR okut — kamera açılıyor ama okumuyordu:** kamera yüksek çözünürlük ve sürekli netlemeyle
+  açılır; görüntünün ortası tam çözünürlükte taranır; tarayıcının kendi okuyucusu yalnızca QR'ı
+  gerçekten destekliyorsa kullanılır, jsQR her zaman yedekte çalışır. Ek yollar: "Fotoğrafla okut"
+  (telefonun kamerasıyla çekilen fotoğraftan okur) ve "Listeden seç".
+- **QR çalışmıyordu ("bileşen yüklenemedi / internet" uyarısı):** QR çizme ve okuma bileşenleri
+  internetten (cdnjs / jsDelivr) yükleniyordu; ağ veya reklam engelleyici bunları engelleyince QR
+  açılmıyordu. İkisi de artık dosyaya gömülü (`cf-qr-libs`), internet bağlantısı gerektirmez.
+- **Proforma sayfa düzeni:** belge tek sayfaya sığmayınca kapanış bölümünün tamamı 2. sayfaya
+  atılıyor, 1. sayfanın yarısı boş kalıyordu. Artık açıklamalar / toplamlar, firma ve banka
+  bilgileri, imzalar sırayla yerleştirilir; sığan kısım 1. sayfada kalır.
 - **Plan formu boşluğa tıklayınca kapanıyordu:** plan, servis, görüşme ve müşteri formları artık
   pencere dışına tıklanınca kapanmaz (girilen bilgi kaybolmaz); Kapat düğmesiyle kapanır.
 - **Saat seçimi:** tarayıcının saat penceresi yerine saat + dakika listesi (5 dakikalık adımlar,
@@ -135,7 +152,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-18.8">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-18.13">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
