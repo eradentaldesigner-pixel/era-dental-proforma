@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-19.50)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-19.51)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -314,6 +314,12 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
   kartlarda yolcu adları; tarihi geçmiş ama hâlâ onay / organizasyon / hazırlık bekleyen talepler
   kırmızı uyarıyla işaretli; üstte tıklanınca filtreleyen durum özeti.
 
+- **Görünüm paneli:** sağ kenardaki "Görünüm" sekmesi, üst çubuktaki palet simgesi (telefonda
+  üst çubukta) ile açılır. Renk paleti (Mavi, Lacivert, Zümrüt, Mor, Turuncu, Gül, Grafit), tema
+  (Açık / Koyu / Sistem), yazı tipi (Inter, Manrope, Plus Jakarta, IBM Plex Sans, Nunito Sans,
+  Sistem), yazı boyutu ve köşe yuvarlaklığı. Seçimler yalnızca o cihazda saklanır; teklif /
+  proforma PDF'leri ve baskı çıktısı değişmez. "Varsayılan" düğmesi her şeyi geri alır.
+
 ## Hata düzeltmeleri
 
 - **Ayarlar:** profil fotoğrafı ve bildirim kartı her sekmede tekrar ediyordu; "Kaşe ve İmza" sekmesi seçili kalıyordu
@@ -393,7 +399,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-19.50">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-19.51">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
