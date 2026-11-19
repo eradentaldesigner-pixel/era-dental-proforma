@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-19.49)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-19.50)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -301,6 +301,19 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
   tür filtresi, yaklaşan etkinlikler.
 - **Raporlar:** Metis renk paleti, teklif aktivitesi alan grafiği.
 
+- **Belgeler — Proformalar (premium):** üstte "Tümü" ve "Taslak" sayaçları; tarihler
+  "26 Eki 2026" biçiminde; teklifi veren müşteri hücresinde küçük satır olarak; ürün adı 2 satırla
+  sınırlı; tablo yatay kaydırma olmadan sığıyor. "İptal et" / "Kalıcı sil" ⋯ menüsünde ve ayrıntı
+  panelinde ayrı (kırmızı) grupta. 768–1499 px genişlikte ayrıntı paneli satıra tıklayınca sağdan
+  açılır (✕ ile kapanır). Tekrarlanan "Belgeyi görüntüle" düğmesi kaldırıldı. Telefonda kart
+  görünümü sadeleşti.
+- **Belgeler — Teklifler (premium):** kart görünümü; durum filtresi (Tümü / Hazır / Müşteri kabul
+  etti / Proformaya döndü / Süresi doldu, sayılı). Revizyonlar tek kartta toplanır, eski sürümler
+  "önceki sürümler" altında açılır.
+- **Seyahatler:** başlık "Seyahatler"; arama kutusu daraltma hatası giderildi; tarihler Türkçe;
+  kartlarda yolcu adları; tarihi geçmiş ama hâlâ onay / organizasyon / hazırlık bekleyen talepler
+  kırmızı uyarıyla işaretli; üstte tıklanınca filtreleyen durum özeti.
+
 ## Hata düzeltmeleri
 
 - **Ayarlar:** profil fotoğrafı ve bildirim kartı her sekmede tekrar ediyordu; "Kaşe ve İmza" sekmesi seçili kalıyordu
@@ -380,7 +393,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-19.49">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-19.50">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
