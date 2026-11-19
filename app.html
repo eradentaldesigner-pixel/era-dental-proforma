@@ -1,4 +1,13 @@
-<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-20.52"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
+<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-20.53"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><style id="cf-boot-splash">/* CepFirma: açılışta teklif ekranının bir an görünmesini önler — ana sayfa hazır olana kadar yükleme ekranı */
+html.cf-booting body>*{visibility:hidden!important}
+html.cf-booting body::before{content:"";position:fixed;inset:0;z-index:2147483646;background:#fafafa}
+html.cf-booting body::after{content:"";position:fixed;left:50%;top:50%;z-index:2147483647;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;border:3px solid #e4e4e7;border-top-color:#2563eb;animation:cfBootSpin .8s linear infinite}
+@keyframes cfBootSpin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){html.cf-booting body::after{animation-duration:2.4s}}</style><script id="cf-boot-gate">(function(){try{if(/[?&](proforma|offerPdf)=/.test(location.search))return;var h=document.documentElement;h.classList.add('cf-booting');var t0=Date.now();
+function done(){h.classList.remove('cf-booting');clearInterval(iv)}
+var iv=setInterval(function(){var a=document.getElementById('authGate'),d=document.getElementById('dashboardOverlay'),s=document.getElementById('syncStatus');
+ if(window._bootedWorkspace||(d&&d.classList.contains('open'))||(a&&a.style.display&&a.style.display!=='none')||(s&&/hata/i.test(s.textContent||''))||Date.now()-t0>12000)done()},40);
+window.cfBootDone=done}catch(e){document.documentElement.classList.remove('cf-booting')}})();</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
 #prPrintRoot.cf-pdf-capture{display:block!important;visibility:visible!important;position:fixed!important;left:-12000px!important;top:0!important;right:auto!important;bottom:auto!important;width:210mm!important;padding:0!important;margin:0!important;max-height:none!important;overflow:visible!important;background:white!important;z-index:-1!important}#prPrintRoot.cf-pdf-capture .pr-page{margin:0!important;box-shadow:none!important;zoom:1!important;transform:none!important}
 html.cf-native-pdf-route #authGate{display:none!important}html.cf-native-pdf-route body{padding:0!important;margin:0!important;background:#f6f8fc!important}html.cf-native-pdf-route body>*:not(.auth-shell):not(#cfPdfRouteStatus):not(#prPrintRoot):not(script):not(style):not(iframe):not(.html2canvas-container):not([style*="visibility: hidden"]){display:none!important}#cfPdfRouteStatus{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:#f6f8fc;color:#193450;font:16px system-ui;padding:24px;text-align:center}#cfPdfRouteStatus h1{font-size:22px;margin:0}#cfPdfRouteStatus button,#cfPdfRouteStatus a{font:14px system-ui;padding:12px 18px;background:white;border:1px solid #d9e4f2;border-radius:9px;color:#075cc5;text-decoration:none;cursor:pointer}
 }
@@ -11196,7 +11205,7 @@ html:not(#cfm) body:not(#cfm) .archive-stats .archive-stat.active{outline:2px so
 @media(max-width:1499px) and (min-width:768px){
   html:not(#cfm) body:not(#cfm) #archiveOverlay .archive-workspace{display:block!important}
   html:not(#cfm) body:not(#cfm) #archiveOverlay .cfdp-side{display:none!important}
-  html:not(#cfm) body:not(#cfm) #archiveOverlay .cfdp-side.cfdp-open{display:block!important;position:fixed!important;top:0;right:0;bottom:0;width:min(420px,92vw)!important;max-width:none!important;z-index:12000;overflow:auto;border-radius:0!important;margin:0!important;box-shadow:-20px 0 50px -20px rgba(15,23,42,.45)!important;background:var(--mt-panel,#fff)!important;padding:18px!important}
+  html:not(#cfm) body:not(#cfm) #archiveOverlay .cfdp-side.cfdp-open{display:block!important;position:fixed!important;top:var(--cfsd-top,0px)!important;right:0;bottom:0;width:min(420px,92vw)!important;max-width:none!important;z-index:12000;overflow:auto;border-radius:0!important;margin:0!important;box-shadow:-20px 0 50px -20px rgba(15,23,42,.45)!important;background:var(--mt-panel,#fff)!important;padding:18px!important}
   .cfdp-x{display:inline-flex!important}
 }
 .cfdp-x{display:none;float:right;margin:0 0 8px 8px}
@@ -11285,7 +11294,7 @@ function decorateArchive(){const o=$('archiveOverlay');if(!o)return;const t=o.qu
   const ws=o.querySelector('.archive-workspace');const side=ws&&[...ws.children].find(e=>/ayrıntı/i.test(e.querySelector('h3,h2')?.textContent||''));if(side&&!side.classList.contains('cfdp-side')){side.classList.add('cfdp-side')}
   if(side&&!side.querySelector('.cfdp-x')){const x=document.createElement('button');x.type='button';x.className='btn light cfdp-x';x.textContent='✕ Kapat';x.onclick=()=>side.classList.remove('cfdp-open');side.prepend(x)}
   stats()}
-document.addEventListener('click',e=>{const tr=e.target.closest('#archiveOverlay .archive-table tbody tr[data-quote-row]');if(!tr||e.target.closest('button,a,summary,details'))return;setTimeout(()=>{const s=document.querySelector('#archiveOverlay .cfdp-side');if(s&&window.matchMedia('(max-width:1499px) and (min-width:768px)').matches){s.classList.add('cfdp-open');if(!s.querySelector('.cfdp-x'))decorateArchive()}},60)});
+document.addEventListener('click',e=>{const tr=e.target.closest('#archiveOverlay .archive-table tbody tr[data-quote-row]');if(!tr||e.target.closest('button,a,summary,details'))return;setTimeout(()=>{const s=document.querySelector('#archiveOverlay .cfdp-side');if(s&&window.matchMedia('(max-width:1499px) and (min-width:768px)').matches){const ov=document.getElementById('archiveOverlay');s.style.setProperty('--cfsd-top',Math.max(0,Math.round(ov?ov.getBoundingClientRect().top:0))+'px');s.classList.add('cfdp-open');if(!s.querySelector('.cfdp-x'))decorateArchive()}},60)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelector('#archiveOverlay .cfdp-side.cfdp-open')?.classList.remove('cfdp-open')});
 let cnt=null,cntAt=0,cntBusy=false;
 async function counts(){if(cntBusy||(cnt&&Date.now()-cntAt<60000))return cnt;cntBusy=true;try{const base=()=>sb.from('proformas').select('id',{count:'exact',head:true}).eq('company_id',company()).is('deleted_at',null);const [a,d]=await Promise.all([base(),base().eq('status','Taslak')]);cnt={all:a.count||0,draft:d.count||0};cntAt=Date.now()}catch(_){}finally{cntBusy=false}return cnt}
@@ -11825,48 +11834,47 @@ window.cfWork={open,recheck(){taskReady=null;return probeTasks()},queue:()=>open
 })();</script>
 
 <!-- ==========================================================================
-     CepFirma — Metis yazı ölçüleri
-     Metis (Bootstrap 5 + Inter) tipografisi: gövde 14px, sayfa başlığı 20px/600,
-     kart başlığı 15px/600, özet etiketi 11px büyük harf, özet değeri 26px/600,
-     tablo başlığı büyük harf, menü / buton 14px. Belge (PDF) şablonlarına dokunmaz.
-     Kaldırmak için id değeri cf-typography-style olan stil bloğunu silmeniz yeterlidir.
+     CepFirma — Genel görünüm düzeltmeleri
+     * Müşteriler, Servis ve Ürünler: 768–1499 px genişlikte liste tam genişlik; ayrıntı paneli
+       satıra tıklayınca sağdan açılır (✕, Esc veya boşluğa tıklayınca kapanır). Böylece tablo
+       sütunları kesilmez (Belgeler'deki gibi).
+     * Sol menü: etiketler rozetlerle birlikte kesilmeden sığar.
+     * Ana sayfa "Benden beklenenler" kartında "Tümünü gör" → Bekleyenler sayfası.
+     Kaldırmak için id değeri cf-polish-style olan stil ve cf-polish-module olan betik
+     bloklarını silmeniz yeterlidir.
      ========================================================================== -->
-<style id="cf-typography-style">
-@media screen{
-/* Sayfa başlıkları (Metis: h3 = 20px / 600) */
-html:not(#cfm) body:not(#cfm) :is(.pr-page-head,.dash-hero,.service-page-head,.org-head,.er-head,.ops-heading,.calendar-head,.catalog-head,.settings-head,.customer-head,.crm-head,.stock-head,.archive-head,.offers-head,.cf-work-overlay header) :is(h1,h2):not(.pr-page *):not(.paper *){font-size:20px!important;font-weight:600!important;letter-spacing:-.01em!important;line-height:1.3!important;margin-bottom:2px!important}
-html:not(#cfm) body:not(#cfm) .dashboard-overlay h1#dashGreeting,html:not(#cfm) body:not(#cfm) .dashboard-overlay .hd-hero h1{font-size:20px!important;font-weight:600!important}
-/* Sayfa alt başlığı (Metis: 14px, soluk) */
-html:not(#cfm) body:not(#cfm) :is(.pr-page-head,.dash-hero,.service-page-head,.org-head,.er-head,.ops-heading,.calendar-head,.catalog-head,.settings-head,.customer-head,.crm-head,.stock-head,.archive-head) :is(p,.muted,small:not(.workspace-kicker)){font-size:14px!important;line-height:1.5}
-html:not(#cfm) body:not(#cfm) #dashCompany{font-size:14px!important}
-html:not(#cfm) body:not(#cfm) .workspace-kicker{font-size:11px!important;letter-spacing:.06em!important}
-/* Kart başlıkları (Metis: 15px / 600) */
-html:not(#cfm) body:not(#cfm) :is(.settings-card,.dash-panel,.hd-panel,.cfb-card,.cf-users-card,.cfh-section,.cf-chart-card,.svc-workspace-panel,.catalog-side,.archive-side,.calendar-side,.cfct-wrap,.cffm-box) > :is(h3,h4),html:not(#cfm) body:not(#cfm) :is(.dash-panel-head,.hd-panel-head,.cfb-card-head,.cfh-section > summary) :is(h3,h4){font-size:15px!important;font-weight:600!important;letter-spacing:-.005em}
-/* Özet kartları: etiket 11px büyük harf, değer 26px / 600 */
-html:not(#cfm) body:not(#cfm) :is(.hd-metric,.home-stock-stat,.cfb-stat,.cf-files-stat,.cf-users-stat,.crm-metric,.archive-stat,.stock-stat,.ops-stage,.service-summary-card,.cf-report-kpis article,.cfh-tile) :is(small,.label,em:first-child):not(.cfb-stat em):not(.cf-files-stat em):not(.cf-users-stat em){font-size:11px!important;font-weight:500!important;letter-spacing:.06em!important;text-transform:uppercase}
-html:not(#cfm) body:not(#cfm) .hd-metric span>span:first-child:not(:only-child){font-size:11px!important;font-weight:500!important;letter-spacing:.06em!important;text-transform:uppercase}
-html:not(#cfm) body:not(#cfm) :is(.hd-metric,.home-stock-stat,.cfb-stat,.cf-files-stat,.cf-users-stat,.crm-metric,.archive-stat,.stock-stat,.ops-stage,.service-summary-card,.cf-report-kpis article,.cfh-tile,.dash-card) :is(b,strong){font-size:26px!important;font-weight:600!important;letter-spacing:-.02em!important;line-height:1.2!important;font-variant-numeric:tabular-nums}
-html:not(#cfm) body:not(#cfm) .cfb-stats.six .cfb-stat b{font-size:24px!important}
-/* Menü (Metis: 14px; grup başlığı 11px / 600) */
-html:not(#cfm) body:not(#cfm) .desktop-side .ds-btn{font-size:14px!important;font-weight:500!important}
-html:not(#cfm) body:not(#cfm) .desktop-side .ds-btn.active{font-weight:600!important}
-html:not(#cfm) body:not(#cfm) .desktop-side :is(.pn-group,[data-cfnav-group]){font-size:11px!important;font-weight:600!important;letter-spacing:.06em!important}
-html:not(#cfm) body:not(#cfm) .mobile-drawer .md-menu button{font-size:14px!important}
-/* Butonlar ve form alanları (Metis: 14px) */
-html:not(#cfm) body:not(#cfm) .btn:not(.pr-page *):not(.paper *):not(#prPrintRoot *){font-size:14px!important}
-html:not(#cfm) body:not(#cfm) :is(.cfct-actions,.cffm-sel,.cfh-table,.cf-users-actions,.cf-files-actions,.cfb-seg) .btn{font-size:12.5px!important}
-html:not(#cfm) body:not(#cfm) :is(input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea):not(.pr-page *):not(.paper *):not(#prPrintRoot *){font-size:14px!important}
-html:not(#cfm) body:not(#cfm) label:not(.pr-page *):not(.paper *):not(#prPrintRoot *):not(.dash-search):not(.mobile-drawer-backdrop):not(.cfb-status){font-size:13px!important;font-weight:500!important}
-/* Tablolar (Metis: başlık büyük harf 600; hücre 14px) */
-html:not(#cfm) body:not(#cfm) :is(.archive-table,.stock-table,.crm-table,.customer-table,.service-table,.audit-table,.data-table,.cfct-table,.cffm-table,.cf-users-table,.cf-files-table,.cfb-table,.cfh-table) th{font-size:12.5px!important;font-weight:600!important;letter-spacing:.04em!important;text-transform:uppercase}
-html:not(#cfm) body:not(#cfm) :is(.archive-table,.stock-table,.crm-table,.customer-table,.service-table,.data-table,.cfct-table,.cffm-table,.cf-users-table,.cf-files-table) td{font-size:14px!important}
-/* Belge düzenleyici başlığı, pencere / çekmece başlıkları, hızlı belge kartları */
-html:not(#cfm) body:not(#cfm) .quote-editor-head :is(h1,h2){font-size:20px!important;font-weight:600!important;letter-spacing:-.01em!important;line-height:1.3!important}
-html:not(#cfm) body:not(#cfm) :is(#cfHistoryTitle,#cfNotifyTitle,#presenceTitle,#securityTitle,#serviceFormTitle,#uiDrawerTitle,#pgTitle){font-size:18px!important;font-weight:600!important;letter-spacing:-.01em!important}
-html:not(#cfm) body:not(#cfm) :is(.cf-quick-customer,.cf-quick-products,.cf-quick-summary) > :is(h2,h3,header h2,header h3),html:not(#cfm) body:not(#cfm) :is(.cf-quick-customer,.cf-quick-products,.cf-quick-summary) :is(h2,h3):not(.pr-page *){font-size:15px!important;font-weight:600!important}
-html:not(#cfm) body:not(#cfm) .hd-fx :is(h2,h3),html:not(#cfm) body:not(#cfm) .home-fx-card :is(h2,h3){font-weight:600!important}
-/* Üst çubuk arama (Metis: 14px) */
-html:not(#cfm) body:not(#cfm) .dash-search input{font-size:14px!important}
+<style id="cf-polish-style">
+/* sol menü: daha az iç boşluk, etiket + rozet sığar */
+html:not(#cfm) body:not(#cfm) .desktop-side .ds-nav{padding-left:2px!important;padding-right:2px!important;scrollbar-width:thin}
+html:not(#cfm) body:not(#cfm) .desktop-side .ds-nav>.ds-btn{padding-left:12px!important;padding-right:10px!important;gap:10px!important}
+html:not(#cfm) body:not(#cfm) .desktop-side .ds-nav>.ds-btn>span:not(.ds-icon){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html:not(#cfm) body:not(#cfm) .desktop-side .ds-nav>.ds-btn>.cfui-badge{min-width:18px;height:18px;padding:0 5px;font-size:10.5px}
+html:not(#cfm) body:not(#cfm) .desktop-side .ds-nav>.ds-btn>.cfui-badge.green{padding:0 6px;font-size:10px}
+/* liste + ayrıntı paneli: orta genişlikte çekmece */
+.cfsd-x{display:none}
+.cfsd-back{display:none}
+@media (min-width:768px) and (max-width:1499px){
+  html:not(#cfm) body:not(#cfm) :is(.customer-workspace,.service-workspace,.catalog-workspace){grid-template-columns:minmax(0,1fr)!important}
+  html:not(#cfm) body:not(#cfm) :is(.customer-workspace,.service-workspace,.catalog-workspace)>.cfsd-side{display:none!important}
+  html:not(#cfm) body:not(#cfm) :is(.customer-workspace,.service-workspace,.catalog-workspace)>.cfsd-side.cfsd-open{display:block!important;position:fixed!important;top:var(--cfsd-top,0px)!important;right:0!important;bottom:0!important;left:auto!important;width:min(440px,92vw)!important;max-width:none!important;height:auto!important;max-height:none!important;z-index:12001!important;overflow:auto!important;margin:0!important;border-radius:0!important;border:0!important;border-left:1px solid var(--mt-border,#e4e4e7)!important;box-shadow:-24px 0 60px -24px rgba(15,23,42,.45)!important;background:var(--mt-panel,#fff)!important;padding:18px!important;animation:cfsdIn .2s ease}
+  .cfsd-open>.cfsd-x{display:inline-flex!important;float:right;margin:0 0 10px 10px;position:relative;z-index:1}
+  .cfsd-back.on{display:block;position:fixed;left:0;right:0;bottom:0;top:var(--cfsd-top,0px);z-index:12000;background:rgba(9,9,11,.25)}
+  html:not(#cfm) body:not(#cfm) :is(.customer-workspace,.service-workspace,.catalog-workspace) tbody tr{cursor:pointer}
 }
+@keyframes cfsdIn{from{transform:translateX(30px);opacity:0}to{transform:none;opacity:1}}
+/* ana sayfa satış akışı: "3 gecikti" etiketi başlığın üstüne binmesin */
+html:not(#cfm) body:not(#cfm) #cfFlow .cff-st.warn::after{position:static!important;display:inline-block!important;margin-top:4px!important}
+/* ana sayfa: Bekleyenler kısayolu */
+.cfpl-all{border:0;background:none;padding:4px 0;font:inherit;font-size:13px;font-weight:600;color:var(--mt-primary,#2563eb);cursor:pointer}
+.cfpl-all:hover{text-decoration:underline}
+@media print{.cfsd-x,.cfsd-back,.cfpl-all{display:none!important}}
 </style>
-</body></html>
+<script id="cf-polish-module">(function(){'use strict';
+const PAIRS=[['.customer-workspace','.customer-detail'],['.service-workspace','.service-side'],['.catalog-workspace','.catalog-side']];
+const mid=()=>window.matchMedia('(min-width:768px) and (max-width:1499px)').matches;
+let back=null;
+/* arka perde çekmeceyle aynı katmanda olmalı (sayfa kendi katmanını oluşturuyor) */
+function backdrop(on,ws,top){if(!back){back=document.createElement('div');back.className='cfsd-back';back.onclick=closeAll}if(on&&ws&&back.parentElement!==ws)ws.append(back);if(top!=null)back.style.setProperty('--cfsd-top',top+'px');back.classList.toggle('on',!!on)}
+function closeAll(){document.querySelectorAll('.cfsd-side.cfsd-open').forEach(s=>s.classList.remove('cfsd-open'));backdrop(false)}
+function mark(){for(const [w,s] of PAIRS){document.querySelectorAll(w).forEach(ws=>{const side=ws.querySelector(':scope > '+s);if(!side)return;if(!side.classList.contains('cfsd-side'))side.classList.add('cfsd-side');
+  if(!side.query

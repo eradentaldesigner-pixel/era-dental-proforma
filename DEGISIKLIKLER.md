@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-20.52)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-20.53)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -344,6 +344,17 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Hata düzeltmeleri
 
+- **Açılışta teklif ekranı görünmesi:** site veya mobil açılırken bir an "Hızlı teklif" sayfası
+  görünüp ana sayfaya geçiyordu. Artık ana sayfa (veya rolün açılış sayfası) hazır olana kadar
+  sade bir yükleme ekranı görünür; giriş yapılmamışsa doğrudan giriş ekranı açılır.
+- **Müşteriler, Servis, Ürünler (orta boy ekran, 768–1499 px):** tablo sütunları ayrıntı paneli
+  yüzünden kesiliyordu. Liste artık tam genişlik; ayrıntılar satıra tıklayınca sağdan açılan
+  panelde (✕, Esc veya boşluğa tıklayınca kapanır). Belgeler'deki panel üst çubuğun altında kalıyordu,
+  düzeltildi.
+- **Sol menü:** "Bekleyenler", "Mesajlar" gibi etiketler rozetle birlikte kesiliyordu; artık tam görünür.
+- **Ana sayfa:** "Benden beklenenler" kartına "Tümünü gör →" (Bekleyenler sayfası). Satış akışındaki
+  "3 gecikti" etiketi kart başlığının üstüne biniyordu, düzeltildi.
+
 - **Ayarlar:** profil fotoğrafı ve bildirim kartı her sekmede tekrar ediyordu; "Kaşe ve İmza" sekmesi seçili kalıyordu
   (iki sekme birden seçili); "Bildirimler" sekmesi boş ekran gösteriyordu; kaydedilecek şey olmayan sekmelerde de
   "Ayarları Kaydet" çıkıyordu; ayar yetkisi olmayan çalışanlar sağ üstteki fotoğraflarına tıklayınca "yetkiniz yok"
@@ -413,20 +424,4 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
   gösteriyordu) — düzeltildi.
 - Raporlar menü öğesi açıkken **vurgulanmıyordu** — düzeltildi.
 - **Proformalar müşteri kartına bağlanmıyordu** (`customer_id` hiç yazılmıyordu) — artık
-  kaydedilen her düzenlenebilir proforma güvenli eşleşmeyle müşteri kartına bağlanır.
-- Belge kaydedilirken **aynı vergi numaralı başka bir müşteri kartının adı eziliyordu** —
-  artık ad farklıysa kart değiştirilmez ve uyarı gösterilir.
-
-## Teknik
-
-- **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
-  çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-20.52">` — sonraki yayınlarda bu değeri artırın.
-- Inter yazı tipi Google Fonts'tan yüklenir.
-
-## Geri alma
-
-Eklenen her özellik `app.html` içinde kendi `id`'li bloğundadır (`cf-…-module`, `cf-…-style`).
-Bir bloğu silmek o özelliği kaldırır. Uygulama kodunda yapılan küçük değişiklikler
-(ürün kaydına kategori, proforma–müşteri bağlantısı, müşteri kartı koruması) dosyada
-"CepFirma düzeltme" açıklamasıyla işaretlidir.
+  kaydedilen he
