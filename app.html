@@ -1,4 +1,4 @@
-<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-19.39"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
+<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-19.41"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
 #prPrintRoot.cf-pdf-capture{display:block!important;visibility:visible!important;position:fixed!important;left:-12000px!important;top:0!important;right:auto!important;bottom:auto!important;width:210mm!important;padding:0!important;margin:0!important;max-height:none!important;overflow:visible!important;background:white!important;z-index:-1!important}#prPrintRoot.cf-pdf-capture .pr-page{margin:0!important;box-shadow:none!important;zoom:1!important;transform:none!important}
 html.cf-native-pdf-route #authGate{display:none!important}html.cf-native-pdf-route body{padding:0!important;margin:0!important;background:#f6f8fc!important}html.cf-native-pdf-route body>*:not(.auth-shell):not(#cfPdfRouteStatus):not(#prPrintRoot):not(script):not(style):not(iframe):not(.html2canvas-container):not([style*="visibility: hidden"]){display:none!important}#cfPdfRouteStatus{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:#f6f8fc;color:#193450;font:16px system-ui;padding:24px;text-align:center}#cfPdfRouteStatus h1{font-size:22px;margin:0}#cfPdfRouteStatus button,#cfPdfRouteStatus a{font:14px system-ui;padding:12px 18px;background:white;border:1px solid #d9e4f2;border-radius:9px;color:#075cc5;text-decoration:none;cursor:pointer}
 }
@@ -3450,7 +3450,7 @@ function erReset(){++erRequest;++erDetailRequest;erRows=[];erCurrent=null;erBusy
 function erRole(){if(erScope&&erScope!==opsKey())erReset();document.querySelectorAll('[data-er-open]').forEach(b=>b.hidden=!erAllowed())}
 function erBadge(state){return '<span class="er-badge '+esc(state)+'">'+esc(erStates[state]||state)+'</span>'}
 function erMessage(msg,error=false){const box=document.getElementById('erMessage');box.textContent=msg;box.classList.toggle('error',error)}
-async function openRequests(inbox=erManager()){if(!erAllowed())return;erScope=opsKey();document.getElementById('requestsOverlay').hidden=false;document.getElementById('erScope').innerHTML='<option value="mine">Taleplerim</option>'+(erManager()?'<option value="inbox">Yönetim onayları</option>':'');document.getElementById('erScope').value=inbox&&erManager()?'inbox':'mine';erPage=0;erCurrent=null;document.getElementById('erEditor').innerHTML='<div class="er-empty">Bir talep seçin veya yeni talep oluşturun.</div>';document.getElementById('erStatus').value=inbox?'pending':'all';if(typeof setMobileMenu==='function')setMobileMenu(false);await erLoad()}
+async function openRequests(inbox=erManager()){if(!erAllowed())return;/* CepFirma düzeltme: Mesajlar / Gelen İşler gibi açık sayfalar kapanmadan Talepler arkada açılıyordu */try{if(window.cfUnsaved&&!cfUnsaved.allow())return;if(typeof closeAllCepFirmaViews==='function')closeAllCepFirmaViews()}catch(_){}erScope=opsKey();document.getElementById('requestsOverlay').hidden=false;document.getElementById('erScope').innerHTML='<option value="mine">Taleplerim</option>'+(erManager()?'<option value="inbox">Yönetim onayları</option>':'');document.getElementById('erScope').value=inbox&&erManager()?'inbox':'mine';erPage=0;erCurrent=null;document.getElementById('erEditor').innerHTML='<div class="er-empty">Bir talep seçin veya yeni talep oluşturun.</div>';document.getElementById('erStatus').value=inbox?'pending':'all';if(typeof setMobileMenu==='function')setMobileMenu(false);await erLoad()}
 async function erLoad(){if(!erAllowed())return;const token=++erRequest,key=opsKey();document.getElementById('erList').textContent='Talepler yükleniyor…';erMessage('');try{
  let q=sb.from('employee_requests').select('*',{count:'exact'}).eq('company_id',currentCompanyId);
  if(val('erScope')==='inbox'&&erManager())q=q.neq('state','draft');else q=q.eq('requester_id',currentUser.id);
@@ -8719,7 +8719,7 @@ async function q(p){try{const r=await p;return r.error?[]:(r.data||[])}catch(_){
 async function load(){const c=currentCompanyId,u=currentUser.id,t=today(),M=mgr();const since3=new Date(Date.now()-3*864e5).toISOString();const monthStart=t.slice(0,8)+'01';const prevStart=(()=>{const d=new Date(monthStart+'T12:00:00Z');d.setUTCMonth(d.getUTCMonth()-1);return d.toISOString().slice(0,10)})();
   const can=a=>{try{return hasAppAction(a)}catch(_){return false}};
   const people=window.cfPeople?await window.cfPeople().catch(()=>[]):[];
-  const [offers,pfs,orders,services,crm,events,stock,approvals,requests,audit]=await Promise.all([
+  const [offers,pfs,orders,services,crm,events,stock,approvals,requests,maint,audit]=await Promise.all([
     M&&can('archive')?q(sb.from('sales_offers').select('id,offer_number,status,created_at,created_by,payload->>grand_total,payload->>currency,payload->>customer_name').eq('company_id',c).order('created_at',{ascending:false}).limit(400)):[],
     can('archive')||can('new')?q(sb.from('proformas').select('id,proforma_number,customer_name,approval_state,grand_total,currency,created_at,approval_requested_at,approval_requested_by,prepared_by,updated_at').eq('company_id',c).is('deleted_at',null).order('created_at',{ascending:false}).limit(500)):[],
     q(sb.from('operation_orders').select('id,order_number,customer_name,proforma_id,shipment_status,grand_total,currency,created_at,updated_at,updated_by,created_by,shipped_date,delivered_date,cargo_company').eq('company_id',c).is('cancelled_at',null).order('updated_at',{ascending:false}).limit(400)),
@@ -8729,9 +8729,10 @@ async function load(){const c=currentCompanyId,u=currentUser.id,t=today(),M=mgr(
     M&&can('catalog')?q(sb.from('products').select('id,stock_quantity,stock_low_threshold').eq('company_id',c).is('deleted_at',null).limit(2000)):[],
     M?q(sb.from('proforma_approval_events').select('id,proforma_id,action,created_at,snapshot').eq('company_id',c).gte('created_at',since3).order('created_at',{ascending:false}).limit(40)):[],
     M&&typeof erManager==='function'&&erManager()?q(sb.from('employee_requests').select('id,title,requester_label,updated_at').eq('company_id',c).neq('requester_id',u).in('state',['submitted','reviewing']).limit(50)):[],
+    can('service')||M?q(sb.from('customer_devices').select('id,customer_name,device_name,next_maintenance').eq('company_id',c).eq('active',true).not('next_maintenance','is',null).lte('next_maintenance',new Date(Date.now()+7*864e5).toISOString().slice(0,10)).order('next_maintenance').limit(50)):[],
     M?q(sb.from('audit_logs').select('action,table_name,event_key,record_label,actor_name,actor_email,created_at,user_id').eq('company_id',c).gte('created_at',since3).order('created_at',{ascending:false}).limit(60)):[]]);
   const evIds=events.map(e=>e.id);let responses=[];for(let i=0;i<evIds.length;i+=150){responses=responses.concat(await q(sb.from('calendar_assignment_responses').select('event_id,user_id,status,reason,responded_at').in('event_id',evIds.slice(i,i+150))))}
-  return {people,offers,pfs,orders,services,crm,events,stock,approvals,requests,audit,responses,t,u,M,monthStart,prevStart}}
+  return {people,offers,pfs,orders,services,crm,events,stock,approvals,requests,maint,audit,responses,t,u,M,monthStart,prevStart}}
 
 /* ---------- 1) Benden beklenenler ---------- */
 function todo(d){const L=[];const {t,u,M}=d;const respOf=(e,uid)=>d.responses.find(r=>String(r.event_id)===String(e.id)&&r.user_id===uid);
@@ -8747,6 +8748,8 @@ function todo(d){const L=[];const {t,u,M}=d;const respOf=(e,uid)=>d.responses.fi
   if(d.requests?.length)L.push({c:'#0ea5e9',ic:'🗂',n:d.requests.length,t:d.requests.length+' talep kararınızı bekliyor',s:d.requests.slice(0,3).map(x=>(x.title||'Talep')+(x.requester_label?' · '+x.requester_label:'')).join(', '),go:()=>window.openRequests?.()});
   const crmLate=d.crm.filter(x=>String(x.next_follow_up||'').slice(0,10)<t);if(crmLate.length)L.push({c:'#a855f7',ic:'☎',n:crmLate.length,t:crmLate.length+' görüşmenin takip günü geçti',s:crmLate.slice(0,3).map(x=>x.company_name||x.contact_name).join(', '),go:()=>appNavigate('crm')});
   const svLate=d.services.filter(x=>['waiting','following'].includes(x.status)&&x.follow_up_date&&String(x.follow_up_date).slice(0,10)<t);if(svLate.length)L.push({c:'#f59e0b',ic:'🔧',n:svLate.length,t:svLate.length+' servis kaydının takip günü geçti',s:svLate.slice(0,3).map(x=>(x.service_number||'')+' · '+(x.customer_name||'')).join(', '),go:()=>appNavigate('service')});
+  /* periyodik bakımı yaklaşan / geciken cihazlar */
+  if(d.maint?.length){const late=d.maint.filter(x=>String(x.next_maintenance).slice(0,10)<t).length;L.push({c:late?'#dc2626':'#0891b2',ic:'🛠',n:d.maint.length,t:d.maint.length+' cihazın periyodik bakımı '+(late?(late===d.maint.length?'gecikti':'yaklaştı / gecikti'):'yaklaştı'),s:d.maint.slice(0,3).map(x=>(x.customer_name||'')+' · '+(x.device_name||'')).join(', '),go:()=>window.cfMaintenanceList?.()})}
   /* 7 günden uzun süredir serviste bekleyen cihazlar */
   {const now=new Date(t+'T00:00:00');const svOld=d.services.filter(x=>['waiting','following','approved'].includes(x.status)&&(x.received_date||x.created_at)&&(now-new Date(String(x.received_date||x.created_at).slice(0,10)+'T00:00:00'))/864e5>7);if(svOld.length)L.push({c:'#dc2626',ic:'⏳',n:svOld.length,t:svOld.length+' cihaz 7 günden uzun süredir serviste',s:svOld.slice(0,3).map(x=>(x.service_number||'')+' · '+(x.customer_name||'')).join(', '),go:()=>{const f=document.getElementById('serviceFilter');if(f){if(!f.querySelector('option[value="late"]'))f.add(new Option('7+ gündür serviste','late'));f.value='late'}appNavigate('service')}})}
   return L}
@@ -9931,6 +9934,268 @@ let t=0;function run(){t=0;if(!mobile()||typeof currentUser==='undefined'||!curr
 new MutationObserver(()=>{if(!t)t=setTimeout(run,250)}).observe(document.body,{childList:true,subtree:true});
 window.addEventListener('resize',()=>{if(!t)t=setTimeout(run,250)});
 setTimeout(run,1200);
+})();</script>
+<!-- ==========================================================================
+     CepFirma — Teknik Servis: cihazı ürün listesinden seç
+     * "Cihaz / ürün adı" alanına yazarken ürün kataloğundaki (stoktaki) ürünler önerilir.
+     * Listeden seçilince cihaz adı ürün adıyla, boşsa "Marka / model" ürünün marka ve
+       modeliyle dolar; altında "Ürün listesinden: KOD" bilgisi görünür.
+     * Listede olmayan bir cihaz elle yazılmaya devam edebilir.
+     Veritabanı değişikliği gerekmez.
+     Kaldırmak için id değeri cf-svcdevice-style olan stil ve cf-svcdevice-module olan
+     betik bloklarını silmeniz yeterlidir.
+     ========================================================================== -->
+<style id="cf-svcdevice-style">
+.cfsd-hint{display:block;margin-top:5px;font-size:12px;color:var(--mt-ink-3,#71717a)}
+.cfsd-hint b{color:#15803d;font-weight:600}
+.cfsd-hint:empty{display:none}
+</style>
+<script id="cf-svcdevice-module">(function(){'use strict';
+const $=id=>document.getElementById(id);
+const company=()=>(typeof currentCompanyId!=='undefined'&&currentCompanyId)||'';
+let products=[],loadedFor='',loadedAt=0,busy=false;
+const label=p=>p.name+(p.product_code?' · '+p.product_code:'');
+async function load(){const c=company();if(!c||busy||(loadedFor===c&&Date.now()-loadedAt<120000))return;busy=true;
+  try{const {data,error}=await sb.from('products').select('id,name,product_code,brand,model,is_service_part').eq('company_id',c).eq('active',true).order('name').limit(1000);if(!error){products=(data||[]).filter(p=>p.name&&!p.is_service_part);loadedFor=c;loadedAt=Date.now();fill()}}catch(_){}finally{busy=false}}
+function fill(){const dl=$('cfsdList');if(!dl)return;dl.innerHTML='';const frag=document.createDocumentFragment();for(const p of products){const o=document.createElement('option');o.value=label(p);if(p.brand||p.model)o.label=[p.brand,p.model].filter(Boolean).join(' ');frag.append(o)}dl.append(frag)}
+function build(){const inp=$('svcDevice');if(!inp||$('cfsdList'))return;
+  const dl=document.createElement('datalist');dl.id='cfsdList';inp.after(dl);inp.setAttribute('list','cfsdList');inp.setAttribute('autocomplete','off');
+  if(!inp.placeholder||/Örn/.test(inp.placeholder))inp.placeholder='Ürün listesinden seçin veya yazın';
+  const hint=document.createElement('small');hint.className='cfsd-hint';hint.id='cfsdHint';dl.after(hint);
+  const pick=()=>{const v=inp.value.trim();const p=products.find(x=>label(x)===v)||products.find(x=>x.name.toLocaleLowerCase('tr-TR')===v.toLocaleLowerCase('tr-TR'));
+    if(!p){hint.textContent='';return}
+    if(inp.value!==p.name)inp.value=p.name;const bm=$('svcBrand');const bmv=[p.brand,p.model].filter(Boolean).join(' ');if(bm&&!bm.value.trim()&&bmv)bm.value=bmv;
+    hint.innerHTML='Ürün listesinden: <b>'+(p.product_code?p.product_code.replace(/[<>&]/g,''):'kayıtlı ürün')+'</b>';try{serviceDirty=true}catch(_){}};
+  inp.addEventListener('change',pick);inp.addEventListener('input',()=>{if(products.some(x=>label(x)===inp.value.trim()))pick();else $('cfsdHint').textContent=''});
+  inp.addEventListener('focus',load);fill()}
+if(typeof fillServiceForm==='function'){const f=fillServiceForm;const w=function(){const r=f.apply(this,arguments);try{build();load();const h=$('cfsdHint');if(h){const v=($('svcDevice')?.value||'').trim().toLocaleLowerCase('tr-TR');const p=products.find(x=>x.name.toLocaleLowerCase('tr-TR')===v);h.innerHTML=p?'Ürün listesinden: <b>'+(p.product_code||'kayıtlı ürün')+'</b>':''}}catch(_){}return r};w.__cfsv=f.__cfsv;fillServiceForm=w}
+let t=0;new MutationObserver(()=>{if(t)return;t=setTimeout(()=>{t=0;if($('serviceFormModal')?.classList.contains('open')){build();load()}},250)}).observe(document.body,{childList:true,subtree:true});
+})();</script>
+<!-- ==========================================================================
+     CepFirma — Müşteri cihazları, seri no takibi, müşteri 360° ve periyodik bakım
+     * Müşteriye satılan / kurulan cihazlar seri numarasıyla kaydedilir (satış tarihi, garanti bitişi).
+     * Servis formunda seri no yazılınca kayıtlı cihaz bulunur: müşteri, satış tarihi, garanti durumu;
+       "Bilgileri forma al" ile müşteri / cihaz / garanti dolar. Kayıtlı değilse "Müşterinin cihazlarına ekle".
+     * Müşteriler sayfasında seçili müşteri için 360° görünüm: cihazlar, açık servisler, son belgeler,
+       son görüşme; cihaz ekleme / düzenleme, siparişlerdeki seri numaralarından cihaz alma.
+     * Periyodik bakım: cihaza bakım aralığı (3 / 6 / 12 ay…) verilir; Servis sayfasında
+       "Periyodik bakımlar" listesi (gecikmiş / 30 gün içinde / sonra), "Servis kaydı aç",
+       "Plan oluştur", "Bakım yapıldı". Ana sayfada yaklaşan / geciken bakımlar.
+     Veritabanı: veritabani/2026-11-19-musteri-cihazlari.sql bir kez çalıştırılmalıdır.
+     Kaldırmak için id değeri cf-devices-style olan stil ve cf-devices-module olan
+     betik bloklarını silmeniz yeterlidir.
+     ========================================================================== -->
+<style id="cf-devices-style">
+.cfdv-modal{position:fixed;inset:0;z-index:2147482500;background:rgba(15,23,42,.5);display:grid;place-items:center;padding:12px}
+.cfdv-modal[hidden]{display:none}
+.cfdv-card{background:var(--mt-panel,#fff);color:var(--mt-ink,#18181b);border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.25);width:min(640px,100%);max-height:calc(100dvh - 24px);overflow:auto;padding:18px}
+.cfdv-card.wide{width:min(900px,100%)}
+.cfdv-card h3{margin:0 0 4px;font-size:17px}.cfdv-card>p{margin:0 0 12px;font-size:13px;color:var(--mt-ink-3,#71717a)}
+.cfdv-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+.cfdv-grid .w{grid-column:1/-1}
+.cfdv-grid label{display:block;font-size:12.5px;font-weight:500;margin:0 0 5px}
+.cfdv-grid input,.cfdv-grid select,.cfdv-grid textarea{width:100%;box-sizing:border-box;font:inherit;font-size:14px;border:1px solid var(--mt-border,#e4e4e7);border-radius:8px;padding:9px 10px;background:var(--mt-panel,#fff);color:inherit}
+.cfdv-quick{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.cfdv-quick button{border:1px solid var(--mt-border,#e4e4e7);background:var(--mt-sunken,#f8fafc);border-radius:999px;padding:3px 10px;font:inherit;font-size:12px;cursor:pointer}
+.cfdv-foot{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-top:14px}
+.cfdv-foot .left{margin-right:auto}
+.cfdv-err{color:#b91c1c;font-size:12.5px;min-height:16px;margin-top:8px}
+.cfdv-badge{display:inline-flex;align-items:center;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:600;line-height:17px;white-space:nowrap}
+.cfdv-badge.ok{background:#dcfce7;color:#15803d}.cfdv-badge.no{background:#f1f5f9;color:#475569}.cfdv-badge.soon{background:#fef3c7;color:#92400e}.cfdv-badge.late{background:#fee2e2;color:#b91c1c}.cfdv-badge.info{background:#e0f2fe;color:#0369a1}
+/* servis formu bilgi kutusu */
+.cfdv-info{margin-top:8px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:10px;padding:10px 12px;font-size:12.5px;color:#1e3a8a;display:grid;gap:6px}
+.cfdv-info[hidden]{display:none}
+.cfdv-info.none{border-color:var(--mt-border,#e4e4e7);background:var(--mt-sunken,#f8fafc);color:var(--mt-ink-2,#52525b)}
+.cfdv-info b{font-weight:600}
+.cfdv-info .row{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.cfdv-info button{border:0;background:none;padding:0;font:inherit;font-size:12.5px;color:#2563eb;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+/* müşteri 360 */
+.cf360{margin-top:14px;display:grid;gap:12px}
+.cf360-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.cf360-kpis div{background:var(--mt-sunken,#f8fafc);border-radius:10px;padding:8px 10px;min-width:0}
+.cf360-kpis small{display:block;font-size:11px;color:var(--mt-ink-3,#71717a);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cf360-kpis b{font-size:17px}
+.cf360 section{border:1px solid var(--mt-border,#e4e4e7);border-radius:12px;padding:10px 12px;background:var(--mt-panel,#fff)}
+.cf360 h4{margin:0 0 8px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px}
+.cf360 h4 span{margin-left:auto;display:flex;gap:10px}
+.cf360 h4 button{border:0;background:none;padding:0;font:inherit;font-size:12px;font-weight:500;color:#2563eb;cursor:pointer}
+.cf360 ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.cf360 li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 8px;align-items:center;padding:7px 8px;border-radius:8px;cursor:pointer;font-size:13px}
+.cf360 li:hover{background:var(--mt-hover,#f4f4f5)}
+.cf360 li small{grid-column:1;color:var(--mt-ink-3,#71717a);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cf360 li .r{grid-row:1/span 2;grid-column:2;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.cf360 .empty{font-size:12.5px;color:var(--mt-ink-3,#71717a);padding:4px 2px}
+.cf360 .note{font-size:12px;color:var(--mt-ink-3,#71717a)}
+/* bakım listesi */
+.cfmt-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+.cfmt-tabs button{border:1px solid var(--mt-border,#e4e4e7);background:var(--mt-panel,#fff);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer}
+.cfmt-tabs button.on{background:#eff6ff;border-color:#3b82f6;color:#1d4ed8;font-weight:600}
+.cfmt-list{display:grid;gap:8px}
+.cfmt-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;border:1px solid var(--mt-border,#e4e4e7);border-radius:12px;padding:10px 12px}
+.cfmt-item b{font-size:14px}.cfmt-item small{display:block;color:var(--mt-ink-3,#71717a);font-size:12px;margin-top:2px}
+.cfmt-item .acts{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px}
+.cfmt-item .acts .btn{min-height:34px;padding:5px 12px!important;font-size:12.5px}
+@media(max-width:640px){.cfdv-grid{grid-template-columns:1fr}.cf360-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.cfdv-foot .btn{flex:1 1 auto}.cfdv-foot .left{margin-right:0}}
+</style>
+<script id="cf-devices-module">(function(){'use strict';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const company=()=>(typeof currentCompanyId!=='undefined'&&currentCompanyId)||'';
+const norm=s=>String(s||'').trim().toLocaleLowerCase('tr-TR');
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const today=()=>iso(new Date());
+const addMonths=(s,m)=>{const d=new Date((s||today())+'T12:00:00');d.setMonth(d.getMonth()+m);return iso(d)};
+const fmt=s=>{if(!s)return '';const d=new Date(String(s).slice(0,10)+'T12:00:00');return isNaN(d)?'':d.toLocaleDateString('tr-TR',{day:'numeric',month:'short',year:'numeric'})};
+const daysTo=s=>s?Math.round((new Date(String(s).slice(0,10)+'T12:00:00')-new Date(today()+'T12:00:00'))/864e5):null;
+const money=(n,c)=>{const v=Number(n);if(!isFinite(v))return '';return new Intl.NumberFormat('tr-TR',{maximumFractionDigits:0}).format(v)+' '+({TRY:'₺',TL:'₺',EUR:'€',USD:'$'}[c]||c||'')};
+const toast=(m,k)=>{try{window.showToast?.(m,k||'success')}catch(_){}};
+let enabled=false,probedFor='',probing=false;
+async function probe(){const c=company();if(!c||probing||probedFor===c||typeof sb==='undefined')return;probing=true;
+  try{const {error}=await sb.from('customer_devices').select('id').eq('company_id',c).limit(1);probedFor=c;enabled=!error}catch(_){probedFor=c}finally{probing=false}}
+const warranty=d=>{if(!d?.warranty_until)return null;const n=daysTo(d.warranty_until);return n>=0?{cls:n<=30?'soon':'ok',t:'Garanti '+fmt(d.warranty_until)+' tarihine kadar'}:{cls:'no',t:'Garanti bitti ('+fmt(d.warranty_until)+')'}};
+const maint=d=>{if(!d?.maintenance_months||!d.next_maintenance)return null;const n=daysTo(d.next_maintenance);return {cls:n<0?'late':n<=30?'soon':'info',n,t:n<0?'Bakım '+(-n)+' gün gecikti':n===0?'Bakım bugün':'Bakım '+fmt(d.next_maintenance)}};
+
+/* ---------- veri ---------- */
+let products=[],prodAt=0,customers=[],custAt=0;
+async function loadProducts(){if(products.length&&Date.now()-prodAt<120000)return products;const {data}=await sb.from('products').select('id,name,product_code,brand,model,is_service_part').eq('company_id',company()).eq('active',true).order('name').limit(1000);products=(data||[]).filter(p=>!p.is_service_part);prodAt=Date.now();return products}
+async function loadCustomers(){if(customers.length&&Date.now()-custAt<120000)return customers;const {data}=await sb.from('customers').select('id,name,phone,email,address').eq('company_id',company()).is('deleted_at',null).order('name').limit(2000);customers=data||[];custAt=Date.now();return customers}
+async function bySerial(serial){const s=String(serial||'').trim();if(s.length<3||!enabled)return null;const pat=s.replace(/[\\%_*]/g,m=>'\\'+m);const {data}=await sb.from('customer_devices').select('*').eq('company_id',company()).ilike('serial_number',pat).limit(5);return (data||[]).find(d=>norm(d.serial_number)===norm(s))||null}
+async function byCustomer(cid){if(!enabled)return [];const {data}=await sb.from('customer_devices').select('*').eq('company_id',company()).eq('customer_id',cid).eq('active',true).order('sold_date',{ascending:false,nullsFirst:false}).limit(200);return data||[]}
+
+/* ---------- küçük pencere ---------- */
+let modalEl=null;
+function modal(html,wide){if(!modalEl){modalEl=document.createElement('div');modalEl.className='cfdv-modal';modalEl.hidden=true;modalEl.setAttribute('role','dialog');modalEl.setAttribute('aria-modal','true');modalEl.innerHTML='<div class="cfdv-card"></div>';document.body.append(modalEl);modalEl.addEventListener('click',e=>{if(e.target===modalEl||e.target.closest('[data-close]'))closeModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modalEl&&!modalEl.hidden){e.stopPropagation();closeModal()}},true)}
+  const card=modalEl.firstElementChild;card.className='cfdv-card'+(wide?' wide':'');card.innerHTML=html;modalEl.hidden=false;card.scrollTop=0}
+function closeModal(){if(modalEl)modalEl.hidden=true}
+
+/* ---------- cihaz kaydı penceresi ---------- */
+async function deviceEditor(dev,opts={}){if(!enabled){alert('Cihaz kaydı için önce veritabanı güncellemesi (musteri-cihazlari.sql) çalıştırılmalı.');return}
+  const [ps,cs]=await Promise.all([loadProducts(),loadCustomers()]);const d={...(dev||{})};const isNew=!d.id;
+  modal('<h3>'+(isNew?'Cihaz ekle':'Cihazı düzenle')+'</h3><p>Müşteriye satılan / kurulan cihaz. Seri numarası servis kaydında otomatik tanınır.</p><div class="cfdv-grid">'
+   +'<div class="w"><label for="cfdvCust">Müşteri *</label><select id="cfdvCust"><option value="">Seçin…</option>'+cs.map(c=>'<option value="'+c.id+'"'+(String(c.id)===String(d.customer_id||opts.customerId||'')?' selected':'')+'>'+esc(c.name)+'</option>').join('')+'</select></div>'
+   +'<div class="w"><label for="cfdvName">Cihaz / ürün *</label><input id="cfdvName" list="cfdvProd" autocomplete="off" maxlength="200" value="'+esc(d.device_name||'')+'" placeholder="Ürün listesinden seçin veya yazın"><datalist id="cfdvProd">'+ps.map(p=>'<option value="'+esc(p.name)+'"></option>').join('')+'</datalist></div>'
+   +'<div><label for="cfdvBrand">Marka / model</label><input id="cfdvBrand" maxlength="200" value="'+esc(d.brand_model||'')+'"></div>'
+   +'<div><label for="cfdvSerial">Seri numarası</label><input id="cfdvSerial" maxlength="150" autocomplete="off" value="'+esc(d.serial_number||'')+'"></div>'
+   +'<div><label for="cfdvSold">Satış / kurulum tarihi</label><input id="cfdvSold" type="date" value="'+esc(d.sold_date||'')+'"></div>'
+   +'<div><label for="cfdvWar">Garanti bitişi</label><input id="cfdvWar" type="date" value="'+esc(d.warranty_until||'')+'"><div class="cfdv-quick"><button type="button" data-w="12">1 yıl</button><button type="button" data-w="24">2 yıl</button><button type="button" data-w="36">3 yıl</button></div></div>'
+   +'<div><label for="cfdvMm">Periyodik bakım</label><select id="cfdvMm"><option value="">Yok</option>'+[1,3,6,12,24].map(m=>'<option value="'+m+'"'+(Number(d.maintenance_months)===m?' selected':'')+'>'+(m===1?'Her ay':m===12?'Yılda bir':m===24?'2 yılda bir':m+' ayda bir')+'</option>').join('')+'</select></div>'
+   +'<div><label for="cfdvNext">Sonraki bakım</label><input id="cfdvNext" type="date" value="'+esc(d.next_maintenance||'')+'"></div>'
+   +'<div class="w"><label for="cfdvNote">Not</label><input id="cfdvNote" maxlength="1000" value="'+esc(d.note||'')+'" placeholder="Kurulum yeri, kullanıcı, aksesuar…"></div></div>'
+   +'<div class="cfdv-err" id="cfdvErr"></div><div class="cfdv-foot">'+(isNew?'':'<button type="button" class="btn light left" id="cfdvDel" style="color:#b91c1c">Kaldır</button>')+'<button type="button" class="btn light" data-close>Vazgeç</button><button type="button" class="btn primary" id="cfdvSave">Kaydet</button></div>');
+  if(isNew&&opts.prefill){for(const [id,v] of Object.entries(opts.prefill))if(v&&$(id)&&!$(id).value)$(id).value=v}
+  const prodFill=()=>{const p=ps.find(x=>norm(x.name)===norm($('cfdvName').value));if(p&&!$('cfdvBrand').value.trim())$('cfdvBrand').value=[p.brand,p.model].filter(Boolean).join(' ')};$('cfdvName').addEventListener('change',prodFill);
+  $('cfdvMm').addEventListener('change',()=>{const m=Number($('cfdvMm').value);$('cfdvNext').value=m?addMonths(d.last_maintenance||$('cfdvSold').value||today(),m):''});
+  document.querySelectorAll('.cfdv-quick [data-w]').forEach(b=>b.onclick=()=>{$('cfdvWar').value=addMonths($('cfdvSold').value||today(),Number(b.dataset.w))});
+  $('cfdvDel')?.addEventListener('click',async()=>{if(!confirm('Bu cihaz müşterinin cihazlarından kaldırılsın mı? (Servis kayıtları silinmez.)'))return;const {error}=await sb.from('customer_devices').update({active:false}).eq('id',d.id);if(error){$('cfdvErr').textContent=error.message;return}closeModal();toast('Cihaz kaldırıldı.');opts.onSaved?.()});
+  $('cfdvSave').onclick=async()=>{const cid=$('cfdvCust').value,name=$('cfdvName').value.trim();if(!cid){$('cfdvErr').textContent='Müşteri seçin.';return}if(!name){$('cfdvErr').textContent='Cihaz adını yazın.';return}
+    const p=ps.find(x=>norm(x.name)===norm(name));const c=cs.find(x=>String(x.id)===cid);const mm=Number($('cfdvMm').value)||null;
+    const row={company_id:company(),customer_id:Number(cid),customer_name:c?.name||null,product_id:p?.id||null,device_name:name,brand_model:$('cfdvBrand').value.trim()||null,serial_number:$('cfdvSerial').value.trim()||null,sold_date:$('cfdvSold').value||null,warranty_until:$('cfdvWar').value||null,maintenance_months:mm,next_maintenance:mm?($('cfdvNext').value||null):null,note:$('cfdvNote').value.trim()||null};
+    const b=$('cfdvSave');b.disabled=true;$('cfdvErr').textContent='';
+    try{const q=isNew?sb.from('customer_devices').insert(row).select().single():sb.from('customer_devices').update(row).eq('id',d.id).select().single();const {data,error}=await q;if(error)throw error;closeModal();toast(isNew?'Cihaz müşteriye eklendi.':'Cihaz güncellendi.');opts.onSaved?.(data)}
+    catch(e){const m=String(e.message||'');$('cfdvErr').textContent=/duplicate|unique|serial_uq/.test(m)?'Bu seri numarası başka bir cihazda kayıtlı.':/customer_company_mismatch/.test(m)?'Müşteri bu şirkete ait değil.':'Kaydedilemedi: '+m;b.disabled=false}}}
+window.cfDeviceEditor=deviceEditor;
+
+/* ---------- servis formu: seri no ile cihaz bulma ---------- */
+let infoTok=0;
+async function serialInfo(){const ser=$('svcSerial');if(!ser||!enabled)return;let box=$('cfdvInfo');if(!box){box=document.createElement('div');box.id='cfdvInfo';box.className='cfdv-info';box.hidden=true;(($('cfscHist')||ser)).after(box)}
+  const s=ser.value.trim();const t=++infoTok;if(s.length<3){box.hidden=true;return}const d=await bySerial(s);if(t!==infoTok)return;
+  if(d){const w=warranty(d),m=maint(d);box.className='cfdv-info';box.innerHTML='<div class="row">📦 <b>Kayıtlı cihaz:</b> '+esc(d.customer_name||'Müşteri')+' · '+esc([d.brand_model,d.device_name].filter(Boolean).join(' '))+(d.sold_date?' · satış '+esc(fmt(d.sold_date)):'')+'</div><div class="row">'+(w?'<span class="cfdv-badge '+w.cls+'">'+esc(w.t)+'</span>':'<span class="cfdv-badge no">Garanti bilgisi yok</span>')+(m?'<span class="cfdv-badge '+m.cls+'">'+esc(m.t)+'</span>':'')+'<button type="button" data-a="fill">Bilgileri forma al</button><button type="button" data-a="edit">Cihaz kaydını aç</button></div>';
+    box.querySelector('[data-a=fill]').onclick=()=>fillFromDevice(d);box.querySelector('[data-a=edit]').onclick=()=>deviceEditor(d,{onSaved:serialInfo});
+    const wsel=$('svcWarranty');if(wsel&&w&&(!wsel.value||wsel.value==='Belirtilmedi')){const rec=$('svcDate')?.value||today();wsel.value=daysTo(d.warranty_until)>=daysTo(rec)?'Garanti kapsamında':'Garanti dışı';wsel.dispatchEvent(new Event('change',{bubbles:true}))}}
+  else{const cust=$('svcCustomer')?.value.trim();box.className='cfdv-info none';box.innerHTML='<div class="row">Bu seri numarası müşteri cihazlarında kayıtlı değil.'+(cust?' <button type="button" data-a="add">Müşterinin cihazlarına ekle</button>':'')+'</div>';
+    box.querySelector('[data-a=add]')?.addEventListener('click',async()=>{const cs=await loadCustomers();const c=($('svcCustomerId')?.value&&cs.find(x=>String(x.id)===$('svcCustomerId').value))||cs.find(x=>norm(x.name)===norm(cust));deviceEditor(null,{customerId:c?.id,prefill:{cfdvName:$('svcDevice')?.value.trim(),cfdvBrand:$('svcBrand')?.value.trim(),cfdvSerial:s},onSaved:serialInfo})})}
+  box.hidden=false}
+async function fillFromDevice(d){const set=(id,v)=>{const el=$(id);if(el&&v!=null&&v!==''){el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}))}};
+  set('svcDevice',d.device_name);set('svcBrand',d.brand_model);
+  if(d.customer_id){const cs=await loadCustomers();const c=cs.find(x=>String(x.id)===String(d.customer_id));const pk=$('svcCustomerPicker');if(pk&&[...pk.options].some(o=>o.value===String(d.customer_id))){pk.value=String(d.customer_id);try{selectServiceCustomer(pk.value)}catch(_){}}else if(c){set('svcCustomer',c.name);set('svcPhone',c.phone);set('svcEmail',c.email);set('svcAddress',c.address)}}
+  else set('svcCustomer',d.customer_name);
+  const w=warranty(d);if(w&&$('svcWarranty')){$('svcWarranty').value=daysTo(d.warranty_until)>=daysTo($('svcDate')?.value||today())?'Garanti kapsamında':'Garanti dışı';$('svcWarranty').dispatchEvent(new Event('change',{bubbles:true}))}
+  try{serviceDirty=true}catch(_){}toast('Cihaz bilgileri forma alındı.')}
+document.addEventListener('input',e=>{if(e.target?.id!=='svcSerial')return;clearTimeout(window.__cfdvT);window.__cfdvT=setTimeout(serialInfo,500)});
+if(typeof fillServiceForm==='function'){const f=fillServiceForm;const w=function(){const r=f.apply(this,arguments);setTimeout(serialInfo,300);return r};w.__cfsv=f.__cfsv;fillServiceForm=w}
+/* bakım planlı cihazın servisi "Teslim edildi" ile kaydedilince bakımı ileri al */
+if(typeof saveServiceRecord==='function'){const base=saveServiceRecord;saveServiceRecord=async function(){const prev=typeof serviceEditing!=='undefined'&&serviceEditing?(serviceEditing.stage||serviceEditing.status):null;const res=await base.apply(this,arguments);
+  try{const now=typeof serviceEditing!=='undefined'?serviceEditing:null;const done=now&&(now.stage==='delivered'||(!now.stage&&now.status==='completed'));const was=prev==='delivered'||prev==='completed';
+    if(enabled&&done&&!was&&now.serial_number){const d=await bySerial(now.serial_number);if(d?.maintenance_months&&confirm(d.device_name+' cihazının periyodik bakımı yapıldı olarak işaretlensin mi? Sonraki bakım '+fmt(addMonths(today(),d.maintenance_months))+' olur.')){const {error}=await sb.rpc('cf_device_maintenance_done',{p_id:d.id,p_date:today()});if(!error)toast('Sonraki bakım tarihi güncellendi.')}}}catch(_){}
+  return res}}
+
+/* ---------- müşteri 360° ---------- */
+let c360Tok=0,c360For='';
+async function paint360(){const box=$('customerDetailInline');if(!box)return;const sel=document.querySelector('#customerOverlay tr.selected[data-customer-id]');const cid=sel?.dataset.customerId;let wrap=box.querySelector(':scope > .cf360');
+  if(!cid){wrap?.remove();c360For='';return}if(wrap&&c360For===cid)return;c360For=cid;const t=++c360Tok;
+  if(!wrap){wrap=document.createElement('div');wrap.className='cf360';box.append(wrap)}wrap.innerHTML='<p class="note">Müşteri özeti yükleniyor…</p>';
+  const c=(typeof customerManagerData!=='undefined'?customerManagerData:[]).find(x=>String(x.id)===cid)||{};const name=c.name||'';
+  const svcQ=()=>{let q=sb.from('technical_service_records').select('*').eq('company_id',company()).in('status',['waiting','following','approved']).order('received_date',{ascending:false}).limit(20);return window.cfSvcCustLink?q.or('customer_id.eq.'+cid+',customer_name.eq.'+JSON.stringify(name)):q.eq('customer_name',name)};
+  const [devs,svcs,pfs,offers,crm,svcAll]=await Promise.all([
+    byCustomer(cid).catch(()=>[]),
+    svcQ().then(r=>r.data||[]).catch(()=>[]),
+    sb.from('proformas').select('id,proforma_number,proforma_date,grand_total,currency,status,approval_state,created_at').eq('company_id',company()).or('customer_id.eq.'+cid+(name?',customer_name.eq.'+JSON.stringify(name):'')).is('deleted_at',null).order('created_at',{ascending:false}).limit(5).then(r=>r.data||[]).catch(()=>[]),
+    sb.from('sales_offers').select('id',{count:'exact',head:true}).eq('company_id',company()).or('payload->>customer_id.eq.'+cid+(name?',payload->>customer_name.eq.'+JSON.stringify(name):'')).then(r=>r.count||0).catch(()=>0),
+    sb.from('customer_interactions').select('id,interaction_date,next_follow_up,status,notes,sales_rep').eq('company_id',company()).eq('customer_id',cid).is('deleted_at',null).order('interaction_date',{ascending:false}).limit(1).then(r=>r.data||[]).catch(()=>[]),
+    (window.cfSvcCustLink?sb.from('technical_service_records').select('id',{count:'exact',head:true}).eq('company_id',company()).or('customer_id.eq.'+cid+',customer_name.eq.'+JSON.stringify(name)):sb.from('technical_service_records').select('id',{count:'exact',head:true}).eq('company_id',company()).eq('customer_name',name)).then(r=>r.count||0).catch(()=>0)]);
+  if(t!==c360Tok||!wrap.isConnected)return;
+  const SG=window.cfServiceStage;const stage=r=>SG?.label?SG.label(SG.stageOf(r),r):(window.serviceState?serviceState(r.status).label:r.status);
+  const lastCrm=crm[0];
+  wrap.innerHTML='<div class="cf360-kpis"><div><small>Cihaz</small><b>'+(enabled?devs.length:'—')+'</b></div><div><small>Açık servis</small><b>'+svcs.length+'</b></div><div><small>Teklif / Proforma</small><b>'+offers+' / '+pfs.length+(pfs.length===5?'+':'')+'</b></div><div><small>Toplam servis</small><b>'+svcAll+'</b></div></div>'
+   +'<section><h4>📦 Cihazlar<span>'+(enabled?'<button type="button" data-a="add">+ Cihaz ekle</button><button type="button" data-a="import">Siparişlerden al</button>':'')+'</span></h4>'+(enabled?(devs.length?'<ul>'+devs.map(d=>{const w=warranty(d),m=maint(d);return '<li data-dev="'+d.id+'"><span><b>'+esc(d.device_name)+'</b>'+(d.brand_model?' · '+esc(d.brand_model):'')+'</span><small>'+(d.serial_number?'SN '+esc(d.serial_number):'Seri no yok')+(d.sold_date?' · '+esc(fmt(d.sold_date)):'')+'</small><span class="r">'+(w?'<span class="cfdv-badge '+w.cls+'">'+esc(w.cls==='no'?'Garanti bitti':'Garantili')+'</span>':'')+(m?'<span class="cfdv-badge '+m.cls+'">'+esc(m.t)+'</span>':'')+'</span></li>'}).join('')+'</ul>':'<p class="empty">Kayıtlı cihaz yok. Satılan cihazları seri numarasıyla ekleyin; servis kaydında otomatik tanınır.</p>'):'<p class="empty">Cihaz takibi için veritabanı güncellemesi (musteri-cihazlari.sql) çalıştırılmalı.</p>')+'</section>'
+   +'<section><h4>🔧 Açık servisler</h4>'+(svcs.length?'<ul>'+svcs.slice(0,6).map(s=>'<li data-svc="'+esc(s.id)+'"><span><b>'+esc(s.service_number||'Servis')+'</b> · '+esc(s.device_name||'')+'</span><small>'+esc(fmt(s.received_date))+(s.serial_number?' · SN '+esc(s.serial_number):'')+'</small><span class="r"><span class="cfdv-badge info">'+esc(stage(s))+'</span></span></li>').join('')+'</ul>':'<p class="empty">Açık servis yok.</p>')+'</section>'
+   +'<section><h4>📄 Son proformalar</h4>'+(pfs.length?'<ul>'+pfs.map(p=>'<li data-pf="'+esc(p.id)+'"><span><b>'+esc(p.proforma_number||'Proforma')+'</b></span><small>'+esc(fmt(p.proforma_date||p.created_at))+'</small><span class="r"><b>'+esc(money(p.grand_total,p.currency))+'</b></span></li>').join('')+'</ul>':'<p class="empty">Proforma yok.</p>')+'</section>'
+   +'<section><h4>💬 Son görüşme</h4>'+(lastCrm?'<p class="note" style="margin:0">'+esc(fmt(lastCrm.interaction_date))+(lastCrm.sales_rep?' · '+esc(lastCrm.sales_rep):'')+(lastCrm.next_follow_up?' · <b>Sonraki takip: '+esc(fmt(lastCrm.next_follow_up))+'</b>':'')+'</p>'+(lastCrm.notes?'<p class="note" style="margin:4px 0 0;color:inherit">'+esc(String(lastCrm.notes).slice(0,160))+'</p>':''):'<p class="empty">Görüşme kaydı yok.</p>')+'</section>';
+  const refresh=()=>{c360For='';paint360()};
+  wrap.querySelector('[data-a=add]')?.addEventListener('click',()=>deviceEditor(null,{customerId:cid,onSaved:refresh}));
+  wrap.querySelector('[data-a=import]')?.addEventListener('click',()=>importFromOrders(cid,name,devs,refresh));
+  wrap.querySelectorAll('[data-dev]').forEach(li=>li.onclick=()=>deviceEditor(devs.find(d=>String(d.id)===li.dataset.dev),{onSaved:refresh}));
+  wrap.querySelectorAll('[data-svc]').forEach(li=>li.onclick=()=>window.cfOpenService?window.cfOpenService(li.dataset.svc):(appNavigate('service'),setTimeout(()=>editServiceRecord(li.dataset.svc),400)));
+  wrap.querySelectorAll('[data-pf]').forEach(li=>li.onclick=async()=>{try{if(typeof closeAllCepFirmaViews==='function')closeAllCepFirmaViews();await loadSavedProforma(Number(li.dataset.pf),true)}catch(e){alert('Proforma açılamadı.')}})}
+
+/* siparişlerdeki seri numaralarından cihaz alma */
+async function importFromOrders(cid,name,existing,done){const {data:pfs}=await sb.from('proformas').select('id,items').eq('company_id',company()).or('customer_id.eq.'+cid+(name?',customer_name.eq.'+JSON.stringify(name):'')).is('deleted_at',null).limit(200);const ids=(pfs||[]).map(p=>p.id);
+  let orders=[];if(ids.length){const r=await sb.from('operation_orders').select('id,order_number,proforma_id,serial_numbers,delivered_date,shipped_date,created_at,cancelled_at').eq('company_id',company()).in('proforma_id',ids).is('cancelled_at',null).limit(200);orders=r.data||[]}
+  const have=new Set(existing.map(d=>norm(d.serial_number)).filter(Boolean));const found=[];
+  for(const o of orders){const p=(pfs||[]).find(x=>x.id===o.proforma_id);const items=(Array.isArray(p?.items)?p.items:[]).filter(i=>i.product_id||i.description);
+    const date=String(o.delivered_date||o.shipped_date||o.created_at||'').slice(0,10);
+    for(const it of items){if(it.serial){for(const sn of String(it.serial).split(/[\n,;]+/).map(s=>s.trim()).filter(Boolean))found.push({sn,name:it.description,brand:[it.brand,it.model].filter(Boolean).join(' '),pid:it.product_id,date,order:o})}}
+    for(const line of String(o.serial_numbers||'').split(/\n+/).map(s=>s.trim()).filter(Boolean)){const m=line.match(/^(.*?)[\s:–-]+([A-Z0-9][A-Z0-9\-\/\.]{3,})$/i);const sn=(m?m[2]:line).trim();const nm=m&&m[1].trim()?m[1].trim():(items.length===1?items[0].description:'');for(const s of sn.split(/[,;]+/).map(x=>x.trim()).filter(Boolean))found.push({sn:s,name:nm||items[0]?.description||'Cihaz',brand:items.length===1?[items[0].brand,items[0].model].filter(Boolean).join(' '):'',pid:items.length===1?items[0].product_id:null,date,order:o})}}
+  const fresh=found.filter((f,i)=>!have.has(norm(f.sn))&&found.findIndex(x=>norm(x.sn)===norm(f.sn))===i);
+  if(!fresh.length){modal('<h3>Siparişlerden cihaz al</h3><p>'+(orders.length?orders.length+' siparişte yeni seri numarası bulunamadı. Depo, siparişin "Seri numaraları" alanını doldurduğunda cihazlar buradan tek tıkla eklenir.':'Bu müşterinin siparişi yok.')+'</p><div class="cfdv-foot"><button type="button" class="btn primary" data-close>Tamam</button></div>');return}
+  modal('<h3>Siparişlerden cihaz al</h3><p>'+fresh.length+' seri numarası bulundu. Eklenecekleri seçin.</p><div class="cfmt-list">'+fresh.map((f,i)=>'<label class="cfmt-item" style="cursor:pointer"><span><b>'+esc(f.name)+'</b><small>SN '+esc(f.sn)+' · '+esc(f.order.order_number||'')+(f.date?' · '+esc(fmt(f.date)):'')+'</small></span><input type="checkbox" data-i="'+i+'" checked style="width:20px;height:20px"></label>').join('')+'</div><div class="cfdv-grid" style="margin-top:12px"><div><label for="cfdvImpW">Garanti süresi</label><select id="cfdvImpW"><option value="">Belirtme</option><option value="12">1 yıl</option><option value="24" selected>2 yıl</option><option value="36">3 yıl</option></select></div></div><div class="cfdv-err" id="cfdvErr"></div><div class="cfdv-foot"><button type="button" class="btn light" data-close>Vazgeç</button><button type="button" class="btn primary" id="cfdvImpGo">Seçilenleri ekle</button></div>',true);
+  $('cfdvImpGo').onclick=async()=>{const pick=[...document.querySelectorAll('.cfdv-modal [data-i]:checked')].map(x=>fresh[Number(x.dataset.i)]);if(!pick.length){$('cfdvErr').textContent='En az bir cihaz seçin.';return}const wm=Number($('cfdvImpW').value)||0;
+    const rows=pick.map(f=>({company_id:company(),customer_id:Number(cid),customer_name:name||null,product_id:/^\d+$/.test(String(f.pid||''))?Number(f.pid):null,device_name:String(f.name).slice(0,200),brand_model:f.brand||null,serial_number:f.sn.slice(0,150),sold_date:f.date||null,warranty_until:wm&&f.date?addMonths(f.date,wm):null,order_id:f.order.id}));
+    const {error}=await sb.from('customer_devices').insert(rows);if(error){$('cfdvErr').textContent=/duplicate|unique/.test(error.message)?'Seri numaralarından biri başka bir cihazda kayıtlı.':error.message;return}closeModal();toast(rows.length+' cihaz eklendi.');done?.()}}
+
+/* ---------- periyodik bakımlar ---------- */
+let mtFilter='due';
+async function maintenanceList(){if(!enabled){alert('Periyodik bakım için önce veritabanı güncellemesi (musteri-cihazlari.sql) çalıştırılmalı.');return}
+  const {data,error}=await sb.from('customer_devices').select('*').eq('company_id',company()).eq('active',true).not('next_maintenance','is',null).order('next_maintenance').limit(500);if(error){alert(error.message);return}const all=data||[];
+  const draw=()=>{const list=all.filter(d=>{const n=daysTo(d.next_maintenance);return mtFilter==='due'?n<=30:mtFilter==='late'?n<0:true});const late=all.filter(d=>daysTo(d.next_maintenance)<0).length,due=all.filter(d=>daysTo(d.next_maintenance)<=30).length;
+    modal('<h3>Periyodik bakımlar</h3><p>Bakım aralığı tanımlı cihazlar. Cihaz eklemek / aralık vermek için Müşteriler › müşteri › Cihazlar.</p><div class="cfmt-tabs"><button type="button" data-f="due"'+(mtFilter==='due'?' class="on"':'')+'>30 gün içinde ('+due+')</button><button type="button" data-f="late"'+(mtFilter==='late'?' class="on"':'')+'>Geciken ('+late+')</button><button type="button" data-f="all"'+(mtFilter==='all'?' class="on"':'')+'>Tümü ('+all.length+')</button></div><div class="cfmt-list">'
+     +(list.length?list.map(d=>{const m=maint(d);return '<div class="cfmt-item"><span><b>'+esc(d.customer_name||'Müşteri')+'</b><small>'+esc([d.device_name,d.brand_model].filter(Boolean).join(' · '))+(d.serial_number?' · SN '+esc(d.serial_number):'')+(d.last_maintenance?' · son bakım '+esc(fmt(d.last_maintenance)):'')+'</small></span><span class="cfdv-badge '+m.cls+'">'+esc(m.t)+'</span><div class="acts"><button type="button" class="btn primary" data-svc="'+d.id+'">Servis kaydı aç</button><button type="button" class="btn light" data-plan="'+d.id+'">Plan oluştur</button><button type="button" class="btn light" data-done="'+d.id+'">Bakım yapıldı</button><button type="button" class="btn light" data-edit="'+d.id+'">Düzenle</button></div></div>'}).join(''):'<p class="cfdv-err" style="color:inherit">'+(mtFilter==='late'?'Geciken bakım yok.':mtFilter==='due'?'Önümüzdeki 30 günde bakım yok.':'Bakım aralığı tanımlı cihaz yok.')+'</p>')
+     +'</div><div class="cfdv-foot"><button type="button" class="btn light" data-close>Kapat</button></div>',true);
+    document.querySelectorAll('.cfmt-tabs [data-f]').forEach(b=>b.onclick=()=>{mtFilter=b.dataset.f;draw()});
+    const get=id=>all.find(x=>String(x.id)===String(id));
+    document.querySelectorAll('.cfdv-modal [data-svc]').forEach(b=>b.onclick=()=>serviceFromDevice(get(b.dataset.svc)));
+    document.querySelectorAll('.cfdv-modal [data-plan]').forEach(b=>b.onclick=()=>planFromDevice(get(b.dataset.plan)));
+    document.querySelectorAll('.cfdv-modal [data-edit]').forEach(b=>b.onclick=()=>deviceEditor(get(b.dataset.edit),{onSaved:maintenanceList}));
+    document.querySelectorAll('.cfdv-modal [data-done]').forEach(b=>b.onclick=async()=>{const d=get(b.dataset.done);if(!confirm(d.customer_name+' · '+d.device_name+' bakımı bugün yapıldı olarak işaretlensin mi?'))return;const {data:nx,error}=await sb.rpc('cf_device_maintenance_done',{p_id:d.id,p_date:today()});if(error){alert(error.message);return}d.last_maintenance=today();d.next_maintenance=nx;toast('Sonraki bakım: '+fmt(nx));draw()})};
+  draw()}
+window.cfMaintenanceList=maintenanceList;
+async function serviceFromDevice(d){if(!d)return;closeModal();try{await appNavigate('service')}catch(_){}await new Promise(r=>setTimeout(r,300));await newServiceRecord();
+  const set=(id,v)=>{const el=$(id);if(el&&v){el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}))}};
+  if(d.customer_id){const pk=$('svcCustomerPicker');if(pk&&[...pk.options].some(o=>o.value===String(d.customer_id))){pk.value=String(d.customer_id);try{selectServiceCustomer(pk.value)}catch(_){}}else set('svcCustomer',d.customer_name)}else set('svcCustomer',d.customer_name);
+  set('svcDevice',d.device_name);set('svcBrand',d.brand_model);set('svcSerial',d.serial_number);set('svcFault','Periyodik bakım ('+(d.maintenance_months===12?'yıllık':d.maintenance_months+' aylık')+')');
+  const w=warranty(d);if(w&&$('svcWarranty')){$('svcWarranty').value=w.cls==='no'?'Garanti dışı':'Garanti kapsamında';$('svcWarranty').dispatchEvent(new Event('change',{bubbles:true}))}
+  const onsite=document.querySelector('input[name="cfsmMode"][value="onsite"]');if(onsite){onsite.checked=true;onsite.dispatchEvent(new Event('change',{bubbles:true}))}
+  try{serviceDirty=true}catch(_){}serialInfo()}
+async function planFromDevice(d){if(!d)return;closeModal();const date=daysTo(d.next_maintenance)<0?today():d.next_maintenance;
+  if(window.cfQuickPlan?.open){await window.cfQuickPlan.open(date);await new Promise(r=>setTimeout(r,400));const w=$('cfqWho');if(w){w.value=d.customer_name||'';w.dispatchEvent(new Event('input',{bubbles:true}))}document.querySelector('#cfqKinds [data-kind="Servis"]')?.click();const n=$('calNotes');if(n&&!n.value)n.value='Periyodik bakım: '+[d.device_name,d.brand_model].filter(Boolean).join(' ')+(d.serial_number?' · SN '+d.serial_number:'')}
+  else{try{await appNavigate('calendar');newCalendarEvent(date);const t=$('calTitle');if(t)t.value=(d.customer_name||'')+' – Periyodik bakım'}catch(_){}}}
+/* Servis sayfasına "Periyodik bakımlar" düğmesi */
+function serviceButton(){const head=document.querySelector('#serviceOverlay .service-page-head');if(!head||head.querySelector('[data-cfmt]'))return;const b=document.createElement('button');b.type='button';b.className='btn light';b.dataset.cfmt='';b.textContent='🛠 Periyodik bakımlar';b.onclick=maintenanceList;const pri=head.querySelector('.btn.primary');if(pri){let g=pri.parentElement;if(g===head){g=document.createElement('div');g.style.cssText='display:flex;gap:8px;flex-wrap:wrap';pri.before(g);g.append(pri)}g.prepend(b)}else head.append(b)}
+
+let t=0;function run(){t=0;probe();if($('serviceOverlay')?.classList.contains('open'))serviceButton();if($('customerOverlay')&&getComputedStyle($('customerOverlay')).display!=='none')paint360()}
+new MutationObserver(()=>{if(!t)t=setTimeout(run,200)}).observe(document.body,{childList:true,subtree:true});
+setTimeout(run,1000);
+window.cfDevices={get enabled(){return enabled},recheck(){probedFor='';return probe()},bySerial};
 })();</script>
 <!-- ==========================================================================
      CepFirma — Metis yazı ölçüleri
