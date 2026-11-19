@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-19.45)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-19.46)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -47,6 +47,8 @@ bu dosyalar orada da birer kez çalıştırılmalıdır:
     mevcut görüşmelerdeki kişiler bir kez aktarılır.
 19. `veritabani/2026-11-19-gorusme-sahibi.sql` — görüşme kaydını **yalnızca kaydı giren kişi** değiştirebilir / silebilir.
 20. `veritabani/2026-11-19-gorusme-kayip-rakip.sql` — görüşmeye **kayıp nedeni** ve **rakip** (firma, fiyat / not) alanları.
+21. `veritabani/2026-11-19-siparis-takip.sql` — **sipariş aşama geçmişi** (`operation_order_events`): her aşama değişikliği,
+    kim, ne zaman; birimler arası bildirim için.
 
 ## Görünüm
 
@@ -113,6 +115,12 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Geliştirilen sayfalar
 
+- **Sipariş takip çizgisi (●━●━◉┄○):** teklif verildi → kabul → proforma onaylandı → müşteri onayı · muhasebeye sevk →
+  fatura kesildi → depoda hazır → yolda → teslim edildi. Sipariş ayrıntısında büyük çizgi (tarih, saat, işi yapan; şu anki
+  adım yanıp söner, "Muhasebede 3 gündür"); adıma dokununca fatura no / PDF, seri no, kargo / takip no, teslim alan.
+  Siparişler listesinde küçük şerit; sayfa başında role göre "size düşen işler" ve 2+ gündür bekleyenler; ana sayfada
+  yöneticiye "N sipariş 2 günden uzun süredir aynı aşamada". Birimler arası telefon bildirimi: yeni sipariş → muhasebe,
+  fatura kesildi → depo / lojistik, yola çıktı / teslim edildi → satışçı, iptal → hepsi. (`cf-ordertrack-module`)
 - **İstihbarat geliştirmeleri:** takipteki fırsat toplamı (tahmini değerlerden) ve dönüşüm oranı; 30 gündür görüşülmeyen
   takipteki müşteriler "💤 sessiz" (filtre ve ana sayfa uyarısı); "Kaçan" filtresinde "Neden kaybediyoruz?" ve kaybedilen
   rakipler; ayrıntı kartında kayıp nedeni / rakip ve "📅 Demo / ziyaret planla" (takvime hazır plan).
@@ -360,7 +368,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-19.45">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-19.46">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma

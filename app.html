@@ -1,4 +1,4 @@
-<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-19.45"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
+<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-19.46"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
 #prPrintRoot.cf-pdf-capture{display:block!important;visibility:visible!important;position:fixed!important;left:-12000px!important;top:0!important;right:auto!important;bottom:auto!important;width:210mm!important;padding:0!important;margin:0!important;max-height:none!important;overflow:visible!important;background:white!important;z-index:-1!important}#prPrintRoot.cf-pdf-capture .pr-page{margin:0!important;box-shadow:none!important;zoom:1!important;transform:none!important}
 html.cf-native-pdf-route #authGate{display:none!important}html.cf-native-pdf-route body{padding:0!important;margin:0!important;background:#f6f8fc!important}html.cf-native-pdf-route body>*:not(.auth-shell):not(#cfPdfRouteStatus):not(#prPrintRoot):not(script):not(style):not(iframe):not(.html2canvas-container):not([style*="visibility: hidden"]){display:none!important}#cfPdfRouteStatus{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:#f6f8fc;color:#193450;font:16px system-ui;padding:24px;text-align:center}#cfPdfRouteStatus h1{font-size:22px;margin:0}#cfPdfRouteStatus button,#cfPdfRouteStatus a{font:14px system-ui;padding:12px 18px;background:white;border:1px solid #d9e4f2;border-radius:9px;color:#075cc5;text-decoration:none;cursor:pointer}
 }
@@ -8724,7 +8724,7 @@ async function load(){const c=currentCompanyId,u=currentUser.id,t=today(),M=mgr(
   const [offers,pfs,orders,services,crm,events,stock,approvals,requests,maint,audit]=await Promise.all([
     M&&can('archive')?q(sb.from('sales_offers').select('id,offer_number,status,created_at,created_by,payload->>grand_total,payload->>currency,payload->>customer_name').eq('company_id',c).order('created_at',{ascending:false}).limit(400)):[],
     can('archive')||can('new')?q(sb.from('proformas').select('id,proforma_number,customer_name,approval_state,grand_total,currency,created_at,approval_requested_at,approval_requested_by,prepared_by,updated_at').eq('company_id',c).is('deleted_at',null).order('created_at',{ascending:false}).limit(500)):[],
-    q(sb.from('operation_orders').select('id,order_number,customer_name,proforma_id,shipment_status,grand_total,currency,created_at,updated_at,updated_by,created_by,shipped_date,delivered_date,cargo_company').eq('company_id',c).is('cancelled_at',null).order('updated_at',{ascending:false}).limit(400)),
+    q(sb.from('operation_orders').select('id,order_number,customer_name,proforma_id,shipment_status,finance_status,warehouse_status,grand_total,currency,created_at,updated_at,updated_by,created_by,shipped_date,delivered_date,cargo_company').eq('company_id',c).is('cancelled_at',null).order('updated_at',{ascending:false}).limit(400)),
     can('service')?q((()=>{let s=sb.from('technical_service_records').select('id,service_number,customer_name,device_name,status,follow_up_date,received_date,assigned_user_id,updated_at,created_at').eq('company_id',c).order('updated_at',{ascending:false}).limit(300);if(!M)s=s.eq('assigned_user_id',u);return s})()):[],
     can('crm')?q((()=>{let s=sb.from('customer_interactions').select('id,company_name,contact_name,phone,next_follow_up,reminder_date,status,assigned_user_id,interaction_date').eq('company_id',c).is('deleted_at',null).eq('status','gorusuluyor').order('interaction_date',{ascending:false}).limit(600);if(!M)s=s.or('assigned_user_id.eq.'+u+',created_by.eq.'+u);return s})()):[],
     q(sb.from('calendar_events').select('*').eq('company_id',c).gte('event_date',addDays(t,-30)).lte('event_date',addDays(t,1)).order('event_date').order('start_time',{nullsFirst:true}).limit(800)),
@@ -8750,6 +8750,9 @@ function todo(d){const L=[];const {t,u,M}=d;const respOf=(e,uid)=>d.responses.fi
   if(d.requests?.length)L.push({c:'#0ea5e9',ic:'🗂',n:d.requests.length,t:d.requests.length+' talep kararınızı bekliyor',s:d.requests.slice(0,3).map(x=>(x.title||'Talep')+(x.requester_label?' · '+x.requester_label:'')).join(', '),go:()=>window.openRequests?.()});
   const crmLate=(()=>{/* kişi başına yalnızca son görüşme */const m=new Map();for(const x of d.crm){const k=String(x.phone||'').replace(/\D/g,'').slice(-10)||((x.contact_name||'')+'|'+(x.company_name||'')).toLocaleLowerCase('tr-TR');const p=m.get(k);if(!p||String(x.interaction_date||'')>String(p.interaction_date||''))m.set(k,x)}return [...m.values()].filter(x=>x.next_follow_up&&String(x.next_follow_up).slice(0,10)<t)})();if(crmLate.length)L.push({c:'#a855f7',ic:'☎',n:crmLate.length,t:crmLate.length+' görüşmenin takip günü geçti',s:crmLate.slice(0,3).map(x=>x.company_name||x.contact_name).join(', '),go:()=>appNavigate('crm')});
   const svLate=d.services.filter(x=>['waiting','following'].includes(x.status)&&x.follow_up_date&&String(x.follow_up_date).slice(0,10)<t);if(svLate.length)L.push({c:'#f59e0b',ic:'🔧',n:svLate.length,t:svLate.length+' servis kaydının takip günü geçti',s:svLate.slice(0,3).map(x=>(x.service_number||'')+' · '+(x.customer_name||'')).join(', '),go:()=>appNavigate('service')});
+  /* 2 günden uzun süredir aynı aşamada bekleyen siparişler (yönetici) */
+  if(d.M){const two=Date.now()-2*864e5;const st=o=>o.finance_status!=='issued'&&!['shipped','delivered'].includes(o.shipment_status)?'muhasebede':o.warehouse_status!=='packed'&&!['shipped','delivered'].includes(o.shipment_status)?'depoda':!['shipped','partial','delivered'].includes(o.shipment_status)?'sevkiyat bekliyor':'';const stuck=d.orders.filter(o=>o.shipment_status!=='delivered'&&st(o)&&Date.parse(o.updated_at||o.created_at)<two);
+   if(stuck.length)L.push({c:'#ea580c',ic:'🚚',n:stuck.length,t:stuck.length+' sipariş 2 günden uzun süredir aynı aşamada',s:stuck.slice(0,3).map(o=>(o.order_number||'')+' · '+st(o)).join(', '),go:()=>appNavigate('orders')})}
   /* 30 gündür görüşülmeyen takipteki müşteriler */
   {const last=new Map();for(const x of d.crm){const k=String(x.phone||'').replace(/\D/g,'').slice(-10)||((x.contact_name||'')+'|'+(x.company_name||'')).toLocaleLowerCase('tr-TR');const p=last.get(k);if(!p||String(x.interaction_date||'')>String(p.interaction_date||''))last.set(k,x)}
    const lcx=v=>String(v||'').trim().toLocaleLowerCase('tr-TR');const won=new Set([...(d.pfs||[]).filter(p=>p.approval_state==='approved').map(p=>lcx(p.customer_name)),...(d.offers||[]).filter(o=>o.status==='converted').map(o=>lcx(o.customer_name))]);
@@ -10845,6 +10848,169 @@ if(typeof saveInteraction==='function'){const base=saveInteraction;saveInteracti
   return res}}
 let t=0;new MutationObserver(()=>{if(!t)t=setTimeout(()=>{t=0;probe();if($('crmForm')?.classList.contains('open'))build()},300)}).observe(document.body,{childList:true,subtree:true});setTimeout(probe,1200);
 window.cfCrmExtraInfo={get enabled(){return enabled}};
+})();</script>
+<!-- ==========================================================================
+     CepFirma — Sipariş takip çizgisi (teklif → teslim)
+     ●━━●━━●━━◉┄┄○┄┄○  kargo takibi gibi:
+       Teklif verildi → Teklif kabul edildi → Proforma onaylandı → Müşteri onayı · muhasebeye sevk →
+       Fatura kesildi → Depoda hazır → Yolda → Teslim edildi
+     * Sipariş ayrıntısında büyük takip çizgisi: her adımda tarih, saat, işi yapan; şu anki adım yanıp söner,
+       "Muhasebede 2 gündür bekliyor" gibi; adıma dokununca ayrıntı (fatura no ve PDF, seri no, kargo / takip no,
+       teslim alan, irsaliye).
+     * Siparişler listesinde her kartta küçük takip şeridi; sayfa başında role göre "size düşen işler" ve
+       2 günden uzun bekleyenler (muhasebe → fatura, depo / lojistik → hazırlık ve sevkiyat, yönetici → hepsi).
+     * Birimler arası telefon bildirimi: aşama değişince ilgili birime (cepfirma-push, action: order_events).
+     * Bildirime dokununca sipariş açılır (/app.html?order=…).
+     Aşama saatleri ve bildirim için veritabani/2026-11-19-siparis-takip.sql çalıştırılmalıdır; SQL olmadan
+     çizgi sipariş alanlarındaki tarihlerle çizilir.
+     Kaldırmak için id değeri cf-ordertrack-style olan stil ve cf-ordertrack-module olan
+     betik bloklarını silmeniz yeterlidir.
+     ========================================================================== -->
+<style id="cf-ordertrack-style">
+@keyframes cfotPulse{0%{box-shadow:0 0 0 0 rgba(37,99,235,.55)}70%{box-shadow:0 0 0 10px rgba(37,99,235,0)}100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}}
+.cfot{border:1px solid var(--mt-border,#e4e4e7);border-radius:14px;padding:16px 14px 10px;background:var(--mt-panel,#fff);margin:0 0 14px}
+.cfot-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin:0 0 14px}
+.cfot-head h3{margin:0;font-size:15px}
+.cfot-now{font-size:12.5px;padding:3px 10px;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-weight:600}
+.cfot-now.late{background:#fee2e2;color:#b91c1c}.cfot-now.done{background:#dcfce7;color:#15803d}.cfot-now.cancel{background:#fee2e2;color:#b91c1c}
+.cfot-steps{display:grid;grid-template-columns:repeat(var(--n,8),minmax(0,1fr));position:relative}
+.cfot-step{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 4px;cursor:pointer;border:0;background:none;font:inherit;color:inherit}
+.cfot-step::before{content:"";position:absolute;top:10px;left:-50%;right:50%;height:3px;background:var(--cfot-l,#e4e4e7);z-index:0}
+.cfot-step:first-child::before{display:none}
+.cfot-step.done::before,.cfot-step.cur::before{background:#16a34a}
+.cfot-step.cur::before{background:linear-gradient(90deg,#16a34a,#2563eb)}
+.cfot-step.todo::before{background:repeating-linear-gradient(90deg,#d4d4d8 0 6px,transparent 6px 11px)}
+.cfot-dot{position:relative;z-index:1;width:23px;height:23px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:#fff;border:3px solid #d4d4d8;color:#a1a1aa}
+.cfot-step.done .cfot-dot{background:#16a34a;border-color:#16a34a;color:#fff}
+.cfot-step.cur .cfot-dot{background:#2563eb;border-color:#2563eb;color:#fff;animation:cfotPulse 1.6s infinite}
+.cfot-step.cur.late .cfot-dot{background:#dc2626;border-color:#dc2626}
+.cfot-step.cancel .cfot-dot{background:#dc2626;border-color:#dc2626;color:#fff}
+.cfot-step b{display:block;font-size:12px;font-weight:600;margin-top:7px;line-height:1.25}
+.cfot-step small{display:block;font-size:11px;color:var(--mt-ink-3,#71717a);margin-top:2px;line-height:1.3}
+.cfot-step.cur small.w{color:#1d4ed8;font-weight:600}.cfot-step.cur.late small.w{color:#b91c1c}
+.cfot-step[aria-expanded="true"] b{color:#1d4ed8}
+.cfot-det{margin:12px 2px 2px;padding:10px 12px;border-radius:10px;background:var(--mt-sunken,#f8fafc);font-size:13px;display:grid;gap:4px}
+.cfot-det[hidden]{display:none}
+.cfot-det b{font-weight:600}
+.cfot-det .row{display:flex;flex-wrap:wrap;gap:4px 14px}
+.cfot-det button{border:0;background:none;padding:0;color:#2563eb;font:inherit;font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+@media(prefers-reduced-motion:reduce){.cfot-step.cur .cfot-dot{animation:none}}
+@media(max-width:700px){
+  .cfot-steps{grid-template-columns:1fr}
+  .cfot-step{flex-direction:row;align-items:flex-start;text-align:left;gap:10px;padding:0 0 14px}
+  .cfot-step::before{top:-14px;bottom:auto;left:10px;right:auto;width:3px;height:calc(100% );}
+  .cfot-step:first-child::before{display:none}
+  .cfot-step.todo::before{background:repeating-linear-gradient(180deg,#d4d4d8 0 6px,transparent 6px 11px)}
+  .cfot-step.cur::before{background:linear-gradient(180deg,#16a34a,#2563eb)}
+  .cfot-step b{margin-top:2px}
+}
+/* liste: küçük şerit */
+.cfot-mini{display:flex;align-items:center;gap:0;margin-top:8px}
+.cfot-mini i{width:9px;height:9px;border-radius:50%;background:#d4d4d8;flex:none}
+.cfot-mini i.d{background:#16a34a}.cfot-mini i.c{background:#2563eb;box-shadow:0 0 0 3px #dbeafe}.cfot-mini i.c.l{background:#dc2626;box-shadow:0 0 0 3px #fee2e2}.cfot-mini i.x{background:#dc2626}
+.cfot-mini span{flex:1 1 auto;height:2px;background:#d4d4d8;min-width:6px;max-width:26px}
+.cfot-mini span.d{background:#16a34a}
+.cfot-mini em{font-style:normal;font-size:11.5px;color:var(--mt-ink-3,#71717a);margin-left:8px;white-space:nowrap}
+.cfot-mini em.l{color:#b91c1c;font-weight:600}
+/* sayfa başı: size düşen işler */
+.cfot-todo{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.cfot-todo button{display:flex;align-items:center;gap:8px;border:1px solid var(--mt-border,#e4e4e7);background:var(--mt-panel,#fff);border-radius:12px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer;color:inherit;text-align:left}
+.cfot-todo button b{font-size:18px}
+.cfot-todo button.late{border-color:#fecaca;background:#fef2f2}
+.cfot-todo button.late small{color:#b91c1c;font-weight:600}
+.cfot-todo small{display:block;font-size:11.5px;color:var(--mt-ink-3,#71717a)}
+</style>
+<script id="cf-ordertrack-module">(function(){'use strict';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const company=()=>(typeof currentCompanyId!=='undefined'&&currentCompanyId)||'';
+const me=()=>(typeof currentUser!=='undefined'&&currentUser?.id)||'';
+const role=()=>(typeof currentMembership!=='undefined'&&currentMembership?.role)||'';
+const LATE_DAYS=2;
+const fmtT=v=>{if(!v)return '';const s=String(v);const d=new Date(s.length<=10?s+'T12:00:00':s);if(isNaN(d))return '';return d.toLocaleDateString('tr-TR',{day:'numeric',month:'short'})+(s.length>10?' '+d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}):'')};
+const ageDays=v=>{if(!v)return null;const s=String(v);const d=new Date(s.length<=10?s+'T12:00:00':s);return isNaN(d)?null:Math.floor((Date.now()-d)/864e5)};
+const ageTxt=n=>n==null?'':n<=0?'bugünden beri':n+' gündür';
+let evOk=null,people=new Map();
+async function loadPeople(){if(people.size)return;try{const l=window.cfPeople?await window.cfPeople():[];people=new Map(l.map(p=>[String(p.id),p.name]))}catch(_){}}
+const who=id=>id?(people.get(String(id))||''):'';
+async function events(ids){if(evOk===false||!ids.length)return [];const {data,error}=await sb.from('operation_order_events').select('order_id,kind,old_value,new_value,actor,created_at').eq('company_id',company()).in('order_id',ids).order('created_at').limit(2000);if(error){evOk=false;return []}evOk=true;return data||[]}
+const lastEv=(evs,kind,val)=>[...evs].reverse().find(e=>e.kind===kind&&(val==null||e.new_value===val))||null;
+
+/* ---------- adımlar ---------- */
+function build(o,ctx){const ev=ctx.events||[];const off=ctx.offer,pf=ctx.pf,docs=ctx.docs||[];const S=[];
+  const shipDone=['shipped','delivered'].includes(o.shipment_status);
+  if(off){S.push({k:'offer',l:'Teklif verildi',owner:'Satış',done:true,t:off.created_at,by:off.created_by,det:[['Teklif',off.offer_number+(off.revision>1?' · revizyon '+off.revision:'')]]});
+    S.push({k:'accept',l:'Teklif kabul edildi',owner:'Satış',done:!!(off.accepted_at||off.status==='converted'||pf),t:off.accepted_at,by:off.accepted_by,det:off.acceptance_note?[['Not',off.acceptance_note]]:[]})}
+  else S.push({k:'pf0',l:'Proforma hazırlandı',owner:'Satış',done:true,t:pf?.created_at,by:pf?.prepared_by&&/^[0-9a-f-]{36}$/i.test(pf.prepared_by)?pf.prepared_by:null});
+  S.push({k:'pf',l:'Proforma onaylandı',owner:'Yönetici',done:true,t:pf?.approved_at,by:pf?.approved_by,det:[['Proforma',o.proforma_number||pf?.proforma_number||'']]});
+  S.push({k:'order',l:'Müşteri onayı · muhasebeye sevk',owner:'Satış',done:true,t:o.customer_confirmed_at||o.created_at,by:o.created_by,det:[['Sipariş',o.order_number],['Teslimat',[o.delivery_contact,o.delivery_phone].filter(Boolean).join(' · ')]]});
+  const fe=lastEv(ev,'finance','issued');const invDocs=docs.filter(d=>d.kind==='invoice');
+  S.push({k:'inv',l:'Fatura kesildi',owner:'Muhasebe',done:o.finance_status==='issued'||shipDone,prog:o.finance_status==='preparing'?'Fatura hazırlanıyor':'',t:fe?.created_at||o.invoice_date,by:fe?.actor,det:[['Fatura no',o.invoice_number],['Fatura tarihi',o.invoice_date?fmtT(o.invoice_date):''],['Not',o.finance_note]],docs:invDocs});
+  const we=lastEv(ev,'warehouse','packed');const dispDocs=docs.filter(d=>d.kind!=='invoice');
+  S.push({k:'wh',l:'Depoda hazır',owner:'Depo / lojistik',done:o.warehouse_status==='packed'||shipDone,prog:o.warehouse_status==='allocated'?'Ürünler ayrıldı':'',t:we?.created_at,by:we?.actor,det:[['Seri numaraları',o.serial_numbers],['Not',o.warehouse_note]],docs:dispDocs});
+  const se=lastEv(ev,'shipment','shipped');const M={cargo:'Kargo',vehicle:'Şirket aracı',pickup:'Müşteri teslim alacak'};
+  S.push({k:'ship',l:'Yolda',owner:'Depo / lojistik',done:shipDone,prog:o.shipment_status==='planned'?('Planlandı'+(o.planned_date?' · '+fmtT(o.planned_date):'')):o.shipment_status==='partial'?'Kısmi sevkiyat':'',t:se?.created_at||o.shipped_date,by:se?.actor,det:[['Gönderim',M[o.shipment_method]||''],['Kargo',o.cargo_company],['Takip no',o.tracking_number],['Araç',o.vehicle_plate],['Teslim eden',o.delivery_person],['İrsaliye',[o.dispatch_number,o.dispatch_date?fmtT(o.dispatch_date):''].filter(Boolean).join(' · ')]]});
+  const de=lastEv(ev,'shipment','delivered');
+  S.push({k:'del',l:'Teslim edildi',owner:'Depo / lojistik',done:o.shipment_status==='delivered',t:de?.created_at||o.delivered_date,by:de?.actor,det:[['Teslim alan',o.received_by],['Not',o.shipment_note]]});
+  const WAIT={accept:'Teklif kabulü bekleniyor',pf:'Proforma onayı bekleniyor',inv:'Fatura bekleniyor',wh:'Depo hazırlığı bekleniyor',ship:'Sevkiyat bekleniyor',del:'Teslim bekleniyor'};S.forEach(s=>s.wait=WAIT[s.k]||s.l);
+  const cur=o.cancelled_at?-1:S.findIndex(s=>!s.done);
+  /* şu anki adımın başladığı an: önceki tamamlanan adımın zamanı */
+  let since=null;if(cur>0){for(let i=cur-1;i>=0;i--){if(S[i].t){since=S[i].t;break}}}
+  return {S,cur,since,cancelled:!!o.cancelled_at}}
+
+/* ---------- büyük takip çizgisi ---------- */
+let detTok=0;
+async function paintDetail(){const o=typeof opsDetail!=='undefined'?opsDetail:null;const body=$('opsModalBody');if(!o||!body)return;const t=++detTok;
+  let box=$('cfotBox');if(!box){box=document.createElement('section');box.id='cfotBox';box.className='cfot';body.prepend(box)}box.innerHTML='<div class="cfot-head"><h3>Sipariş takibi</h3><span class="cfot-now">Yükleniyor…</span></div>';
+  const [offR,pfR,evs,docR]=await Promise.all([o.proforma_id?sb.from('sales_offers').select('id,offer_number,revision,status,created_at,created_by,accepted_at,accepted_by,acceptance_note').eq('company_id',company()).eq('proforma_id',o.proforma_id).order('created_at',{ascending:false}).limit(1):{data:[]},o.proforma_id?sb.from('proformas').select('id,proforma_number,created_at,prepared_by,approved_at,approved_by').eq('id',o.proforma_id).maybeSingle():{data:null},events([o.id]),sb.from('operation_documents').select('id,kind,file_name,state,ready_at,created_at,shipment_id').eq('company_id',company()).eq('order_id',o.id).eq('state','ready').order('created_at'),loadPeople()]);
+  if(t!==detTok||!box.isConnected||opsDetail?.id!==o.id)return;
+  const ctx={offer:offR?.data?.[0]||null,pf:pfR?.data||null,events:evs,docs:docR?.data||[]};const {S,cur,since,cancelled}=build(o,ctx);
+  const age=ageDays(since);const late=cur>=0&&age!=null&&age>=LATE_DAYS;
+  const nowTxt=cancelled?'İptal edildi'+(o.cancel_reason?' · '+o.cancel_reason:''):cur<0?'Teslim edildi ✓':(S[cur].owner+' · '+S[cur].wait.toLocaleLowerCase('tr-TR')+(age!=null?' · '+ageTxt(age):''));
+  box.innerHTML='<div class="cfot-head"><h3>Sipariş takibi</h3><span class="cfot-now '+(cancelled?'cancel':cur<0?'done':late?'late':'')+'">'+esc(nowTxt)+'</span>'+(evOk===false?'<small style="color:#71717a">Aşama saatleri için siparis-takip.sql çalıştırılmalı.</small>':'')+'</div>'
+   +'<div class="cfot-steps" style="--n:'+S.length+'">'+S.map((s,i)=>{const cls=cancelled&&(i===S.findIndex(x=>!x.done)||(S.every(x=>x.done)&&i===S.length-1))?'cancel':s.done?'done':i===cur?'cur'+(late?' late':''):'todo';const byN=who(s.by);
+      const sub=s.done?[fmtT(s.t),byN].filter(Boolean).join(' · '):i===cur?(s.prog||(s.owner+' bekliyor')):s.owner;
+      return '<button type="button" class="cfot-step '+cls+'" data-i="'+i+'" aria-expanded="false"><span class="cfot-dot">'+(s.done?'✓':cls==='cancel'?'✕':i+1)+'</span><span><b>'+esc(s.l)+'</b><small>'+esc(sub)+'</small>'+(i===cur&&!cancelled&&age!=null?'<small class="w">'+esc(ageTxt(age))+' bekliyor</small>':'')+'</span></button>'}).join('')+'</div><div class="cfot-det" id="cfotDet" hidden></div>';
+  box.querySelectorAll('.cfot-step').forEach(b=>b.onclick=()=>{const i=Number(b.dataset.i),s=S[i],det=$('cfotDet');const open=b.getAttribute('aria-expanded')==='true';box.querySelectorAll('.cfot-step').forEach(x=>x.setAttribute('aria-expanded','false'));if(open){det.hidden=true;return}b.setAttribute('aria-expanded','true');
+    const rows=(s.det||[]).filter(([,v])=>v);det.innerHTML='<div class="row"><b>'+esc(s.l)+'</b><span>'+esc(s.owner)+'</span>'+(s.t?'<span>'+esc(fmtT(s.t))+'</span>':'')+(who(s.by)?'<span>👤 '+esc(who(s.by))+'</span>':'')+'</div>'+(rows.length?rows.map(([k,v])=>'<div><small style="color:#71717a">'+esc(k)+':</small> '+esc(v)+'</div>').join(''):(s.done?'':'<div style="color:#71717a">'+(i===cur?'Bu adım bekleniyor.':'Henüz bu adıma gelinmedi.')+'</div>'))+(s.docs?.length?'<div class="row">'+s.docs.map(d=>'<button type="button" data-doc="'+d.id+'">📄 '+esc(d.file_name||'Belge')+'</button>').join('')+'</div>':'');
+    det.hidden=false;det.querySelectorAll('[data-doc]').forEach(x=>x.onclick=()=>{const orig=document.querySelector('[data-p2-download="'+x.dataset.doc+'"]');if(orig)orig.click();else alert('Belge, sipariş ayrıntısındaki fatura / irsaliye bölümünden indirilebilir.')})})}
+if(typeof renderOperationDetail==='function'){const base=renderOperationDetail;renderOperationDetail=function(){const r=base.apply(this,arguments);try{paintDetail();notifySoon()}catch(_){}return r}}
+
+/* ---------- liste: küçük şerit ve size düşen işler ---------- */
+let listTok=0;
+async function paintList(){const list=$('opsList');if(!list)return;const ids=[...list.querySelectorAll('[data-ops-id]')].map(b=>Number(b.dataset.opsId)).filter(Boolean);if(!ids.length)return;const t=++listTok;
+  const [or,evs]=await Promise.all([sb.from('operation_orders').select('id,finance_status,warehouse_status,shipment_status,cancelled_at,created_at,customer_confirmed_at,invoice_date,shipped_date,delivered_date,updated_at,proforma_id').eq('company_id',company()).in('id',ids),events(ids)]);if(t!==listTok)return;
+  for(const o of or.data||[]){const card=list.querySelector('[data-ops-id="'+o.id+'"]')?.closest('.ops-card');if(!card)continue;const {S,cur,since,cancelled}=build(o,{offer:null,pf:{created_at:o.created_at,approved_at:null},events:evs.filter(e=>e.order_id===o.id),docs:[]});
+    const age=ageDays(since||o.updated_at);const late=cur>=0&&age!=null&&age>=LATE_DAYS;
+    const html=S.map((s,i)=>(i?'<span class="'+(s.done?'d':'')+'"></span>':'')+'<i class="'+(cancelled&&i===S.findIndex(x=>!x.done)?'x':s.done?'d':i===cur?'c'+(late?' l':''):'')+'" title="'+esc(s.l)+'"></i>').join('')+'<em class="'+(late?'l':'')+'">'+esc(cancelled?'İptal':cur<0?'Teslim edildi':S[cur].wait+(age!=null?' · '+ageTxt(age):''))+'</em>';
+    let m=card.querySelector('.cfot-mini');if(!m){m=document.createElement('div');m.className='cfot-mini';(card.querySelector('.ops-pills')||card.firstElementChild).after(m)}if(m.innerHTML!==html)m.innerHTML=html}}
+if(typeof loadOperationOrders==='function'){const base=loadOperationOrders;loadOperationOrders=async function(){const r=await base.apply(this,arguments);try{paintList();paintTodo()}catch(_){}return r}}
+let todoTok=0;
+async function paintTodo(){const page=$('opsList')?.parentElement;if(!page)return;const t=++todoTok;
+  const {data}=await sb.from('operation_orders').select('id,finance_status,warehouse_status,shipment_status,cancelled_at,created_at,customer_confirmed_at,invoice_date,shipped_date,updated_at,created_by').eq('company_id',company()).is('cancelled_at',null).neq('shipment_status','delivered').limit(500);if(t!==todoTok)return;
+  const rows=data||[];const evs=await events(rows.map(r=>r.id));const r0=role();const mine=['owner','admin','manager'].includes(r0)?null:r0==='accounting'?['finance']:r0==='logistics'?['warehouse','shipment','transit']:['finance','warehouse','shipment','transit'];
+  const own=r0==='sales'||r0==='service'?rows.filter(o=>o.created_by===me()):rows;
+  const stage=o=>o.finance_status!=='issued'&&!['shipped','delivered'].includes(o.shipment_status)?'finance':o.warehouse_status!=='packed'&&!['shipped','delivered'].includes(o.shipment_status)?'warehouse':!['shipped','partial','delivered'].includes(o.shipment_status)?'shipment':'transit';
+  const entered=o=>{const e=evs.filter(x=>x.order_id===o.id);const st=stage(o);const f=st==='finance'?(o.customer_confirmed_at||o.created_at):st==='warehouse'?(lastEv(e,'finance','issued')?.created_at||o.invoice_date||o.updated_at):st==='shipment'?(lastEv(e,'warehouse','packed')?.created_at||o.updated_at):(lastEv(e,'shipment','shipped')?.created_at||o.shipped_date||o.updated_at);return f};
+  const L={finance:['Fatura bekleyen','finance'],warehouse:['Depo hazırlığı bekleyen','warehouse'],shipment:['Sevkiyat bekleyen','shipment'],transit:['Yolda','transit']};
+  const groups={};own.forEach(o=>{const s=stage(o);if(mine&&!mine.includes(s))return;(groups[s]=groups[s]||[]).push(o)});
+  let box=$('cfotTodo');if(!box){box=document.createElement('div');box.id='cfotTodo';box.className='cfot-todo';const anchor=$('opsCounts')||page.querySelector('.ops-filters');anchor?anchor.after(box):page.prepend(box)}
+  const keys=Object.keys(L).filter(k=>groups[k]?.length);if(!keys.length){box.innerHTML='';return}
+  box.innerHTML='<div style="width:100%;font-size:12.5px;font-weight:600;color:#52525b">'+(mine&&r0!=='sales'&&r0!=='service'?'Size düşen işler':'Siparişlerin durumu')+'</div>'+keys.map(k=>{const l=groups[k];const late=l.filter(o=>{const a=ageDays(entered(o));return a!=null&&a>=LATE_DAYS}).length;return '<button type="button" data-f="'+L[k][1]+'" class="'+(late&&k!=='transit'?'late':'')+'"><b>'+l.length+'</b><span>'+esc(L[k][0])+(late&&k!=='transit'?'<small>'+late+' tanesi '+LATE_DAYS+'+ gündür bekliyor</small>':'<small>&nbsp;</small>')+'</span></button>'}).join('');
+  box.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const f=$('opsFilter');if(f){f.value=b.dataset.f;f.dispatchEvent(new Event('change',{bubbles:true}));try{opsPage=0}catch(_){}loadOperationOrders()}})}
+
+/* ---------- birimler arası bildirim ---------- */
+let nTimer=0,nLast=0;
+function notifySoon(){clearTimeout(nTimer);nTimer=setTimeout(()=>{if(Date.now()-nLast<2500||evOk===false)return;nLast=Date.now();try{sb.functions.invoke('cepfirma-push',{body:{action:'order_events'}}).catch(()=>{})}catch(_){}},1500)}
+if(typeof saveOperationSection==='function'){const base=saveOperationSection;saveOperationSection=async function(){const r=await base.apply(this,arguments);notifySoon();return r}}
+
+/* ---------- bildirime dokununca sipariş ---------- */
+async function openOrder(id){try{await appNavigate('orders')}catch(_){}setTimeout(()=>{try{openOperationOrder(Number(id))}catch(_){}},400)}
+if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('message',e=>{if(e.data?.type==='cepfirma-open-order'&&/^\d{1,18}$/.test(String(e.data.order||''))&&me())openOrder(e.data.order)});
+(function(){const id=new URLSearchParams(location.search).get('order');if(!id||!/^\d{1,18}$/.test(id))return;let tries=0;const go=()=>{if(me()&&company()){const u=new URL(location.href);u.searchParams.delete('order');history.replaceState(null,'',u);setTimeout(()=>openOrder(id),900);return}if(++tries<600)setTimeout(go,1000)};setTimeout(go,800)})();
+/* liste başka yoldan yenilense de (Yenile, filtre, sayfa) şerit çizilsin */
+let lt=0,lastSig='';new MutationObserver(()=>{if(lt)return;lt=setTimeout(()=>{lt=0;const l=$('opsList');if(!l)return;const sig=[...l.querySelectorAll('[data-ops-id]')].map(b=>b.dataset.opsId).join(',');const need=[...l.querySelectorAll('.ops-card')].some(c=>!c.querySelector('.cfot-mini'));if(sig&&(sig!==lastSig||need)){lastSig=sig;paintList();paintTodo()}},300)}).observe(document.body,{childList:true,subtree:true});
+window.cfOrderTrack={build,paintDetail,paintList};
 })();</script>
 <!-- ==========================================================================
      CepFirma — Metis yazı ölçüleri
