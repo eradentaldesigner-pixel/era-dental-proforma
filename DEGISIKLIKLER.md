@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-18.19)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-19.37)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -24,6 +24,23 @@ bu dosyalar orada da birer kez çalıştırılmalıdır:
 7. `veritabani/2026-11-18-plan-yetki.sql` — **plan düzenleme yetkisi**: planı yalnızca oluşturan
    kişi ve şirket sahibi / yöneticisi değiştirir veya siler; atanan kişiler yalnızca "tamamlandı"
    durumunu ve seyahat hazırlık maddelerini işaretleyebilir (veritabanı tetikleyicisi).
+8. `veritabani/2026-11-18-gorev-yanit.sql` — **görev kabul / red** (`calendar_assignment_responses`) ve
+   planın **konum linki** (`calendar_events.location_url`); plan koruma kuralı konum linkini de kapsar.
+9. `veritabani/2026-11-18-gorev-tamamlama.sql` — görev yanıtlarına **"tamamlandı"** durumu (isteğe bağlı not).
+10. `veritabani/2026-11-18-servis-asama.sql` — Teknik Servis **aşamaları** (`technical_service_records.stage`) ve
+    aşama geçmişi (`technical_service_stage_log`). Mevcut kayıtlara dokunmaz.
+11. `veritabani/2026-11-19-servis-atama.sql` — Teknik Servis **teknisyen ataması ve kabul / red**
+    (`assigned_by`, `assignee_status`, `assignee_reason` sütunları, `cf_service_respond` fonksiyonu).
+12. `veritabani/2026-11-19-servis-sekli.sql` — Teknik Servis **servis şekli** (atölyede / yerinde / uzaktan
+    bağlantı), bağlantı aracı ve bağlantı ID'si. Mevcut kayıtlar "atölyede" sayılır.
+13. `veritabani/2026-11-19-servis-musteri.sql` — servis kaydının **kayıtlı müşteriye bağlantısı** (`customer_id`),
+    seri numarası dizini; adı tek ve tam eşleşen mevcut kayıtlar müşteriye bağlanır.
+14. `veritabani/2026-11-19-servis-ucret.sql` — Teknik Servis **ücret** (işçilik, parça, KDV, para birimi),
+    **müşteri onayı** (durum, not, zaman) ve **ödeme** (durum, tarih).
+15. `veritabani/2026-11-19-servis-parca.sql` — Teknik Servis **stoktan parça kullanımı** (`technical_service_parts`,
+    `cf_service_use_part`, `cf_service_return_part`): stoktan düşer / geri ekler ve stok hareketi yazar.
+16. `veritabani/2026-11-19-servis-imza.sql` — Teknik Servis **dijital teslim imzası** (`delivery_signature`,
+    `delivery_signed_by`, `delivery_signed_at`; `cf_service_sign` fonksiyonu).
 
 ## Görünüm
 
@@ -90,6 +107,78 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Geliştirilen sayfalar
 
+- **Teknik Servis — QR cihaz etiketi ve teslim imzası:** formda ve ayrıntıda "🏷 Etiket": servis no, müşteri, cihaz,
+  seri no, kabul tarihi ve QR; 62×29 / 50×30 mm etiket yazıcısı veya A4. QR telefon kamerasıyla ya da uygulamadaki
+  QR okuyucuyla okutulunca servis kaydı açılır. "✍ Müşteri imzası al": teslim alan adı + parmakla / kalemle imza;
+  imza, ad ve zaman servis formu çıktısındaki "Müşteri / Teslim Alan" bölümüne basılır. (`cf-svclabel-module`)
+- **Teknik Servis — stoktan parça:** formda "Stoktan kullanılan parçalar": parça adı / koduyla seçilip adet girilir,
+  onaydan sonra stoktan düşer ve stok hareketlerine "TS-… servisinde kullanıldı" yazılır; stok yetersizse eklenmez.
+  "Stoğa geri al" ile iade. Servis parçaları önce listelenir; işaretsiz ürünleri yalnızca yönetici kullanabilir.
+  Parça toplamı (liste fiyatı) "Parça" ücretine aktarılabilir; servis formu çıktısında parçalar listelenir.
+  (`cf-svcparts-module`)
+- **Teknik Servis — ücret, müşteri onayı ve ödeme:** formda "Ücret ve Müşteri Onayı" bölümü (işçilik + parça,
+  KDV, TL / € / $, anlık toplam; onay: gerekmez / bekleniyor / onaylandı / reddedildi + not; ödeme: ücretsiz /
+  ödenmedi / ödendi). Garanti kapsamında → onay gerekmez, ücretsiz. Onay gelince aşama "Onarımda"ya geçer; garanti
+  dışı işte onaysız onarıma / teslime geçerken uyarır. WhatsApp "Onay isteği"ne tahmini tutar, "Cihaz hazır"a
+  ödenecek tutar eklenir. Listede "Onay bekliyor" / "Ödenmedi", ayrıntıda ücret özeti, filtrede "Ödemesi bekleyen",
+  servis formu çıktısında "Ücret ve müşteri onayı" bölümü. (`cf-svccost-module`)
+- **Teknik Servis — müşteri bağlantısı ve cihaz geçmişi:** "Kayıtlı müşteriden seç" kaydı müşteriye bağlar
+  (silinmiş müşteriler listede çıkmaz); ad elle yazılıp tek bir kayıtlı müşteriyle tam eşleşirse "Bu müşteriye bağla"
+  önerilir; bağlı kayıtta "Müşteri geçmişi" kısayolu. Müşteri geçmişi servisleri bağlantıdan da bulur. Aynı seri
+  numaralı cihazın önceki servisleri formda ve ayrıntı panelinde ("⚠ Bu cihaz daha önce N kez servise geldi"),
+  tıklayınca o kayıt açılır. (`cf-svccust-module`)
+- **Teknik Servis — uzaktan bağlantı ve yerinde servis:** formun başında "Servis şekli" (Cihaz servise geldi /
+  Yerinde / Uzaktan bağlantı). Uzaktan bağlantıda bağlantı aracı (AnyDesk, TeamViewer, RustDesk…) ve bağlantı ID'si
+  (şifre saklanmaz). Aşama adları şekle göre ("Talep alındı → Uzaktan inceleniyor → … → Çözüldü"), tarih alanı
+  "Talep / Çözüm tarihi", aksesuar alanı gizlenir. Listede "🖥 Uzaktan" / "📍 Yerinde" etiketi, filtrede servis şekli,
+  WhatsApp metinleri uzaktan / yerinde servise göre. Telefonda "Müşteriye mesaj" düğmesi simgeye küçüldü.
+  Servis formundaki durum rozeti aşama adını gösterir. (`cf-svcmode-module`)
+- **Teknik Servis — teknisyen ataması:** sorumlu hesap seçilip kaydedilince teknisyenin telefonuna bildirim
+  ("… size bir servis işi atadı · TS-… · müşteri · cihaz · ACİL"). Gelen İşler'in üstünde "Servis işlerim";
+  "Kabul et" / "Reddet (sebep)" → atayana bildirim, yanıt bekleyenler rozete eklenir. Servis listesinde ve ayrıntıda
+  teknisyenin yanıtı ve red sebebi. Teknisyen aşamayı "Hazır, teslim bekliyor" yapınca atayana bildirim. Bildirime
+  dokununca servis formu açılır. Supabase fonksiyonu `cepfirma-push` (action: service) ve `push-sw.js` güncellendi.
+  (`cf-svcassign-module`)
+- **Teknik Servis — müşteriye mesaj:** ayrıntıda ve formda "💬 Müşteriye mesaj": aşamaya göre hazır WhatsApp metni
+  (teslim alındı, onay isteği, parça bekleniyor, hazır, teslim edildi, yapılamadı…), düzenlenebilir, kopyalanabilir.
+- **Teknik Servis — aşamalar:** Teslim alındı → Arıza tespiti → Müşteri onayı bekleniyor → Parça bekleniyor →
+  Onarımda → Hazır, teslim bekliyor → Teslim edildi / Yapılamadı-iade. Aşama seçilince eski durum alanı otomatik
+  eşlenir (raporlar, ana sayfa sayıları bozulmaz). Özet kutuları ve filtre aşamalara göre; durum geçmişinde aşama
+  değişiklikleri ve kimin yaptığı. "Teslim edildi" seçilince teslim tarihi bugün olarak dolar.
+  Veritabanı: `veritabani/2026-11-18-servis-asama.sql`. (`cf-svcstage-module`)
+- **Teknik Servis — kaç gündür serviste:** listede, kartlarda ve ayrıntıda "N gündür serviste" (4–7 gün sarı,
+  7 günden fazla kırmızı), teslim edilenlerde "N günde". "7+ gündür serviste" kutusu ve filtresi; ana sayfada
+  "Benden beklenenler"e uzun bekleyen cihazlar düşer. Bu kısım SQL olmadan da çalışır.
+- **Ana sayfa sadeleşti:** yalnızca yarım kalan belge uyarısı ve iş akışı bölümleri kalır. Grafikler yalnızca
+  Raporlar > Analitik'te; Yaklaşan Planlar, Satış / Operasyon / Stok panelleri, Ekip durumu, Bugünün planım ve eski
+  "İşlerim" düğmesi kaldırıldı. Karar bekleyen talepler "Benden beklenenler"e, döviz kuru "Kısa özet"e taşındı.
+  "Ekip bugün"de planı olmayan kişi "🏢 Ofiste" görünür (varsa yarının planı altında); "+ Hızlı ziyaret" düğmesi.
+- **Ana sayfa — firmanın iş akışı:** (1) Benden beklenenler: onay bekleyen proformalar, reddedilen / 24 saattir
+  yanıtsız görevler, takip günü geçen görüşme ve servisler; (2) Satış akışı: Teklif → Proforma → Onay bekliyor →
+  Onaylandı → Sipariş → Sevkiyatta, adet ve tutar, geciken aşama sarı; (3) Ekip bugün: kimin hangi işte olduğu ve
+  görev durumu; (4) Son hareketler: son 3 günde firmada olanlar; (5) Kısa özet: bu ay proforma toplamı ve geçen
+  aya göre değişim, kritik stok, açık servis. Çalışanlar yalnızca kendi işlerini görür, tutarlar gizlenir.
+  Eski saat / hava, sayı kartları ve Öncelikli İşler gizlendi (blok: `cf-homeflow-module`).
+- **İşi tamamladım:** görevi kabul eden kişi kartta "✓ İşi tamamladım" der (isteğe bağlı not); plan takvimde
+  tamamlandı olur, işi atayana uygulama içi ve telefon bildirimi gider ("Görkem Köksel görevi tamamladı · … · Not: …").
+  Yanlışlıkla basılırsa "Tamamlanmadı, geri al". İşi atayan kartta "✓✓ işi tamamladı" ve notu görür; Gelen İşler'de
+  "Tamamladınız" etiketi. `cepfirma-push.ts` yeniden Deploy edilmeli.
+- **Hızlandırma:** sayfa 3,75 MB → 2,23 MB (sıkıştırılmış indirme ~1,24 MB → ~0,8 MB). Büyük bileşenler
+  `vendor/` klasörüne taşındı ve yalnızca gerektiğinde yüklenir: grafikler (ApexCharts), takvim (FullCalendar),
+  QR (qrcode-generator, jsQR), PDF (html2canvas, jsPDF). Sitedeki dosyaya ulaşılamazsa internet yedeği
+  kullanılır. **`vendor/` klasörü de GitHub'a (app.html'in yanına) yüklenmeli.**
+- **Mobil uygulama görünümü:** alt sekme çubuğu Ana Sayfa · Gelen İşler · Takvim · Mesajlar · Menü (okunmamış
+  sayıları ile; Teklifler menüde "Belgeler"). Telefonda tablolar kart görünümüne geçer (Müşteriler, Ürünler,
+  Servis, Ekip, Veri Kontrolü). Sohbet ekranı üst ve alt çubuk arasında tam ekran. Plan kartı ve QR penceresi
+  alttan açılan sayfa. iPhone alt çentiği için boşluk. 18 sayfa 375 px genişlikte taşmasız
+  (blok: `cf-mobile-module`).
+- **Görev kabul / red:** atanan kişi iş kartında "Kabul et" / "Reddet" seçer (red için sebep zorunlu,
+  yanıt sonradan değiştirilebilir). Yanıt işi atayana uygulama içinde ("Görkem görevi reddetti · … · Sebep: …")
+  ve telefona gider; bildirime dokununca plan açılır, başka birine atanabilir. İşi atayan kişi kartta ve plan
+  formunda herkesin yanıtını görür; Gelen İşler'de "Yanıt bekliyor / Kabul ettiniz / Reddettiniz" etiketi.
+- **Konum linki:** plan formunda "Konum linki" (Google Maps bağlantısı yapıştır veya "Adresten oluştur");
+  iş kartında "📍 Haritada aç" (link yoksa adresten "Haritada ara") (blok: `cf-respond-module`;
+  `cepfirma-push.ts` yeni `respond` işlemi ile yeniden Deploy edilmeli).
 - **Bildirimden doğrudan plan kartı:** atanan kişi bildirime dokununca takvim sayfası açılmadan, mesaj
   gibi bir kartta işi görür (ne, ne zaman, nerede, kimler, not, seyahat). Plana atanmış kişi yönetici olsa
   bile planı yalnızca oluşturan düzenler. Telefon bildirimi `app.html?plan=NO` ile doğrudan kartı açar
@@ -154,6 +243,32 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Hata düzeltmeleri
 
+- **Teknik Servis:** telefonda / dar ekranda kayda dokununca ayrıntıya kayar, "‹ Listeye dön" düğmesi eklendi
+  (önceden ayrıntı ekranın dışında açılıyordu). "Acil" kayıtlar listede, kartlarda ve ayrıntıda kırmızı rozetle
+  görünür. Kayıt numarası tek satır; arama, durum ve "Yenile" tek satırda; özet kutuları sıkılaştı.
+  Servis sorumlusu tek alan oldu: hesap seçilince ad otomatik dolar, hesabı olmayan biri için "Diğer (hesabı yok)".
+  Teknisyen adı boş ama hesap atanmış kayıtlarda listede hesabın adı gösterilir. (`cf-svcfix-module`)
+- **Talepler ve Onaylar:** menüde iki satıra taşan ad kısaldı ("Talepler"), menü yazıları tek satır, "Yeni" rozetleri
+  küçüldü (Gelen İşler'de kaldırıldı). Sayfada sıkışan filtre satırı (arama kutusu 26 px'e düşüyordu) düzenlendi:
+  arama tam genişlik, altında durum ve "Yenile". Seçili sekme belirgin, gereksiz boşluk ve çift çerçeve kaldırıldı.
+  Telefonda talebe dokununca ayrıntıya gider, "‹ Listeye dön" düğmesi (blok: `cf-reqfix-module`).
+- **Mobil alt çubuk yanlış sekmeyi gösteriyordu** (Talepler açıkken "Takvim"): artık açık sayfaya göre doğru sekme,
+  listede olmayan sayfalarda "Menü".
+- **Menü sürekli yeniden diziliyordu (pil / ısınma):** çalışma alanı yenilemesi, talepler modülünün başlığı her
+  seferinde silip kurması ve menü düzenleyicinin her şeyi baştan dizmesi birbirini tetikliyordu (boşta 5 saniyede
+  2.600+ değişiklik → ~100). Menüde iki kez görünen "Ekip" ve fazladan "EKİP VE TALEPLER" başlığı da düzeldi.
+- **Mobil Proformalar / Teklifler kartlarında işlem düğmeleri harf harf kırılıyordu** ("Ko-py-al-a"): düğme içeren
+  satırlarda etiket üstte, düğmeler tam genişlikte iki sütunlu düzende; düğme yazıları hiçbir yerde harf harf
+  bölünmez. Tüm sayfalar telefonda sıkışan yazı için tarandı.
+- **Telefon bildirimi plan kartını açmıyordu:** sitedeki `push-sw.js` sunucunun gönderdiği plan bağlantısını
+  yok sayıyordu. Güncellenen `push-sw.js` yalnızca `/app.html?plan=SAYI` biçimini kabul eder ve kartı açar
+  (uygulama açıksa `cepfirma-open-plan` mesajıyla). **`push-sw.js` de GitHub'a yüklenmeli.**
+- **Gereksiz sürekli işlem (pil):** mobil tablo kartları ve alt çubuk kendi değişikliklerini tekrar tetikliyordu;
+  boşta 6 saniyede 489 sayfa değişikliği → 84'e indi.
+- **Mobil hızlı belge:** "Yan yana" düğmesi telefonda görünüyordu, gizlendi.
+- **Mobil plan formu:** Kaydet düğmesi formun altında sabit; uzun formda aşağı kaydırmak gerekmez.
+- **Mobilde Mesajlar / Gelen İşler açılmıyordu:** sayfa açılıyor ama menü kapanmadığı için üstünde kalıyordu;
+  menüden açılan her sayfada menü artık kapanır.
 - **QR okut — kamera açılıyor ama okumuyordu:** kamera yüksek çözünürlük ve sürekli netlemeyle
   açılır; görüntünün ortası tam çözünürlükte taranır; tarayıcının kendi okuyucusu yalnızca QR'ı
   gerçekten destekliyorsa kullanılır, jsQR her zaman yedekte çalışır. Ek yollar: "Fotoğrafla okut"
@@ -192,7 +307,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-18.19">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-19.37">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
