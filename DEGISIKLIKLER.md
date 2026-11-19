@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-19.46)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-19.49)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -49,6 +49,8 @@ bu dosyalar orada da birer kez çalıştırılmalıdır:
 20. `veritabani/2026-11-19-gorusme-kayip-rakip.sql` — görüşmeye **kayıp nedeni** ve **rakip** (firma, fiyat / not) alanları.
 21. `veritabani/2026-11-19-siparis-takip.sql` — **sipariş aşama geçmişi** (`operation_order_events`): her aşama değişikliği,
     kim, ne zaman; birimler arası bildirim için.
+22. `veritabani/2026-11-19-firma-ek-bilgiler.sql` — firma **ticaret sicil no, KEP adresi, e-Fatura durumu** ve
+    **varsayılan teklif / proforma notu**.
 
 ## Görünüm
 
@@ -115,6 +117,12 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Geliştirilen sayfalar
 
+- **Ayarlar eklemeleri:** banka hesabı alanlarına başlıklar; Firma Profili'ne ticaret sicil no, KEP adresi,
+  e-Fatura durumu; Belge Varsayılanları'na "Varsayılan teklif / proforma notu" (yeni belgede Notlar alanı boşsa gelir);
+  Firma Bilgileri'nde "Ekip ve izinler" kısayolu. (`cf-setextra-module`)
+- **Ayarlar — Profilim ve Hesabım:** yeni "Profilim" sekmesi (ad soyad, profil fotoğrafı, bildirim tercihleri, hesap
+  güvenliği); çalışanlar için "Hesabım" ekranı. Ad soyad kaydedilince ekipte e-posta yerine ad görünür. Banka hesaplarında
+  IBAN anında denetlenir (TR, 26 karakter, kontrol hanesi) ve proformadaki biçimiyle gösterilir. (`cf-setfix-module`)
 - **Sipariş takip çizgisi (●━●━◉┄○):** teklif verildi → kabul → proforma onaylandı → müşteri onayı · muhasebeye sevk →
   fatura kesildi → depoda hazır → yolda → teslim edildi. Sipariş ayrıntısında büyük çizgi (tarih, saat, işi yapan; şu anki
   adım yanıp söner, "Muhasebede 3 gündür"); adıma dokununca fatura no / PDF, seri no, kargo / takip no, teslim alan.
@@ -295,6 +303,10 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Hata düzeltmeleri
 
+- **Ayarlar:** profil fotoğrafı ve bildirim kartı her sekmede tekrar ediyordu; "Kaşe ve İmza" sekmesi seçili kalıyordu
+  (iki sekme birden seçili); "Bildirimler" sekmesi boş ekran gösteriyordu; kaydedilecek şey olmayan sekmelerde de
+  "Ayarları Kaydet" çıkıyordu; ayar yetkisi olmayan çalışanlar sağ üstteki fotoğraflarına tıklayınca "yetkiniz yok"
+  uyarısı alıyordu; telefonda sekmeler 3 satır kaplıyor, kaydet çubuğu formun ortasında kalıyordu. Hepsi düzeltildi.
 - **Menü simgeleri bulanık / iç içe görünüyordu:** dolgulu simgelere eski çizgi simge kuralı uygulanıyordu; düzeltildi (`cf-iconfix-style`).
 - **Mesajlar açıkken Talepler açılmıyordu:** Talepler sayfası Mesajlar'ın arkasında açılıyordu; artık önceki sayfa kapanır.
   Mesajlar / Gelen İşler / Talepler ile diğer bütün menüler arasındaki geçişler denendi.
@@ -368,7 +380,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-19.46">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-19.49">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma

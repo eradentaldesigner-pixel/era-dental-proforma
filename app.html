@@ -1,4 +1,4 @@
-<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-19.46"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
+<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-19.49"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
 #prPrintRoot.cf-pdf-capture{display:block!important;visibility:visible!important;position:fixed!important;left:-12000px!important;top:0!important;right:auto!important;bottom:auto!important;width:210mm!important;padding:0!important;margin:0!important;max-height:none!important;overflow:visible!important;background:white!important;z-index:-1!important}#prPrintRoot.cf-pdf-capture .pr-page{margin:0!important;box-shadow:none!important;zoom:1!important;transform:none!important}
 html.cf-native-pdf-route #authGate{display:none!important}html.cf-native-pdf-route body{padding:0!important;margin:0!important;background:#f6f8fc!important}html.cf-native-pdf-route body>*:not(.auth-shell):not(#cfPdfRouteStatus):not(#prPrintRoot):not(script):not(style):not(iframe):not(.html2canvas-container):not([style*="visibility: hidden"]){display:none!important}#cfPdfRouteStatus{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:#f6f8fc;color:#193450;font:16px system-ui;padding:24px;text-align:center}#cfPdfRouteStatus h1{font-size:22px;margin:0}#cfPdfRouteStatus button,#cfPdfRouteStatus a{font:14px system-ui;padding:12px 18px;background:white;border:1px solid #d9e4f2;border-radius:9px;color:#075cc5;text-decoration:none;cursor:pointer}
 }
@@ -1629,7 +1629,7 @@ async function cfArchiveQuickAction(id,revision,action){return action==='submit'
 
 async function loadCompanySettings(){if(!currentUser||!currentCompanyId)return;let loaded;try{loaded=await cfCompanyLogos.load()}catch(e){console.error('Logo yüklenemedi',e);return}const {data,error}=loaded;if(error){console.error('Ayarlar yüklenemedi',error);return}if(!data)return;await cfPaymentDefaults.load(data);if(!currentUser||data.company_id!==currentCompanyId)return;window._companySettings=data;window._companyLogo=data.logo_data||'';const c=data.corporate_color||'#172033';document.getElementById('corpHex').value=c;document.getElementById('corpColor').value=c;document.documentElement.style.setProperty('--corp',c);document.documentElement.style.setProperty('--app-accent',data.accent_color||'#5B5BD6');document.getElementById('defaultCurrency').value=data.default_currency||'EUR';document.getElementById('defaultVat').value=data.default_vat??20;document.getElementById('defaultValidity').value=String(data.default_validity_days||7);document.getElementById('defaultDeliveryNote').value=data.default_delivery_note||'';companyDisplayName.value=data.company_display_name||'';companyLegalName.value=data.legal_name||'';companyAddress.value=data.address||'';companyTaxOffice.value=data.tax_office||'';companyTaxNumber.value=data.tax_number||'';companyPhone.value=data.phone||'';companyEmail.value=data.email||'';companyWebsite.value=data.website||'';const nm=data.company_display_name||currentMembership?.companies?.name||'Firma';document.getElementById('profileCompany').textContent=nm;document.getElementById('headerCompanyName').textContent=nm.toLocaleUpperCase('tr-TR');document.getElementById('profileAvatar').textContent=nm.trim().charAt(0).toLocaleUpperCase('tr-TR')||'P';setupLogo();render()}
 function applyCompanyDefaults(){if(window._openedArchiveId||(typeof currentOffer!=='undefined'&&currentOffer?.id))return;if(!val('bidder').trim())document.getElementById('bidder').value=currentUser?.user_metadata?.full_name||currentUser?.user_metadata?.name||'';const s=window._companySettings;if(!s||window._openedArchiveId||(typeof currentOffer!=='undefined'&&currentOffer?.id))return;if(!val('payment').trim())document.getElementById('payment').value=s.default_payment_terms||'';document.getElementById('currency').value=currencyUiFromDb(s.default_currency);document.getElementById('validityDays').value=String(s.default_validity_days||7);if(!document.getElementById('delivery').value)document.getElementById('delivery').value=s.default_delivery_note||'';document.querySelectorAll('.item .vat').forEach(x=>{if(!x.dataset.userChanged)x.value=s.default_vat??20});updateValidity();render()}
-async function saveAllSettings(){const settingsScope=[currentUser?.id,currentCompanyId,currentMembership?.role].join('|');if(!currentUser||!currentCompanyId){alert('Önce giriş yapın.');return}const c=document.getElementById('corpHex').value.trim();if(!/^#[0-9a-f]{6}$/i.test(c)){alert('Kurumsal renk kodu geçersiz.');return}let logoPayload;try{logoPayload=await cfCompanyLogos.payload()}catch(e){cfCompanyLogos.restorePreview();alert('Logo kaydedilemedi: '+e.message);return}if(settingsScope!==[currentUser?.id,currentCompanyId,currentMembership?.role].join('|'))return;const payload={company_id:currentCompanyId,...logoPayload,corporate_color:c,accent_color:'#5B5BD6',company_display_name:companyDisplayName.value.trim(),legal_name:companyLegalName.value.trim(),address:companyAddress.value.trim(),tax_office:companyTaxOffice.value.trim(),tax_number:companyTaxNumber.value.trim(),phone:companyPhone.value.trim(),email:companyEmail.value.trim(),website:companyWebsite.value.trim(),default_currency:document.getElementById('defaultCurrency').value,default_vat:+document.getElementById('defaultVat').value||0,default_validity_days:+document.getElementById('defaultValidity').value||7,default_delivery_note:document.getElementById('defaultDeliveryNote').value.trim(),...cfPaymentDefaults.payload(),updated_at:new Date().toISOString()};const existing=window._companySettings?.id;let q=existing?sb.from('company_settings').update(payload).eq('company_id',currentCompanyId).eq('id',existing):sb.from('company_settings').insert(payload);const {error}=await q;if(settingsScope!==[currentUser?.id,currentCompanyId,currentMembership?.role].join('|'))return;if(error){cfCompanyLogos.restorePreview();alert('Şirket ayarları kaydedilemedi: '+error.message);return}cfCompanyLogos.committed();cfPaymentDefaults.committed();if(!await saveBanksCloud(true))return;window.cfUnsaved?.saved('settings');window._companySettings={...(window._companySettings||{}),...payload};await loadCompanySettings();closeSettings();alert('Firma ayarları kaydedildi.')}
+async function saveAllSettings(){const settingsScope=[currentUser?.id,currentCompanyId,currentMembership?.role].join('|');if(!currentUser||!currentCompanyId){alert('Önce giriş yapın.');return}const c=document.getElementById('corpHex').value.trim();if(!/^#[0-9a-f]{6}$/i.test(c)){alert('Kurumsal renk kodu geçersiz.');return}let logoPayload;try{logoPayload=await cfCompanyLogos.payload()}catch(e){cfCompanyLogos.restorePreview();alert('Logo kaydedilemedi: '+e.message);return}if(settingsScope!==[currentUser?.id,currentCompanyId,currentMembership?.role].join('|'))return;const payload={company_id:currentCompanyId,...logoPayload,corporate_color:c,accent_color:'#5B5BD6',company_display_name:companyDisplayName.value.trim(),legal_name:companyLegalName.value.trim(),address:companyAddress.value.trim(),tax_office:companyTaxOffice.value.trim(),tax_number:companyTaxNumber.value.trim(),phone:companyPhone.value.trim(),email:companyEmail.value.trim(),website:companyWebsite.value.trim(),default_currency:document.getElementById('defaultCurrency').value,default_vat:+document.getElementById('defaultVat').value||0,default_validity_days:+document.getElementById('defaultValidity').value||7,default_delivery_note:document.getElementById('defaultDeliveryNote').value.trim(),...cfPaymentDefaults.payload(),/* CepFirma düzeltme: firma resmi bilgileri ve varsayılan not */...(window.cfSettingsExtra?window.cfSettingsExtra():{}),updated_at:new Date().toISOString()};const existing=window._companySettings?.id;let q=existing?sb.from('company_settings').update(payload).eq('company_id',currentCompanyId).eq('id',existing):sb.from('company_settings').insert(payload);const {error}=await q;if(settingsScope!==[currentUser?.id,currentCompanyId,currentMembership?.role].join('|'))return;if(error){cfCompanyLogos.restorePreview();alert('Şirket ayarları kaydedilemedi: '+error.message);return}cfCompanyLogos.committed();cfPaymentDefaults.committed();if(!await saveBanksCloud(true))return;window.cfUnsaved?.saved('settings');window._companySettings={...(window._companySettings||{}),...payload};await loadCompanySettings();closeSettings();alert('Firma ayarları kaydedildi.')}
 function initCloud(){if(window.cfPdfRoute&&window.opener&&new URLSearchParams(location.search).has('pdfnonce')&&!window.cfPdfAuthorized)return;if(!window.supabase){document.getElementById('authMsg').textContent='Giriş hizmeti yüklenemedi. İnternet bağlantınızı kontrol edip sayfayı yenileyin.';return}sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}});sb.auth.onAuthStateChange((event,session)=>{currentUser=session?.user||null;if(event==='PASSWORD_RECOVERY'){window._recoveringPassword=true;showPasswordRecovery();return}setTimeout(()=>{if(!window._recoveringPassword)updateAuthGate()},0)});sb.auth.getSession().then(({data,error})=>{if(error)throw error;currentUser=data.session?.user||null;if(!window._recoveringPassword)updateAuthGate()}).catch(e=>{document.getElementById('authMsg').textContent='Oturum açılamadı: '+e.message})}
 
 async function loadBanksCloud(){if(!currentUser||!currentCompanyId)return;const {data,error}=await sb.from('bank_accounts').select('*').eq('company_id',currentCompanyId).eq('active',true).order('sort_order',{ascending:true}).order('id',{ascending:true});if(error)throw new Error('Banka bilgileri yüklenemedi: '+error.message);document.getElementById('bankEditors').innerHTML='';(data||[]).forEach(b=>addBank({id:b.id,name:b.bank_name,branch:b.branch,holder:b.account_holder,currency:b.currency,iban:b.iban,swift:b.swift}));render()}
@@ -11011,6 +11011,140 @@ if('serviceWorker' in navigator)navigator.serviceWorker.addEventListener('messag
 /* liste başka yoldan yenilense de (Yenile, filtre, sayfa) şerit çizilsin */
 let lt=0,lastSig='';new MutationObserver(()=>{if(lt)return;lt=setTimeout(()=>{lt=0;const l=$('opsList');if(!l)return;const sig=[...l.querySelectorAll('[data-ops-id]')].map(b=>b.dataset.opsId).join(',');const need=[...l.querySelectorAll('.ops-card')].some(c=>!c.querySelector('.cfot-mini'));if(sig&&(sig!==lastSig||need)){lastSig=sig;paintList();paintTodo()}},300)}).observe(document.body,{childList:true,subtree:true});
 window.cfOrderTrack={build,paintDetail,paintList};
+})();</script>
+<!-- ==========================================================================
+     CepFirma — Ayarlar düzeltmeleri
+     * Sekmeler tek elden yönetilir: her kart yalnızca kendi sekmesinde görünür (profil fotoğrafı ve
+       bildirim kartı artık her sekmede tekrar etmez; veri yedeği Firma Bilgileri'nde kalır).
+     * "Kaşe ve İmza" sekmesinin takılı kalan vurgusu düzeltildi (aynı anda iki sekme seçili görünmez).
+     * Yeni "Profilim" sekmesi (ayrı "Bildirimler" sekmesi yerine): ad soyad, profil fotoğrafı,
+       bildirim tercihleri, hesap güvenliği.
+     * Ad soyad: ekipte, mesajlarda, planlarda e-posta yerine adınız görünür.
+     * Kaydedilecek bir şey olmayan sekmelerde (Profilim, İşlem Geçmişi, Hesap Güvenliği, Kaşe ve İmza)
+       alttaki "Ayarları Kaydet" çubuğu gizlenir.
+     * Çalışanlar (ayar yetkisi olmayanlar) sağ üstteki kendi fotoğraflarına tıklayınca "yetkiniz yok"
+       yerine "Hesabım" ekranı açılır; burada da ad soyad düzenlenebilir.
+     * Banka hesaplarında IBAN anında denetlenir (TR ve kontrol hanesi) ve biçimli gösterilir.
+     Veritabanı değişikliği gerekmez.
+     Kaldırmak için id değeri cf-setfix-style olan stil ve cf-setfix-module olan
+     betik bloklarını silmeniz yeterlidir.
+     ========================================================================== -->
+<style id="cf-setfix-style">
+#settingsOverlay [data-cfsf-off]{display:none!important}
+#settingsOverlay .settings-footer[data-cfsf-off]{display:none!important}
+.cfsf-name{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end;margin-top:10px}
+.cfsf-name input{width:100%;box-sizing:border-box;height:42px;border:1px solid var(--mt-border,#e4e4e7);border-radius:8px;padding:0 12px;font:inherit;font-size:14px;background:var(--mt-panel,#fff);color:inherit}
+.cfsf-name .btn{min-height:42px;white-space:nowrap}
+.cfsf-msg{font-size:12.5px;margin-top:6px;min-height:0}.cfsf-msg:empty{display:none}.cfsf-msg.ok{color:#15803d}.cfsf-msg.err{color:#b91c1c}
+.cfsf-iban{display:block;font-size:12px;margin-top:4px}.cfsf-iban.ok{color:#15803d}.cfsf-iban.err{color:#b91c1c}.cfsf-iban:empty{display:none}
+.cfsf-links{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+#personalSettingsOverlay .settings-head h2{font-size:20px}
+@media(max-width:767px){
+  html:not(#cfm) body:not(#cfm) #uiSettingsTabs{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:4px!important;padding:4px!important}
+  html:not(#cfm) body:not(#cfm) #uiSettingsTabs::-webkit-scrollbar{display:none}
+  html:not(#cfm) body:not(#cfm) #uiSettingsTabs button{flex:0 0 auto!important;white-space:nowrap!important;width:auto!important}
+  html:not(#cfm) body:not(#cfm) #settingsOverlay .settings-footer{position:sticky!important;bottom:-76px!important;top:auto!important;z-index:5;margin-top:12px!important}
+}
+</style>
+<script id="cf-setfix-module">(function(){'use strict';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const can=a=>{try{return typeof hasAppAction==='function'?hasAppAction(a):true}catch(_){return true}};
+const toast=(m,k)=>{try{window.showToast?.(m,k||'success')}catch(_){}};
+const body=()=>document.querySelector('#settingsOverlay .settings-body');
+/* hangi kart hangi sekmede */
+function groupOf(card){if(card.id==='uiSettingsPreview')return 'brand';if(card.id==='cfbkCard')return 'company';if(card.id==='signingAssetsCard')return 'signing';if(card.id==='auditHistoryCard')return 'audit';if(card.id==='accountSecuritySettings')return 'account_security';
+  if(card.matches('.cfav-card,.cfsf-name-card')||/Bildirimler ve Hatırlatmalar/.test(card.querySelector('h3')?.textContent||''))return 'profile';return card.dataset.uiSettingsGroup||''}
+const NOSAVE=new Set(['profile','audit','account_security','signing']);
+function current(){const b=[...document.querySelectorAll('#uiSettingsTabs button')].find(x=>x.getAttribute('aria-pressed')==='true');return b?.dataset.key||'company'}
+function apply(key){const root=body();if(!root)return;key=key||current();
+  for(const c of root.children){const g=groupOf(c);if(!g)continue;const off=g!==key||(g==='signing'&&c.hidden&&key!=='signing');if(g==='signing'&&key==='signing'){c.removeAttribute('data-cfsf-off');continue}if(off){if(!c.hasAttribute('data-cfsf-off'))c.setAttribute('data-cfsf-off','')}else{if(c.hasAttribute('data-cfsf-off'))c.removeAttribute('data-cfsf-off');if(c.hidden&&g!=='signing')c.hidden=false}}
+  const foot=document.querySelector('#settingsOverlay .settings-footer');if(foot){if(NOSAVE.has(key))foot.setAttribute('data-cfsf-off','');else foot.removeAttribute('data-cfsf-off')}
+  document.querySelectorAll('#uiSettingsTabs button').forEach(b=>{const on=(b.dataset.key||'')===key;if(b.classList.contains('active')!==on)b.classList.toggle('active',on);b.setAttribute('aria-pressed',on?'true':'false')})}
+/* Profilim sekmesi ve ad soyad kartı */
+const myName=()=>String(currentUser?.user_metadata?.full_name||currentUser?.user_metadata?.name||'').trim();
+function nameCard(){const c=document.createElement('section');c.className='settings-card cfsf-name-card';c.innerHTML='<h3>Ad soyad</h3><p>Ekipte, mesajlarda, planlarda ve görevlerde e-posta yerine bu ad görünür.</p><div class="cfsf-name"><div><label>Adınız ve soyadınız</label><input type="text" maxlength="80" autocomplete="name" placeholder="Örn. Burak Yavuz" value="'+esc(myName())+'"></div><button type="button" class="btn primary">Kaydet</button></div><div class="cfsf-msg" role="status" aria-live="polite"></div><div class="cfsf-links"></div>';
+  const inp=c.querySelector('input'),btn=c.querySelector('.cfsf-name .btn'),msg=c.querySelector('.cfsf-msg');
+  /* kişisel alan: şirket ayarlarının "kaydedilmemiş değişiklik" takibine karışmasın */['input','change','keyup'].forEach(ev=>c.addEventListener(ev,e=>e.stopPropagation()));
+  btn.onclick=async()=>{const v=inp.value.trim().replace(/\s+/g,' ');if(v.length<2){msg.className='cfsf-msg err';msg.textContent='Adınızı yazın.';return}btn.disabled=true;msg.className='cfsf-msg';msg.textContent='Kaydediliyor…';
+    try{const {data,error}=await sb.auth.updateUser({data:{full_name:v}});if(error)throw error;if(data?.user&&typeof currentUser!=='undefined')currentUser.user_metadata=data.user.user_metadata;msg.className='cfsf-msg ok';msg.textContent='Kaydedildi. Ekip listelerinde birkaç dakika içinde güncellenir.';document.querySelectorAll('.cfsf-name-card input').forEach(x=>{if(x!==inp)x.value=v});toast('Adınız kaydedildi.')}
+    catch(e){msg.className='cfsf-msg err';msg.textContent='Kaydedilemedi: '+(e.message||'bağlantıyı kontrol edin')}finally{btn.disabled=false}};
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();btn.click()}});
+  return c}
+function buildProfile(){const tabs=$('uiSettingsTabs'),root=body();if(!tabs||!root)return;
+  if(!tabs.querySelector('[data-key="profile"]')){const b=document.createElement('button');b.type='button';b.dataset.key='profile';b.textContent='Profilim';b.setAttribute('aria-pressed','false');const first=tabs.querySelector('button');first?first.before(b):tabs.append(b);
+    b.addEventListener('click',()=>{document.querySelectorAll('#settingsOverlay .settings-body > .settings-card, #uiSettingsPreview').forEach(c=>{c.hidden=true});setTimeout(()=>apply('profile'),0)})}
+  const nt=$('cfNotifySettingsTab');if(nt&&!nt.hidden)nt.hidden=true;
+  if(!root.querySelector(':scope > .cfsf-name-card')){const nc=nameCard();root.prepend(nc)}
+  /* bildirim kartına hesap güvenliği bağlantısı */
+  const nCard=[...root.children].find(c=>/Bildirimler ve Hatırlatmalar/.test(c.querySelector('h3')?.textContent||''));if(nCard&&!nCard.querySelector('[data-cfsf-sec]')){const sb2=document.createElement('button');sb2.type='button';sb2.className='btn light';sb2.dataset.cfsfSec='';sb2.textContent='Hesap güvenliği (şifre, iki aşamalı doğrulama)';sb2.style.marginLeft='8px';sb2.onclick=()=>{try{openSecurity()}catch(_){tabs.querySelector('[data-key="account_security"]')?.click()}};nCard.querySelector('.btn')?.after(sb2)}
+  apply()}
+/* sekme tıklamaları: diğer modüllerin işi bittikten sonra uygula */
+document.addEventListener('click',e=>{const b=e.target.closest('#uiSettingsTabs button');if(!b||!b.dataset.key)return;setTimeout(()=>apply(b.dataset.key),0);setTimeout(()=>apply(b.dataset.key),120)});
+if(typeof openSettings==='function'){const base=openSettings;openSettings=async function(){const r=await base.apply(this,arguments);try{buildProfile();apply()}catch(_){}return r}}
+
+/* çalışanlar: sağ üstteki fotoğraf → Hesabım */
+function personal(){const o=$('personalSettingsOverlay');if(!o)return null;const h=o.querySelector('.settings-head h2');if(h&&h.textContent!=='Hesabım')h.textContent='Hesabım';const rb=o.querySelector('.settings-body');if(rb&&!rb.querySelector('.cfsf-name-card'))rb.prepend(nameCard());return o}
+document.addEventListener('click',e=>{const t=e.target.closest('.dash-company');if(!t||can('settings'))return;const o=personal();if(!o)return;e.preventDefault();e.stopImmediatePropagation();o.hidden=false},true);
+
+/* IBAN denetimi */
+function ibanCheck(v){let s=String(v||'').replace(/[\s-]/g,'').toUpperCase();if(!s)return null;if(/^\d{24}$/.test(s))s='TR'+s;if(!/^[A-Z]{2}\d{2}[A-Z0-9]{10,30}$/.test(s))return {ok:false,s,why:'Biçim hatalı'};if(s.startsWith('TR')&&s.length!==26)return {ok:false,s,why:'TR IBAN 26 karakter olmalı ('+s.length+')'};
+  const r=s.slice(4)+s.slice(0,4);let m=0;for(const ch of r){const d=/\d/.test(ch)?ch:String(ch.charCodeAt(0)-55);for(const x of d)m=(m*10+Number(x))%97}return m===1?{ok:true,s}:{ok:false,s,why:'Kontrol hanesi tutmuyor, rakamları kontrol edin'}}
+function ibanHints(){document.querySelectorAll('#bankEditors .cfsf-iban').forEach(h=>{if(!h.previousElementSibling?.matches?.('input.biban'))h.remove()});document.querySelectorAll('#bankEditors input.biban').forEach(inp=>{let h=inp.nextElementSibling;if(!h||!h.classList?.contains('cfsf-iban')){h=document.createElement('small');h.className='cfsf-iban';inp.after(h);inp.addEventListener('input',()=>paintIban(inp,h));inp.addEventListener('blur',()=>paintIban(inp,h))}paintIban(inp,h)})}
+function paintIban(inp,h){const r=ibanCheck(inp.value);if(!r){h.textContent='';h.className='cfsf-iban';return}const f=r.s.replace(/(.{4})/g,'$1 ').trim();h.className='cfsf-iban '+(r.ok?'ok':'err');h.textContent=r.ok?'✓ Geçerli IBAN · proformada: '+f:'⚠ '+r.why}
+
+let t=0;new MutationObserver(()=>{if(t)return;t=setTimeout(()=>{t=0;const so=$('settingsOverlay');if(so&&getComputedStyle(so).display!=='none'){buildProfile();ibanHints()}personal()},300)}).observe(document.body,{childList:true,subtree:true});
+window.cfSettingsFix={apply,ibanCheck};
+})();</script>
+<!-- ==========================================================================
+     CepFirma — Ayarlar eklemeleri
+     * Banka hesaplarında her alanın başlığı (Banka adı, Şube, Hesap sahibi, Para birimi, SWIFT, IBAN).
+     * Firma Profili: Ticaret sicil no, KEP adresi, e-Fatura / e-Arşiv durumu.
+     * Belge Varsayılanları: "Varsayılan teklif / proforma notu" — yeni teklif ve proformada
+       "Notlar / koşullar" alanı boşsa otomatik dolar.
+     * Firma Bilgileri'nde "Ekip ve izinler" kısayolu (şirket sahibi / yönetici).
+     Yeni alanlar için veritabani/2026-11-19-firma-ek-bilgiler.sql çalıştırılmalıdır
+     (banka başlıkları ve ekip kısayolu SQL'siz çalışır).
+     Kaldırmak için id değeri cf-setextra-style olan stil ve cf-setextra-module olan
+     betik bloklarını silmeniz yeterlidir.
+     ========================================================================== -->
+<style id="cf-setextra-style">
+.cfsx-lbl{display:block;font-size:12px;font-weight:500;color:var(--mt-ink-2,#52525b);margin:0 0 4px}
+#bankEditors .cfsx-wrap{display:block;min-width:0}
+#bankEditors .cfsx-wrap>input,#bankEditors .cfsx-wrap>select{width:100%}
+.cfsx-team{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.cfsx-team p{margin:0;flex:1 1 260px}
+</style>
+<script id="cf-setextra-module">(function(){'use strict';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const company=()=>(typeof currentCompanyId!=='undefined'&&currentCompanyId)||'';
+const role=()=>(typeof currentMembership!=='undefined'&&currentMembership?.role)||'';
+const COLS='trade_registry_no,kep_address,e_invoice_status,default_notes';
+let enabled=false,probedFor='',extra={};
+async function load(){const c=company();if(!c||probedFor===c)return;probedFor=c;try{const {data,error}=await sb.from('company_settings').select(COLS).eq('company_id',c).maybeSingle();enabled=!error;extra=data||{};window._companySettingsExtra=extra;fill()}catch(_){enabled=false}}
+/* kaydetme: çekirdek "Ayarları Kaydet" bu fonksiyonu çağırır */
+window.cfSettingsExtra=()=>{if(!enabled)return {};const v=id=>($(id)?.value||'').trim();if(!$('cfsxSicil'))return {};const p={trade_registry_no:v('cfsxSicil')||null,kep_address:v('cfsxKep')||null,e_invoice_status:v('cfsxEinv')||null,default_notes:v('cfsxNotes')||null};extra={...extra,...p};window._companySettingsExtra=extra;return p};
+function field(id,label,html){const d=document.createElement('div');d.innerHTML='<label for="'+id+'">'+label+'</label>'+html;return d}
+function build(){
+  /* banka alan başlıkları */
+  document.querySelectorAll('#bankEditors input,#bankEditors select').forEach(el=>{if(el.dataset.cfsx)return;el.dataset.cfsx='1';const lbl=el.tagName==='SELECT'?'Para birimi':(el.placeholder||'').trim();if(!lbl||el.closest('label'))return;const hint=el.nextElementSibling?.classList?.contains('cfsf-iban')?el.nextElementSibling:null;const w=document.createElement('div');w.className='cfsx-wrap';el.before(w);const l=document.createElement('span');l.className='cfsx-lbl';l.textContent=lbl;w.append(l,el);if(hint)w.append(hint)});
+  if(!enabled)return;
+  /* firma resmi bilgileri */
+  const web=$('companyWebsite');const grid=web?.closest('.grid,[class*=grid]')||web?.parentElement?.parentElement;
+  if(web&&!$('cfsxSicil')){const host=web.closest('div');const frag=[field('cfsxSicil','Ticaret sicil no','<input id="cfsxSicil" maxlength="60">'),field('cfsxKep','KEP adresi','<input id="cfsxKep" type="email" maxlength="200" placeholder="firma@hs01.kep.tr">'),field('cfsxEinv','e-Fatura durumu','<select id="cfsxEinv"><option value="">Belirtilmedi</option><option value="e_fatura">e-Fatura mükellefi</option><option value="e_arsiv">e-Arşiv</option><option value="none">Kâğıt fatura</option></select>')];let after=host;frag.forEach(f=>{after.after(f);after=f})}
+  /* varsayılan belge notu */
+  const pay=$('defaultPaymentTerms');if(pay&&!$('cfsxNotes')){const host=pay.closest('div');const d=document.createElement('div');d.className='full';d.innerHTML='<label for="cfsxNotes">Varsayılan teklif / proforma notu</label><textarea id="cfsxNotes" rows="4" maxlength="4000" placeholder="Örn. Fiyatlara KDV dahil değildir. Teslim süresi sipariş onayından itibaren 7 iş günüdür. Garanti 2 yıldır."></textarea><div class="muted" style="font-size:12px;margin-top:4px">Yeni teklif ve proformada "Notlar / koşullar" alanı boşsa bu metin gelir.</div>';host.after(d)}
+  fill()}
+function fill(){if(!enabled)return;const set=(id,v)=>{const el=$(id);if(el&&!el.dataset.cfsxFilled){el.value=v||'';el.dataset.cfsxFilled='1'}};set('cfsxSicil',extra.trade_registry_no);set('cfsxKep',extra.kep_address);set('cfsxEinv',extra.e_invoice_status);set('cfsxNotes',extra.default_notes)}
+/* ekip kısayolu */
+function team(){if(!['owner','admin'].includes(role()))return;const body=document.querySelector('#settingsOverlay .settings-body');if(!body||$('cfsxTeam'))return;const c=document.createElement('section');c.className='settings-card';c.id='cfsxTeam';c.dataset.uiSettingsGroup='company';c.innerHTML='<h3>Ekip ve izinler</h3><div class="cfsx-team"><p class="muted">Çalışan davet etme, rol (satış, servis, muhasebe, depo / lojistik…) ve erişim ayarları Ekip sayfasındadır.</p><button type="button" class="btn light">Ekip sayfasını aç →</button></div>';
+  c.querySelector('button').onclick=()=>{const b=[...document.querySelectorAll('.ds-nav > button')].find(x=>/^Ekip$/.test(x.innerText.trim().split('\n')[0]));if(b)b.click();else{try{openTeam()}catch(_){}}};
+  const prof=[...body.querySelectorAll(':scope > .settings-card[data-ui-settings-group="company"]')].find(x=>/Firma Profili/.test(x.querySelector('h3')?.textContent||''));prof?prof.after(c):body.append(c);try{window.cfSettingsFix?.apply?.()}catch(_){}}
+/* yeni teklif / proformada varsayılan not */
+if(typeof applyCompanyDefaults==='function'){const base=applyCompanyDefaults;applyCompanyDefaults=function(){const r=base.apply(this,arguments);try{if(window._openedArchiveId||(typeof currentOffer!=='undefined'&&currentOffer?.id))return r;const n=$('notes');const def=(extra.default_notes||'').trim();if(n&&def&&!n.value.trim()){n.value=def;n.dispatchEvent(new Event('input',{bubbles:true}))}}catch(_){}return r}}
+let t=0;new MutationObserver(()=>{if(t)return;t=setTimeout(()=>{t=0;load();const so=$('settingsOverlay');if(so&&getComputedStyle(so).display!=='none'){build();team()}},300)}).observe(document.body,{childList:true,subtree:true});setTimeout(load,1500);
+window.cfSettingsExtraInfo={get enabled(){return enabled},recheck(){probedFor='';return load()}};
 })();</script>
 <!-- ==========================================================================
      CepFirma — Metis yazı ölçüleri
