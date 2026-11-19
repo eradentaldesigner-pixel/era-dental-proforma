@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-19.37)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-19.38)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -107,6 +107,9 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Geliştirilen sayfalar
 
+- **Telefon menüsü (premium):** profil kartı (fotoğraf, ad, rol, firma), "Menüde ara…", hızlı işlemler (Yeni teklif ·
+  Plan ekle · Servis kaydı), bölümler kart içinde 52 px satırlar (renkli simge, rozet, ok), "Çıkış Yap" ayrı ve kırmızı;
+  menü yüksekliği ~1800 px'ten ~1600 px'e indi ve okunur hale geldi. Alt çubuk buzlu cam görünüm. (`cf-mobmenu-module`)
 - **Teknik Servis — QR cihaz etiketi ve teslim imzası:** formda ve ayrıntıda "🏷 Etiket": servis no, müşteri, cihaz,
   seri no, kabul tarihi ve QR; 62×29 / 50×30 mm etiket yazıcısı veya A4. QR telefon kamerasıyla ya da uygulamadaki
   QR okuyucuyla okutulunca servis kaydı açılır. "✍ Müşteri imzası al": teslim alan adı + parmakla / kalemle imza;
@@ -243,6 +246,10 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Hata düzeltmeleri
 
+- **Yeni takvim açılmıyordu:** canlı sitede `vendor/` klasörü yüklenmemişti; sitenin güvenlik ayarı (CSP) dış kaynaktan
+  betik yüklemeyi engellediği için yedek yol da çalışmıyordu. Artık takvim bileşeni bulunamazsa neden açılmadığı açıkça
+  yazılır, tercih kalıcı olarak "klasik"e çevrilmez ve "Yeni takvim"e basınca yeniden denenir.
+  **`vendor/` klasörü mutlaka GitHub'a yüklenmelidir** (takvim, PDF, grafikler ve QR bu dosyalarla çalışır).
 - **Teknik Servis:** telefonda / dar ekranda kayda dokununca ayrıntıya kayar, "‹ Listeye dön" düğmesi eklendi
   (önceden ayrıntı ekranın dışında açılıyordu). "Acil" kayıtlar listede, kartlarda ve ayrıntıda kırmızı rozetle
   görünür. Kayıt numarası tek satır; arama, durum ve "Yenile" tek satırda; özet kutuları sıkılaştı.
@@ -307,7 +314,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-19.37">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-19.38">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
