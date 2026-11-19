@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-19.51)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-20.52)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -51,6 +51,11 @@ bu dosyalar orada da birer kez çalıştırılmalıdır:
     kim, ne zaman; birimler arası bildirim için.
 22. `veritabani/2026-11-19-firma-ek-bilgiler.sql` — firma **ticaret sicil no, KEP adresi, e-Fatura durumu** ve
     **varsayılan teklif / proforma notu**.
+
+- `veritabani/2026-11-20-gorevler-otomasyon.sql` — **Görevler** ve **Otomatik kurallar**:
+  `company_tasks`, `company_automations` tabloları, erişim kuralları ve `cf_run_automations`
+  sunucu fonksiyonu. pg_cron açıksa kurallar 30 dakikada bir sunucuda da çalışır.
+  **(henüz çalıştırılmadı)**
 
 ## Görünüm
 
@@ -320,6 +325,23 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
   Sistem), yazı boyutu ve köşe yuvarlaklığı. Seçimler yalnızca o cihazda saklanır; teklif /
   proforma PDF'leri ve baskı çıktısı değişmez. "Varsayılan" düğmesi her şeyi geri alır.
 
+- **Bekleyenler (yeni sayfa):** kararınızı / yanıtınızı bekleyen her şey tek listede, en eskisi
+  üstte: proforma onayları, seyahat onayları, çalışan talepleri, size atanan planlar, bugün /
+  geciken görevleriniz. Her satırda neden beklediği ve ne kadar süredir beklediği yazar; satıra
+  tıklayınca ilgili ekran açılır (proformada inceleme / karar ekranı). ↑ ↓ ve Enter ile gezilir.
+  Menüde bekleyen sayısı rozetle görünür. SQL gerekmez.
+- **Görevler (yeni sayfa):** görev / hatırlatma — sorumlu, son tarih ve saat, öncelik, bağlı kayıt
+  (müşteri, teklif, proforma, servis, sipariş, görüşme, cihaz, seyahat) ve not. Gecikmiş / Bugün /
+  Bu hafta / Daha sonra / Tarihsiz grupları; Benim · Verdiklerim · Atanmamış · Herkes; kişiye göre
+  filtre (yönetici), arama, tamamlananlar. Tek tıkla tamamlandı. Görevi yalnızca açan kişi ve
+  yöneticiler değiştirir; sorumlu kişi durumu ve notu değiştirebilir. Menüde bugün / geciken
+  görev sayısı rozetle görünür.
+- **Otomatik kurallar (yeni sayfa, şirket sahibi / yönetici):** Teklif takibi (N gün cevapsız),
+  Görüşme takibi (takip günü geldi), Servis takibi, Serviste bekleyen cihaz (N gün), İlerlemeyen
+  sipariş (N gün), Periyodik bakım (N gün kala). Açılan kural görevi kendisi oluşturur, aynı iş
+  için tekrar açmaz; iş sonuçlanınca (teklif kabul, servis kapandı, sipariş ilerledi…) görevi
+  kendisi kapatır. Her kuralın çalışma ve açtığı görev sayısı görünür.
+
 ## Hata düzeltmeleri
 
 - **Ayarlar:** profil fotoğrafı ve bildirim kartı her sekmede tekrar ediyordu; "Kaşe ve İmza" sekmesi seçili kalıyordu
@@ -399,7 +421,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-19.51">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-20.52">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma

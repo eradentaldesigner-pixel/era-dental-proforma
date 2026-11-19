@@ -1,4 +1,4 @@
-<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-19.51"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
+<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-20.52"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><script id="cf-dark-boot">try{if(localStorage.getItem("cfTheme")==="dark"&&!/[?&](proforma|offerPdf)=/.test(location.search))document.documentElement.setAttribute("data-cf-theme","dark")}catch(e){}</script><script>window.cfPdfRoute=new URLSearchParams(location.search).has("proforma")||new URLSearchParams(location.search).has("offerPdf");if(window.cfPdfRoute)document.documentElement.classList.add("cf-native-pdf-route");</script><style>@media screen{
 #prPrintRoot.cf-pdf-capture{display:block!important;visibility:visible!important;position:fixed!important;left:-12000px!important;top:0!important;right:auto!important;bottom:auto!important;width:210mm!important;padding:0!important;margin:0!important;max-height:none!important;overflow:visible!important;background:white!important;z-index:-1!important}#prPrintRoot.cf-pdf-capture .pr-page{margin:0!important;box-shadow:none!important;zoom:1!important;transform:none!important}
 html.cf-native-pdf-route #authGate{display:none!important}html.cf-native-pdf-route body{padding:0!important;margin:0!important;background:#f6f8fc!important}html.cf-native-pdf-route body>*:not(.auth-shell):not(#cfPdfRouteStatus):not(#prPrintRoot):not(script):not(style):not(iframe):not(.html2canvas-container):not([style*="visibility: hidden"]){display:none!important}#cfPdfRouteStatus{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;background:#f6f8fc;color:#193450;font:16px system-ui;padding:24px;text-align:center}#cfPdfRouteStatus h1{font-size:22px;margin:0}#cfPdfRouteStatus button,#cfPdfRouteStatus a{font:14px system-ui;padding:12px 18px;background:white;border:1px solid #d9e4f2;border-radius:9px;color:#075cc5;text-decoration:none;cursor:pointer}
 }
@@ -6295,6 +6295,7 @@ const act=b=>{try{return (typeof pnAction==='function'&&pnAction(b))||''}catch(e
 function keyOf(b){
   const d=b.dataset;
   if('cfHealthNav' in d)return 'health';if('cfMessagesNav' in d)return 'messages';if('cfInboxNav' in d)return 'inbox';if('cfUsersNav' in d)return 'users';if('cfFilesNav' in d)return 'files';if('cfAnalyticsNav' in d)return 'analytics';if('cfReportNav' in d)return 'reports';
+  /* CepFirma düzeltme: Bekleyenler / Görevler / Otomatik kurallar */if('cfQueueNav' in d)return 'queue';if('cfTasksNav' in d)return 'tasks';if('cfAutoNav' in d)return 'rules';
   if('cfWorkNav' in d)return 'work';if('presenceOpen' in d)return 'presence';if('erOpen' in d)return 'requests';if('securityOpen' in d)return 'security';if('personalSettings' in d)return 'personal';
   if(d.newOfferNav)return 'newOffer';if(d.offerNav)return 'offers';
   const a=act(b);if(a)return a;
@@ -6303,7 +6304,7 @@ function keyOf(b){
 }
 /* Hangi öğe görünsün (yetkiler uygulamanın kendi kurallarından) */
 function visibleKeys(){
-  const v=new Set(['requests','messages','inbox','files','guide','logout']);
+  const v=new Set(['requests','messages','inbox','files','guide','logout','queue','tasks']);if(isMgr())v.add('rules');
   for(const k of ['home','calendar','customers','crm','catalog','service','orders','organization'])if(has(k))v.add(k);
   if(has('archive'))v.add('archive');else if(offersOk())v.add('offers');
   if(isMgr())v.add('users');else if(typeof erAllowed!=='function'||erAllowed())v.add('presence');
@@ -6316,11 +6317,11 @@ const MANAGED=new Set(['home','calendar','customers','crm','catalog','service','
 window.cfNavKey=keyOf;
 const LABEL={archive:'Belgeler',offers:'Belgeler',catalog:'Ürünler',service:'Servis',orders:'Siparişler',organization:'Seyahatler',users:'Ekip',presence:'Ekip',settings:'Ayarlar',personal:'Ayarlar'};
 const GROUPS=[
-  ['ÇALIŞMA ALANI',['home','inbox','calendar','requests','messages']],
+  ['ÇALIŞMA ALANI',['home','queue','tasks','inbox','calendar','requests','messages']],
   ['SATIŞ',['customers','crm','archive','offers']],
   ['ÜRÜN VE SERVİS',['catalog','service']],
   ['OPERASYON',['orders','organization']],
-  ['YÖNETİM',['users','presence','reports','files','health','settings','personal','security']]
+  ['YÖNETİM',['users','presence','reports','rules','files','health','settings','personal','security']]
 ];
 const ALWAYS_HIDE=new Set(['work','newOffer','stock','team','analytics']);
 function labelSpan(b){return b.querySelector('.pn-label')||[...b.querySelectorAll(':scope > span')].find(s=>!/(ds-icon|(^|\s)mi(\s|$)|count)/.test(s.className))}
@@ -6793,6 +6794,7 @@ function badgeFor(k){
   if(k==='archive'&&counts.archive>0)return ['red',counts.archive>99?'99+':String(counts.archive),'Onay bekleyen proforma'];
   if(k==='service'&&counts.service>0)return ['blue',String(counts.service),'Açık servis kaydı'];
   if(k==='inbox'&&window.cfInboxUnread>0)return ['red',window.cfInboxUnread>99?'99+':String(window.cfInboxUnread),'Okunmamış iş'];
+  /* CepFirma düzeltme: Bekleyenler / Görevler rozetleri */if(k==='queue'&&window.cfQueueCount>0)return ['red',window.cfQueueCount>99?'99+':String(window.cfQueueCount),'Sizi bekleyen'];if(k==='tasks'&&window.cfTaskCount>0)return ['red',window.cfTaskCount>99?'99+':String(window.cfTaskCount),'Bugün / geciken görev'];
   if(k==='messages'&&window.cfMsgUnread>0)return ['red',window.cfMsgUnread>99?'99+':String(window.cfMsgUnread),'Okunmamış mesaj'];
   if((k==='files'||k==='health'||k==='messages')&&Date.now()<NEW_UNTIL)return ['green','Yeni','Yeni özellik'];
   return null;
@@ -11526,6 +11528,300 @@ window.addEventListener('load',()=>applyColors(false));
 let t=0;new MutationObserver(muts=>{if(t)return;t=setTimeout(()=>{t=0;mount();if(pref.pal!=='blue'){scanSheets(false);scanInline()}},250)}).observe(document.documentElement,{childList:true,subtree:true});
 window.addEventListener('storage',e=>{if(e.key===KEY){try{pref={...DEF,...JSON.parse(e.newValue||'{}')}}catch(_){}applyVars();applyColors(true);render()}});
 window.cfAppearance={open,close,get pref(){return {...pref}},set(k,v){pref[k]=v;save();applyVars();if(k==='pal')applyColors(true);render()}};
+})();</script>
+
+<!-- ==========================================================================
+     CepFirma — Bekleyenler, Görevler ve Otomatik kurallar
+     * Bekleyenler: sizin kararınızı / yanıtınızı bekleyen her şey tek listede, en eskisi üstte:
+       proforma onayları, seyahat onayları, çalışan talepleri, size atanan planlar, geciken görevler.
+       Satırdan doğrudan ilgili ekran açılır (↑ ↓ ile gezin, Enter ile açın).
+     * Görevler: görev / hatırlatma — sorumlu, son tarih, öncelik, bağlı kayıt. Gecikmiş / Bugün /
+       Bu hafta / Sonra grupları; Benim · Herkes · Atanmamış; tamamlananlar.
+     * Otomatik kurallar (şirket sahibi / yönetici): hazır kurallar görevleri kendiliğinden açar,
+       iş sonuçlanınca görevi kapatır.
+     Görevler ve kurallar için veritabani/2026-11-20-gorevler-otomasyon.sql çalıştırılmalıdır
+     (Bekleyenler SQL'siz çalışır).
+     Kaldırmak için id değeri cf-work-style olan stil ve cf-work-module olan betik bloklarını
+     silmeniz yeterlidir.
+     ========================================================================== -->
+<style id="cf-work-style">
+.cfwk-root{display:grid;gap:14px}
+.cfwk-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.cfwk-bar .sp{flex:1}
+.cfwk-chips{display:flex;flex-wrap:wrap;gap:6px}
+.cfwk-chips button{border:1px solid var(--mt-border,#e4e4e7);background:var(--mt-panel,#fff);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:500;color:var(--mt-ink-2,#52525b);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.cfwk-chips button b{font-weight:600;color:var(--mt-ink,#18181b)}
+.cfwk-chips button.on{background:var(--mt-primary-soft,#eff6ff);border-color:var(--mt-primary,#2563eb);color:var(--mt-primary,#2563eb)}
+.cfwk-chips button.on b{color:inherit}
+.cfwk-bar input[type=search],.cfwk-bar select{height:36px;border:1px solid var(--mt-border,#e4e4e7);border-radius:8px;padding:0 10px;font:inherit;font-size:13.5px;background:var(--mt-panel,#fff);color:var(--mt-ink,#18181b);min-width:0}
+html:not(#cfm) body:not(#cfm) .cfwk-bar :is(select,input[type=search]){width:auto!important;height:36px!important;margin:0!important}
+.cfwk-bar input[type=search]{flex:0 1 240px}
+.cfwk-list{background:var(--mt-panel,#fff);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius,8px);overflow:hidden}
+.cfwk-grp{display:flex;align-items:center;gap:8px;padding:9px 16px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mt-ink-3,#71717a);background:var(--mt-gray-50,#fafafa);border-bottom:1px solid var(--mt-border,#e4e4e7)}
+.cfwk-grp em{font-style:normal;font-weight:600;color:var(--mt-ink-2,#52525b)}
+.cfwk-grp.late{color:#b91c1c}
+.cfwk-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;padding:12px 16px;border:0;border-bottom:1px solid var(--mt-border,#e4e4e7);background:transparent;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.cfwk-row:last-child{border-bottom:0}
+.cfwk-row:hover,.cfwk-row.kb{background:var(--mt-hover,#f4f4f5)}
+.cfwk-row.kb{box-shadow:inset 3px 0 0 var(--mt-primary,#2563eb)}
+.cfwk-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:15px;background:color-mix(in srgb,var(--c,#71717a) 13%,transparent);color:var(--c,#71717a)}
+.cfwk-row strong{display:block;font-size:14px;font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cfwk-row .why{display:block;margin-top:2px;font-size:12.5px;color:var(--mt-ink-3,#71717a);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cfwk-end{display:flex;align-items:center;gap:8px}
+.cfwk-age{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--mt-sunken,#f4f4f5);color:var(--mt-ink-2,#52525b);white-space:nowrap}
+.cfwk-age.warn{background:#fef3c7;color:#92400e}.cfwk-age.bad{background:#fee2e2;color:#b91c1c}
+.cfwk-go{font-size:13px;font-weight:600;color:var(--mt-primary,#2563eb);white-space:nowrap}
+.cfwk-empty{padding:34px 18px;text-align:center;color:var(--mt-ink-3,#71717a);font-size:14px}
+.cfwk-empty b{display:block;font-size:28px;margin-bottom:6px}
+.cfwk-hint{font-size:12px;color:var(--mt-ink-3,#71717a);white-space:nowrap}
+.cfwk-bar .cfwk-hint{white-space:normal}
+@media(max-width:1100px){.cfwk-kb{display:none}}
+.cfwk-hint kbd{font:600 11px var(--mt-font,system-ui);padding:1px 6px;border:1px solid var(--mt-border,#e4e4e7);border-bottom-width:2px;border-radius:5px;background:var(--mt-panel,#fff)}
+.cfwk-setup{background:var(--mt-panel,#fff);border:1px dashed var(--mt-border-strong,#d4d4d8);border-radius:var(--mt-radius,8px);padding:22px;font-size:14px;line-height:1.55}
+.cfwk-setup code{font-size:12.5px;background:var(--mt-sunken,#f4f4f5);padding:1px 6px;border-radius:5px}
+/* görev satırı */
+.cfwk-task{grid-template-columns:24px minmax(0,1fr) auto}
+.cfwk-ck{width:20px;height:20px;border-radius:50%;border:2px solid var(--mt-border-strong,#d4d4d8);display:grid;place-items:center;background:var(--mt-panel,#fff);color:#fff;font-size:11px;cursor:pointer;padding:0}
+.cfwk-ck:hover{border-color:#16a34a}
+.cfwk-task.done .cfwk-ck{background:#16a34a;border-color:#16a34a}
+.cfwk-task.done strong{text-decoration:line-through;color:var(--mt-ink-3,#71717a)}
+.cfwk-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;font-size:12px;color:var(--mt-ink-3,#71717a);align-items:center}
+.cfwk-tag{display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:999px;background:var(--mt-sunken,#f4f4f5);color:var(--mt-ink-2,#52525b);font-size:11.5px;font-weight:500;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border:0;font-family:inherit;cursor:pointer}
+.cfwk-tag.auto{background:#ede9fe;color:#6d28d9;cursor:default}
+.cfwk-tag.hi{background:#fee2e2;color:#b91c1c;cursor:default}
+.cfwk-due{font-size:12px;font-weight:600;white-space:nowrap;color:var(--mt-ink-2,#52525b)}
+.cfwk-due.late{color:#b91c1c}.cfwk-due.today{color:#b45309}
+.cfwk-av{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--mt-sunken,#f4f4f5);color:var(--mt-ink-2,#52525b);font-size:10.5px;font-weight:700;flex:none}
+.cfwk-av.none{border:1px dashed var(--mt-border-strong,#d4d4d8);background:transparent}
+/* modal */
+.cfwk-modal{position:fixed;inset:0;z-index:12000;display:grid;place-items:center;background:rgba(9,9,11,.35);padding:16px}
+.cfwk-dlg{width:min(560px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--mt-panel,#fff);border-radius:14px;box-shadow:var(--mt-shadow-modal,0 20px 50px rgba(9,9,11,.2));padding:20px}
+.cfwk-dlg h3{margin:0 0 14px;font-size:17px}
+.cfwk-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cfwk-form .full{grid-column:1/-1}
+.cfwk-form label{display:block;font-size:12px;font-weight:500;color:var(--mt-ink-2,#52525b);margin-bottom:4px}
+.cfwk-form :is(input,select,textarea){width:100%;box-sizing:border-box;border:1px solid var(--mt-border,#e4e4e7);border-radius:8px;padding:8px 10px;font:inherit;font-size:14px;background:var(--mt-panel,#fff);color:var(--mt-ink,#18181b)}
+.cfwk-form :is(input,select,textarea):disabled{background:var(--mt-sunken,#f4f4f5);color:var(--mt-ink-3,#71717a)}
+.cfwk-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;align-items:center}
+.cfwk-acts .sp{flex:1}
+.cfwk-msg{font-size:12.5px;color:var(--mt-ink-3,#71717a);margin-top:8px}
+/* kurallar */
+.cfwk-rules{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+.cfwk-rule{background:var(--mt-panel,#fff);border:1px solid var(--mt-border,#e4e4e7);border-radius:var(--mt-radius,8px);padding:16px;display:flex;flex-direction:column;gap:10px}
+.cfwk-rule.on{border-color:color-mix(in srgb,var(--mt-primary,#2563eb) 45%,var(--mt-border,#e4e4e7))}
+.cfwk-rule header{display:flex;gap:10px;align-items:flex-start}
+.cfwk-rule h4{margin:0;font-size:14.5px;font-weight:600}
+.cfwk-rule header small{display:block;font-size:12px;color:var(--mt-ink-3,#71717a);margin-top:2px}
+.cfwk-sw{margin-left:auto;position:relative;width:40px;height:23px;flex:none;border-radius:999px;border:0;background:var(--mt-border-strong,#d4d4d8);cursor:pointer;transition:background .15s}
+.cfwk-sw::after{content:"";position:absolute;left:3px;top:3px;width:17px;height:17px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.2);transition:transform .15s}
+.cfwk-sw[aria-checked=true]{background:var(--mt-primary,#2563eb)}
+.cfwk-sw[aria-checked=true]::after{transform:translateX(17px)}
+.cfwk-sw:disabled{opacity:.5;cursor:default}
+.cfwk-steps{margin:0;padding:0;list-style:none;display:grid;gap:5px;font-size:13px}
+.cfwk-steps li{display:flex;gap:8px;align-items:baseline}
+.cfwk-steps li b{flex:none;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mt-ink-3,#71717a);width:58px}
+html:not(#cfm) body:not(#cfm) .cfwk-steps input{display:inline-block!important;width:58px!important;height:28px!important;min-height:0!important;margin:0 4px!important;border:1px solid var(--mt-border,#e4e4e7)!important;border-radius:6px!important;padding:0 6px!important;font:inherit;font-size:13px!important;text-align:center;vertical-align:baseline}
+.cfwk-rule footer{display:flex;gap:12px;font-size:11.5px;color:var(--mt-ink-3,#71717a);border-top:1px solid var(--mt-border,#e4e4e7);padding-top:9px;margin-top:auto}
+html[data-cf-theme="dark"] :is(.cfwk-ic,.cfwk-tag.auto,.cfwk-tag.hi,.cfwk-age.warn,.cfwk-age.bad,.cfwk-task.done .cfwk-ck){filter:invert(1) hue-rotate(180deg)}
+@media(max-width:640px){
+  .cfwk-row{grid-template-columns:30px minmax(0,1fr);padding:11px 12px}
+  .cfwk-row .cfwk-end{grid-column:2;justify-content:flex-start}
+  .cfwk-task{grid-template-columns:24px minmax(0,1fr)}
+  .cfwk-row strong,.cfwk-row .why{white-space:normal}
+  .cfwk-bar input[type=search]{flex:1 1 100%}
+  .cfwk-form{grid-template-columns:1fr}
+  .cfwk-rules{grid-template-columns:1fr}
+}
+@media print{#cfWorkOverlay{display:none!important}}
+</style>
+<script id="cf-work-module">(function(){'use strict';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const company=()=>(typeof currentCompanyId!=='undefined'&&currentCompanyId)||'';
+const me=()=>(typeof currentUser!=='undefined'&&currentUser?.id)||'';
+const role=()=>(typeof currentMembership!=='undefined'&&currentMembership?.role)||'';
+const mgr=()=>['owner','admin','manager'].includes(role());
+const admin=()=>['owner','admin'].includes(role());
+const can=a=>{try{return hasAppAction(a)}catch(_){return false}};
+const ident=()=>[me(),company(),role()].join('|');
+const TZ='Europe/Istanbul';
+const dayKey=d=>new Intl.DateTimeFormat('sv-SE',{timeZone:TZ}).format(d);
+const today=()=>dayKey(new Date());
+const fmtDay=v=>{if(!v)return '';const d=new Date(v);return d.toLocaleDateString('tr-TR',{day:'numeric',month:'short',timeZone:TZ})};
+const fmtTime=v=>new Date(v).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',timeZone:TZ});
+const initials=n=>String(n||'?').trim().split(/[\s@._-]+/).filter(Boolean).slice(0,2).map(w=>w[0].toLocaleUpperCase('tr-TR')).join('')||'?';
+function age(v){if(!v)return ['',''];const h=(Date.now()-Date.parse(v))/36e5;if(!isFinite(h))return ['',''];const t=h<1?'az önce':h<24?Math.floor(h)+' saat':Math.floor(h/24)+' gün';return [t,h>=72?'bad':h>=24?'warn':'']}
+async function q(p){try{const r=await p;return r.error?{rows:[],error:r.error}:{rows:r.data||[]}}catch(e){return {rows:[],error:e}}}
+let peopleCache=null;
+async function people(){if(peopleCache?.k===ident())return peopleCache.list;let list=[];try{list=window.cfPeople?await window.cfPeople():[]}catch(_){}
+  list=(list||[]).map(p=>({id:p.id||p.user_id,name:p.name||p.full_name||p.label||p.email||'Çalışan'})).filter(p=>p.id);peopleCache={k:ident(),list};return list}
+const nameOf=(list,id)=>id?(list.find(p=>p.id===id)?.name||'Çalışan'):'';
+
+/* ---------------- sayfa iskeleti ---------------- */
+const overlay=document.createElement('section');overlay.id='cfWorkOverlay';overlay.className='pr-page-view cf-work-overlay';overlay.hidden=true;
+overlay.innerHTML='<div class="pr-page-shell"><header class="pr-page-head"><div><small class="workspace-kicker" id="cfwkKick">ÇALIŞMA ALANI</small><h1 id="cfwkTitle">Bekleyenler</h1><p id="cfwkSub"></p></div><div style="display:flex;gap:8px;flex-wrap:wrap" id="cfwkHeadActs"></div></header><div id="cfwkRoot" class="cfwk-root"></div></div>';
+document.body.append(overlay);
+let mode='',token=0;
+const PAGES={
+  queue:{key:'cfQueueNav',kick:'ÇALIŞMA ALANI',title:'Bekleyenler',sub:'Kararınızı veya yanıtınızı bekleyen her şey tek listede — en eskisi en üstte.',ic:'<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2 2.5A1.5 1.5 0 0 1 3.5 1h9A1.5 1.5 0 0 1 14 2.5v11a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5zM3.5 2a.5.5 0 0 0-.5.5v11a.5.5 0 0 0 .5.5h9a.5.5 0 0 0 .5-.5v-11a.5.5 0 0 0-.5-.5z"/><path d="M10.854 5.146a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7 8.293l3.146-3.147a.5.5 0 0 1 .708 0M5 11.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5"/></svg>'},
+  tasks:{key:'cfTasksNav',kick:'ÇALIŞMA ALANI',title:'Görevler',sub:'Görev ve hatırlatmalar: kim, neyi, ne zamana kadar yapacak.',ic:'<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2 3.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m4 0a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5M2 8a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1A.5.5 0 0 1 2 8m4 0a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 6 8m-4 4.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5m4 0a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5"/></svg>'},
+  rules:{key:'cfAutoNav',kick:'YÖNETİM',title:'Otomatik kurallar',sub:'Hazır kuralları açın; sistem gerektiğinde görevi kendisi açar, iş sonuçlanınca kapatır.',ic:'<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M11.251.068a.5.5 0 0 1 .227.58L9.677 6.5H13a.5.5 0 0 1 .364.843l-8 8.5a.5.5 0 0 1-.842-.49L6.323 9.5H3a.5.5 0 0 1-.364-.843l8-8.5a.5.5 0 0 1 .615-.09zM4.157 8.5H7a.5.5 0 0 1 .478.647L6.11 13.59l5.732-6.09H9a.5.5 0 0 1-.478-.647L9.89 2.41z"/></svg>'}};
+function navAllowed(k){if(!me()||!company())return false;if(k==='rules')return admin();return true}
+function navButtons(){for(const nav of document.querySelectorAll('.ds-nav,.md-menu')){for(const [k,P] of Object.entries(PAGES)){let b=nav.querySelector('[data-'+P.key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())+']');
+  if(!b){b=document.createElement('button');b.type='button';b.dataset[P.key]='';b.className=nav.matches('.ds-nav')?'ds-btn':'';b.innerHTML='<span class="'+(nav.matches('.ds-nav')?'ds-icon':'mi')+'">'+P.ic+'</span><span>'+P.title+'</span>';b.onclick=()=>{if(nav.matches('.md-menu')&&typeof closeMobileDrawer==='function')try{closeMobileDrawer()}catch(_){}open(k)};nav.append(b)}
+  const hide=!navAllowed(k);if(b.hidden!==hide)b.hidden=hide}}}
+function setActive(){document.querySelectorAll('.ds-nav > button.active,.md-menu > button.active').forEach(x=>x.classList.remove('active'));const P=PAGES[mode];if(P)document.querySelectorAll('[data-'+P.key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())+']').forEach(b=>b.classList.add('active'))}
+async function open(k){if(!me()||!company()||!navAllowed(k))return;if(window.cfUnsaved&&!cfUnsaved.allow())return;if(typeof closeAllCepFirmaViews==='function')closeAllCepFirmaViews();mode=k;overlay.hidden=false;overlay.scrollTop=0;const P=PAGES[k];$('cfwkKick').textContent=P.kick;$('cfwkTitle').textContent=P.title;$('cfwkSub').textContent=P.sub;$('cfwkHeadActs').innerHTML='';setActive();
+  $('cfwkRoot').innerHTML='<p class="cfwk-hint">Yükleniyor…</p>';if(k==='queue')await renderQueue();else if(k==='tasks')await renderTasks();else await renderRules()}
+if(typeof closeAllCepFirmaViews==='function'){const base=closeAllCepFirmaViews;closeAllCepFirmaViews=function(){overlay.hidden=true;mode='';const r=base.apply(this,arguments);return r};window.closeAllCepFirmaViews=closeAllCepFirmaViews}
+const isOpen=k=>!overlay.hidden&&mode===k;
+
+/* ---------------- 1) Bekleyenler ---------------- */
+let qFilter='',qItems=[],kbIdx=-1;
+const QT={proforma:['Proforma onayı','#d97706','📄'],travel:['Seyahat onayı','#0891b2','✈'],request:['Çalışan talebi','#0284c7','🗂'],plan:['Size atanan iş','#2563eb','📥'],task:['Görev','#7c3aed','✓']};
+async function collect(){const c=company(),u=me(),out=[];const list=await people();const jobs=[];
+  const approver=typeof isProformaApprover==='function'?isProformaApprover():admin();
+  if(approver&&(can('archive')||can('new')))jobs.push(q(sb.from('proformas').select('id,proforma_number,customer_name,grand_total,currency,approval_requested_at,approval_requested_by,prepared_by,created_at').eq('company_id',c).is('deleted_at',null).eq('approval_state','pending').order('approval_requested_at',{ascending:true,nullsFirst:true}).limit(100)).then(r=>r.rows.forEach(p=>out.push({t:'proforma',id:p.id,at:p.approval_requested_at||p.created_at,title:(p.proforma_number||'Proforma')+' · '+(p.customer_name||''),why:'Onayınızı bekliyor'+(p.approval_requested_by||p.prepared_by?' · gönderen: '+(nameOf(list,p.approval_requested_by)||p.prepared_by):'')+(p.grand_total?' · '+Number(p.grand_total).toLocaleString('tr-TR',{maximumFractionDigits:2})+' '+(p.currency||''):''),go:'İncele / karar ver',run:()=>window.cfApprovalReview?.open?.(p.id)}))));
+  const orgOk=can('organization')&&(typeof orgApprover==='function'?orgApprover():mgr());
+  if(orgOk)jobs.push(q(sb.from('event_organizations').select('id,title,city,departure,status,requester_label,requester_id,created_at,updated_at').eq('company_id',c).eq('status','approval').order('created_at',{ascending:true}).limit(100)).then(r=>r.rows.forEach(x=>out.push({t:'travel',id:x.id,at:x.updated_at||x.created_at,title:(x.title||'Seyahat')+(x.city?' · '+x.city:''),why:'Onay bekliyor'+(x.requester_label?' · '+x.requester_label:'')+(x.departure?' · gidiş '+fmtDay(x.departure):'')+(x.departure&&Date.parse(x.departure)<Date.now()?' · tarihi geçti':''),go:'Aç',run:()=>openTravel(x.id)}))));
+  if(typeof erManager==='function'&&erManager())jobs.push(q(sb.from('employee_requests').select('id,title,requester_label,requester_id,state,created_at,updated_at').eq('company_id',c).neq('requester_id',u).in('state',['submitted','reviewing']).order('created_at',{ascending:true}).limit(100)).then(r=>r.rows.forEach(x=>out.push({t:'request',id:x.id,at:x.created_at,title:x.title||'Talep',why:'Kararınızı bekliyor'+(x.requester_label?' · '+x.requester_label:'')+(x.state==='reviewing'?' · incelemede':''),go:'Aç',run:()=>window.openRequests?.()}))));
+  /* bana atanmış, yanıt vermediğim planlar */
+  jobs.push((async()=>{const t=today();const r=await q(sb.from('calendar_events').select('id,title,event_type,event_date,start_time,created_by,created_at,assigned_user_id,participant_ids,completed_at').eq('company_id',c).gte('event_date',t).is('completed_at',null).neq('created_by',u).or('assigned_user_id.eq.'+u+',participant_ids.cs.{'+u+'}').order('event_date').limit(100));if(!r.rows.length)return;
+    const rs=await q(sb.from('calendar_assignment_responses').select('event_id,status').eq('user_id',u).in('event_id',r.rows.map(e=>e.id)));const done=new Set(rs.rows.map(x=>String(x.event_id)));
+    r.rows.filter(e=>!done.has(String(e.id))).forEach(e=>out.push({t:'plan',id:e.id,at:e.created_at,title:(window.cfPlanTitle?window.cfPlanTitle(e):(e.title||e.event_type||'Plan')),why:nameOf(list,e.created_by)+' size atadı · '+fmtDay(e.event_date+'T12:00:00')+(e.start_time?' '+String(e.start_time).slice(0,5):'')+' · yanıtınızı bekliyor',go:'Yanıtla',run:()=>window.cfOpenPlanCard?window.cfOpenPlanCard(e.id,true):window.cfOpenInbox?.()}))})());
+  /* geciken / bugünkü görevlerim */
+  if(taskReady!==false)jobs.push(q(sb.from('company_tasks').select('id,title,due_at,priority,status,created_at,related_label').eq('company_id',c).eq('assignee_id',u).in('status',['open','doing']).not('due_at','is',null).lte('due_at',new Date(new Date(today()+'T23:59:59+03:00')).toISOString()).order('due_at').limit(100)).then(r=>{if(r.error)return;r.rows.forEach(x=>{const late=dayKey(new Date(x.due_at))<today();out.push({t:'task',id:x.id,at:x.due_at,title:x.title,why:(late?'Gecikti · son tarih '+fmtDay(x.due_at):'Bugün '+fmtTime(x.due_at))+(x.related_label?' · '+x.related_label:''),go:'Göreve git',run:()=>{open('tasks').then(()=>editTask(x.id))}})})}));
+  await Promise.all(jobs);out.sort((a,b)=>String(a.at||'').localeCompare(String(b.at||'')));return out}
+async function openTravel(id){await appNavigate('organization');for(let i=0;i<20;i++){const b=document.querySelector('#orgList [data-org-id="'+CSS.escape(String(id))+'"]');if(b){b.click();b.scrollIntoView({block:'center'});return}await new Promise(r=>setTimeout(r,250))}}
+async function renderQueue(){const t=++token;const items=await collect();if(t!==token||!isOpen('queue'))return;qItems=items;queueCount(items.length);paintQueue()}
+function paintQueue(){const root=$('cfwkRoot');const cnt={};qItems.forEach(x=>cnt[x.t]=(cnt[x.t]||0)+1);if(qFilter&&!cnt[qFilter])qFilter='';const L=qFilter?qItems.filter(x=>x.t===qFilter):qItems;
+  const chips='<div class="cfwk-chips" role="tablist"><button type="button" data-qf="" class="'+(qFilter?'':'on')+'">Tümü <b>'+qItems.length+'</b></button>'+Object.keys(QT).filter(k=>cnt[k]).map(k=>'<button type="button" data-qf="'+k+'" class="'+(qFilter===k?'on':'')+'">'+QT[k][0]+' <b>'+cnt[k]+'</b></button>').join('')+'</div>';
+  const rows=L.map((x,i)=>{const [a,cls]=age(x.at);const T=QT[x.t];return '<button type="button" class="cfwk-row" data-qi="'+qItems.indexOf(x)+'" style="--c:'+T[1]+'"><span class="cfwk-ic" aria-hidden="true">'+T[2]+'</span><span><strong>'+esc(x.title)+'</strong><span class="why">'+esc(T[0])+' · '+esc(x.why)+'</span></span><span class="cfwk-end">'+(a&&x.t!=='task'?'<span class="cfwk-age '+cls+'" title="Bekleme süresi">'+a+'</span>':'')+'<span class="cfwk-go">'+esc(x.go)+' →</span></span></button>'}).join('');
+  root.innerHTML='<div class="cfwk-bar">'+chips+'<span class="sp"></span><span class="cfwk-hint cfwk-kb"><kbd>↑</kbd> <kbd>↓</kbd> gezin · <kbd>Enter</kbd> aç</span><button type="button" class="btn light" data-qr>Yenile</button></div>'+(L.length?'<div class="cfwk-list">'+rows+'</div>':'<div class="cfwk-list"><div class="cfwk-empty"><b>✓</b>Sizi bekleyen bir şey yok.</div></div>');
+  kbIdx=-1;
+  root.querySelectorAll('[data-qf]').forEach(b=>b.onclick=()=>{qFilter=b.dataset.qf;paintQueue()});root.querySelector('[data-qr]').onclick=()=>{root.innerHTML='<p class="cfwk-hint">Yükleniyor…</p>';renderQueue()};
+  root.querySelectorAll('[data-qi]').forEach(b=>b.onclick=()=>{const x=qItems[+b.dataset.qi];try{x?.run?.()}catch(e){alert(e.message||e)}})}
+document.addEventListener('keydown',e=>{if(!isOpen('queue')||e.ctrlKey||e.metaKey||e.altKey)return;if(e.target.closest&&e.target.closest('input,textarea,select,[contenteditable],.cfwk-modal'))return;const rows=[...overlay.querySelectorAll('.cfwk-row')];if(!rows.length)return;
+  if(e.key==='ArrowDown'||e.key==='j'){kbIdx=Math.min(rows.length-1,kbIdx+1)}else if(e.key==='ArrowUp'||e.key==='k'){kbIdx=Math.max(0,kbIdx-1)}else if(e.key==='Enter'&&kbIdx>=0){e.preventDefault();rows[kbIdx].click();return}else return;
+  e.preventDefault();rows.forEach((r,i)=>r.classList.toggle('kb',i===kbIdx));rows[kbIdx].focus({preventScroll:true});rows[kbIdx].scrollIntoView({block:'nearest'})});
+function queueCount(n){if(window.cfQueueCount!==n){window.cfQueueCount=n;window.cfUiDecorate?.()}}
+
+/* ---------------- 2) Görevler ---------------- */
+let taskReady=null,tasks=[],tView='mine',tState='open',tSearch='',tPerson='';
+const PRI={high:['Yüksek','hi'],normal:['Normal',''],low:['Düşük','']};
+const REL={customer:'Müşteri',offer:'Teklif',proforma:'Proforma',service:'Servis',order:'Sipariş',interaction:'Görüşme',device:'Cihaz',travel:'Seyahat'};
+const RULE_NAME={offer_followup:'Teklif takibi',crm_followup:'Görüşme takibi',service_followup:'Servis takibi',service_late:'Serviste bekleyen cihaz',order_stuck:'İlerlemeyen sipariş',maintenance_due:'Periyodik bakım'};
+async function probeTasks(){if(taskReady!==null&&probeTasks.k===ident())return taskReady;probeTasks.k=ident();const r=await q(sb.from('company_tasks').select('id').eq('company_id',company()).limit(1));taskReady=!r.error;probeTasks.err=r.error;return taskReady}
+function setupBox(what){return '<div class="cfwk-setup"><b>'+what+' için veritabanı kurulumu gerekiyor.</b><br>Supabase › SQL Editor\'de <code>veritabani/2026-11-20-gorevler-otomasyon.sql</code> dosyasını bir kez çalıştırın, sonra bu sayfayı yenileyin.'+(probeTasks.err&&!/42P01|PGRST205|does not exist|schema cache/i.test((probeTasks.err.code||'')+' '+(probeTasks.err.message||''))?'<br><small>Hata: '+esc(probeTasks.err.message||'')+'</small>':'')+'</div>'}
+async function loadTasks(){const c=company();let s=sb.from('company_tasks').select('*').eq('company_id',c);
+  if(tState==='open')s=s.in('status',['open','doing']).order('due_at',{ascending:true,nullsFirst:false}).limit(500);else s=s.in('status',['done','cancelled']).order('completed_at',{ascending:false,nullsFirst:false}).limit(200);
+  const r=await q(s);tasks=r.rows;return r}
+async function renderTasks(){const t=++token;if(!(await probeTasks())){if(t===token)$('cfwkRoot').innerHTML=setupBox('Görevler');return}
+  $('cfwkHeadActs').innerHTML='<button type="button" class="btn primary" id="cfwkNew">+ Yeni görev</button>';$('cfwkNew').onclick=()=>editTask(null);
+  await Promise.all([loadTasks(),people()]);if(t!==token||!isOpen('tasks'))return;paintTasks();taskCount()}
+function visibleTasks(){const u=me();let L=tasks;if(tView==='mine')L=L.filter(x=>x.assignee_id===u||(!x.assignee_id&&x.created_by===u));else if(tView==='created')L=L.filter(x=>x.created_by===u&&x.assignee_id!==u);else if(tView==='none')L=L.filter(x=>!x.assignee_id);
+  if(tPerson)L=L.filter(x=>x.assignee_id===tPerson);if(tSearch){const s=tSearch.toLocaleLowerCase('tr-TR');L=L.filter(x=>((x.title||'')+' '+(x.notes||'')+' '+(x.related_label||'')).toLocaleLowerCase('tr-TR').includes(s))}return L}
+function bucket(x){if(!x.due_at)return 'none';const d=dayKey(new Date(x.due_at)),t=today();if(d<t)return 'late';if(d===t)return 'today';const w=new Date(t+'T12:00:00Z');w.setUTCDate(w.getUTCDate()+7);return d<=w.toISOString().slice(0,10)?'week':'later'}
+const BUCKETS=[['late','Gecikmiş'],['today','Bugün'],['week','Bu hafta'],['later','Daha sonra'],['none','Tarihsiz']];
+function paintTasks(){const root=$('cfwkRoot');const list=peopleCache?.list||[];const u=me();const L=visibleTasks();
+  const cMine=tasks.filter(x=>x.assignee_id===u||(!x.assignee_id&&x.created_by===u)).length,cNone=tasks.filter(x=>!x.assignee_id).length,cCreated=tasks.filter(x=>x.created_by===u&&x.assignee_id!==u).length;
+  const chip=(v,l,n)=>'<button type="button" data-tv="'+v+'" class="'+(tView===v?'on':'')+'">'+l+(n!=null?' <b>'+n+'</b>':'')+'</button>';
+  const bar='<div class="cfwk-bar"><div class="cfwk-chips">'+chip('mine','Benim',cMine)+chip('created','Verdiklerim',cCreated)+chip('none','Atanmamış',cNone)+chip('all','Herkes',tasks.length)+'</div><span class="sp"></span>'+(mgr()?'<select data-tp aria-label="Kişi"><option value="">Herkes</option>'+list.map(p=>'<option value="'+esc(p.id)+'"'+(tPerson===p.id?' selected':'')+'>'+esc(p.name)+'</option>').join('')+'</select>':'')+'<select data-ts aria-label="Durum"><option value="open"'+(tState==='open'?' selected':'')+'>Açık görevler</option><option value="done"'+(tState==='done'?' selected':'')+'>Tamamlananlar</option></select><input type="search" data-tq placeholder="Görev ara" value="'+esc(tSearch)+'"></div>';
+  let body='';
+  if(!L.length)body='<div class="cfwk-list"><div class="cfwk-empty"><b>'+(tState==='open'?'☕':'—')+'</b>'+(tState==='open'?'Bu görünümde açık görev yok.':'Tamamlanan görev yok.')+'</div></div>';
+  else if(tState==='open'){body='<div class="cfwk-list">'+BUCKETS.map(([k,l])=>{const G=L.filter(x=>bucket(x)===k);if(!G.length)return '';return '<div class="cfwk-grp'+(k==='late'?' late':'')+'">'+l+' <em>'+G.length+'</em></div>'+G.map(x=>taskRow(x,list)).join('')}).join('')+'</div>'}
+  else body='<div class="cfwk-list">'+L.map(x=>taskRow(x,list)).join('')+'</div>';
+  root.innerHTML=bar+body;
+  root.querySelectorAll('[data-tv]').forEach(b=>b.onclick=()=>{tView=b.dataset.tv;paintTasks()});
+  root.querySelector('[data-ts]').onchange=async e=>{tState=e.target.value;root.querySelector('.cfwk-list')?.replaceWith(Object.assign(document.createElement('p'),{className:'cfwk-hint',textContent:'Yükleniyor…'}));await loadTasks();if(isOpen('tasks'))paintTasks()};
+  const tp=root.querySelector('[data-tp]');if(tp)tp.onchange=e=>{tPerson=e.target.value;paintTasks()};
+  const tq=root.querySelector('[data-tq]');tq.oninput=()=>{tSearch=tq.value;clearTimeout(tq._t);tq._t=setTimeout(()=>{paintTasks();const n=$('cfwkRoot').querySelector('[data-tq]');n.focus();n.setSelectionRange(n.value.length,n.value.length)},250)};
+  root.querySelectorAll('[data-tid]').forEach(b=>b.onclick=e=>{if(e.target.closest('[data-ck],[data-rel]'))return;editTask(+b.dataset.tid)});
+  root.querySelectorAll('[data-ck]').forEach(b=>b.onclick=e=>{e.stopPropagation();toggleDone(+b.dataset.ck)});
+  root.querySelectorAll('[data-rel]').forEach(b=>b.onclick=e=>{e.stopPropagation();const x=tasks.find(t=>String(t.id)===b.dataset.rel);if(x)openRelated(x)})}
+function taskRow(x,list){const done=x.status==='done'||x.status==='cancelled';const b=bucket(x);const who=x.assignee_id?nameOf(list,x.assignee_id):'';
+  const due=x.due_at?'<span class="cfwk-due '+(done?'':b==='late'?'late':b==='today'?'today':'')+'">'+(b==='today'&&!done?'Bugün '+fmtTime(x.due_at):fmtDay(x.due_at)+(new Date(x.due_at).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',timeZone:TZ})!=='00:00'&&b!=='today'?' '+fmtTime(x.due_at):''))+'</span>':'';
+  const meta=[x.priority==='high'?'<span class="cfwk-tag hi">Yüksek öncelik</span>':'',x.related_type?'<button type="button" class="cfwk-tag" data-rel="'+x.id+'" title="Kaydı aç">'+esc(REL[x.related_type]||'')+(x.related_label?' · '+esc(x.related_label):'')+'</button>':'',x.source==='auto'?'<span class="cfwk-tag auto" title="Otomatik kural">⚡ '+esc(RULE_NAME[x.rule_key]||'Otomatik')+'</span>':'',x.status==='doing'?'<span class="cfwk-tag">Yapılıyor</span>':'',x.status==='cancelled'?'<span class="cfwk-tag">İptal</span>':'',done&&x.completed_at?'<span>Tamamlandı '+fmtDay(x.completed_at)+'</span>':''].filter(Boolean).join('');
+  return '<div class="cfwk-row cfwk-task'+(done?' done':'')+'" role="button" tabindex="0" data-tid="'+x.id+'"><button type="button" class="cfwk-ck" data-ck="'+x.id+'" aria-label="'+(done?'Yeniden aç':'Tamamlandı olarak işaretle')+'" title="'+(done?'Yeniden aç':'Tamamlandı')+'">✓</button><span><strong>'+esc(x.title)+'</strong>'+(meta?'<span class="cfwk-meta">'+meta+'</span>':'')+'</span><span class="cfwk-end">'+due+'<span class="cfwk-av'+(who?'':' none')+'" title="'+esc(who||'Atanmamış')+'">'+(who?esc(initials(who)):'')+'</span></span></div>'}
+async function toggleDone(id){const x=tasks.find(t=>t.id===id);if(!x)return;const next=x.status==='done'?'open':'done';const {error}=await sb.from('company_tasks').update({status:next}).eq('company_id',company()).eq('id',id);if(error){alert('Görev güncellenemedi: '+error.message);return}x.status=next;x.completed_at=next==='done'?new Date().toISOString():null;if(tState==='open'&&next==='done'){const row=$('cfwkRoot').querySelector('[data-tid="'+id+'"]');row?.classList.add('done');setTimeout(()=>{tasks=tasks.filter(t=>t.id!==id);if(isOpen('tasks'))paintTasks();taskCount()},500)}else{tasks=tasks.filter(t=>t.id!==id);paintTasks();taskCount()}}
+function openRelated(x){const id=x.related_id;try{switch(x.related_type){
+  case 'offer':return window.openOffers?.();case 'proforma':return typeof loadSavedProforma==='function'?loadSavedProforma(id,true):appNavigate('archive');
+  case 'service':return window.cfOpenService?window.cfOpenService(id):appNavigate('service');case 'order':return appNavigate('orders');
+  case 'interaction':return appNavigate('crm');case 'device':return window.cfMaintenanceList?window.cfMaintenanceList():appNavigate('customers');
+  case 'travel':return openTravel(id);default:return appNavigate('customers')}}catch(e){alert(e.message||e)}}
+function toLocalInput(v){if(!v)return ['',''];const d=new Date(v);return [dayKey(d),d.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit',timeZone:TZ,hour12:false})]}
+async function editTask(id,prefill){if(!(await probeTasks())){alert('Görevler için önce veritabanı kurulumu yapılmalı (2026-11-20-gorevler-otomasyon.sql).');return}
+  let x=id?tasks.find(t=>t.id===id):null;if(id&&!x){const r=await q(sb.from('company_tasks').select('*').eq('company_id',company()).eq('id',id).maybeSingle());x=r.rows&&!Array.isArray(r.rows)?r.rows:null;if(!x){alert('Görev bulunamadı.');return}}
+  const list=await people();const u=me();const isNew=!x;x=x||{title:'',notes:'',assignee_id:u,priority:'normal',status:'open',due_at:null,...(prefill||{})};
+  const full=isNew||mgr()||x.created_by===u||(x.source==='auto'&&!x.assignee_id);const canDel=!isNew&&(x.created_by===u||admin());const [dd,dt]=toLocalInput(x.due_at);const dis=full?'':' disabled';
+  const m=document.createElement('div');m.className='cfwk-modal';m.innerHTML='<div class="cfwk-dlg" role="dialog" aria-modal="true" aria-labelledby="cfwkDlgT"><h3 id="cfwkDlgT">'+(isNew?'Yeni görev':'Görev')+'</h3><div class="cfwk-form">'
+   +'<div class="full"><label for="cfwkT">Görev</label><input id="cfwkT" maxlength="200" value="'+esc(x.title)+'" placeholder="Örn. Burak Dental\'i arayıp teklifi sor"'+dis+'></div>'
+   +'<div><label for="cfwkA">Sorumlu</label><select id="cfwkA"'+dis+'><option value="">Atanmamış (ekip)</option>'+list.map(p=>'<option value="'+esc(p.id)+'"'+(x.assignee_id===p.id?' selected':'')+'>'+esc(p.name)+(p.id===u?' (ben)':'')+'</option>').join('')+'</select></div>'
+   +'<div><label for="cfwkP">Öncelik</label><select id="cfwkP"'+dis+'>'+Object.entries(PRI).map(([k,v])=>'<option value="'+k+'"'+(x.priority===k?' selected':'')+'>'+v[0]+'</option>').join('')+'</select></div>'
+   +'<div><label for="cfwkD">Son tarih</label><input id="cfwkD" type="date" value="'+dd+'"'+dis+'></div>'
+   +'<div><label for="cfwkH">Saat</label><input id="cfwkH" type="time" value="'+(dd?dt:'')+'"'+dis+'></div>'
+   +'<div><label for="cfwkS">Durum</label><select id="cfwkS"><option value="open"'+(x.status==='open'?' selected':'')+'>Açık</option><option value="doing"'+(x.status==='doing'?' selected':'')+'>Yapılıyor</option><option value="done"'+(x.status==='done'?' selected':'')+'>Tamamlandı</option><option value="cancelled"'+(x.status==='cancelled'?' selected':'')+'>İptal</option></select></div>'
+   +'<div><label for="cfwkR">Bağlı kayıt</label><select id="cfwkR"'+dis+'><option value="">Yok</option>'+Object.entries(REL).map(([k,v])=>'<option value="'+k+'"'+(x.related_type===k?' selected':'')+'>'+v+'</option>').join('')+'</select></div>'
+   +'<div class="full"><label for="cfwkRL">Kayıt adı</label><input id="cfwkRL" maxlength="200" value="'+esc(x.related_label||'')+'" placeholder="Örn. müşteri adı veya belge numarası"'+dis+'></div>'
+   +'<div class="full"><label for="cfwkN">Not</label><textarea id="cfwkN" rows="3" maxlength="2000">'+esc(x.notes||'')+'</textarea></div></div>'
+   +(x.source==='auto'?'<div class="cfwk-msg">⚡ Bu görevi "'+esc(RULE_NAME[x.rule_key]||'otomatik kural')+'" açtı. İş sonuçlanınca kendiliğinden kapanır.</div>':'')
+   +(!full?'<div class="cfwk-msg">Bu görevde yalnızca durumu ve notu değiştirebilirsiniz.</div>':'')
+   +'<div class="cfwk-acts">'+(canDel?'<button type="button" class="btn light" data-del style="color:#b91c1c">Sil</button>':'')+(!isNew&&x.related_type?'<button type="button" class="btn light" data-open>Kaydı aç</button>':'')+'<span class="sp"></span><button type="button" class="btn light" data-x>Vazgeç</button><button type="button" class="btn primary" data-save>'+(isNew?'Görevi ekle':'Kaydet')+'</button></div><div class="cfwk-msg" data-m></div></div>';
+  document.body.append(m);const close=()=>{m.remove();document.removeEventListener('keydown',onKey,true)};const onKey=e=>{if(e.key==='Escape'){e.stopPropagation();close()}};document.addEventListener('keydown',onKey,true);
+  m.onclick=e=>{if(e.target===m)close()};m.querySelector('[data-x]').onclick=close;setTimeout(()=>m.querySelector(full?'#cfwkT':'#cfwkS')?.focus(),30);
+  m.querySelector('[data-open]')?.addEventListener('click',()=>{close();openRelated(x)});
+  m.querySelector('[data-del]')?.addEventListener('click',async()=>{if(!confirm('Bu görev silinsin mi? Bu işlem geri alınamaz.'))return;const {error}=await sb.from('company_tasks').delete().eq('company_id',company()).eq('id',x.id);if(error){m.querySelector('[data-m]').textContent='Silinemedi: '+error.message;return}close();tasks=tasks.filter(t=>t.id!==x.id);if(isOpen('tasks'))paintTasks();taskCount()});
+  m.querySelector('[data-save]').onclick=async()=>{const v=s=>m.querySelector(s).value.trim();const title=v('#cfwkT');if(!title){m.querySelector('[data-m]').textContent='Görev adını yazın.';m.querySelector('#cfwkT').focus();return}
+    const d=v('#cfwkD'),h=v('#cfwkH');const due=d?new Date(d+'T'+(h||'18:00')+':00+03:00').toISOString():null;
+    let row={status:v('#cfwkS'),notes:v('#cfwkN')||null};if(full)row={...row,title,assignee_id:v('#cfwkA')||null,priority:v('#cfwkP'),due_at:due,related_type:v('#cfwkR')||null,related_label:v('#cfwkRL')||null,related_id:(v('#cfwkR')&&v('#cfwkR')===x.related_type)?x.related_id||null:(prefill?.related_id&&v('#cfwkR')===prefill.related_type?prefill.related_id:null)};
+    const btn=m.querySelector('[data-save]');btn.disabled=true;m.querySelector('[data-m]').textContent='Kaydediliyor…';
+    const res=isNew?await sb.from('company_tasks').insert({...row,company_id:company()}).select('*').single():await sb.from('company_tasks').update(row).eq('company_id',company()).eq('id',x.id).select('*').single();
+    btn.disabled=false;if(res.error){m.querySelector('[data-m]').textContent='Kaydedilemedi: '+res.error.message;return}
+    close();const y=res.data;tasks=tasks.filter(t=>t.id!==y.id);if((tState==='open')===['open','doing'].includes(y.status))tasks.push(y);if(isOpen('tasks'))paintTasks();taskCount();
+    if(isNew&&y.assignee_id&&y.assignee_id!==u)toast('Görev '+nameOf(list,y.assignee_id)+' kişisine atandı.')}}
+function toast(t){const d=document.createElement('div');d.textContent=t;d.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:12500;background:#18181b;color:#fff;padding:10px 16px;border-radius:10px;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.2)';document.body.append(d);setTimeout(()=>d.remove(),2600)}
+let tcBusy=false,tcAt=0;
+async function taskCount(force){if(tcBusy||!me()||!company())return;if(!force&&Date.now()-tcAt<90000)return;tcBusy=true;tcAt=Date.now();try{if(!(await probeTasks())){window.cfTaskCount=0;return}
+  const end=new Date(today()+'T23:59:59+03:00').toISOString();const {count,error}=await sb.from('company_tasks').select('id',{count:'exact',head:true}).eq('company_id',company()).eq('assignee_id',me()).in('status',['open','doing']).lte('due_at',end);
+  const n=error?0:(count||0);if(window.cfTaskCount!==n){window.cfTaskCount=n;window.cfUiDecorate?.()}}finally{tcBusy=false}}
+window.cfNewTask=(prefill)=>editTask(null,prefill||{});
+
+/* ---------------- 3) Otomatik kurallar ---------------- */
+const RULES=[
+ {k:'offer_followup',n:'Teklif takibi',d:'Cevapsız teklifleri unutturmaz.',when:'Teklif {d} gündür "Teklif hazır" durumunda',then:'Teklifi hazırlayana "Teklif takibi" görevi açılır',close:'Müşteri kabul edince, proformaya dönünce veya yeni revizyon yapılınca kapanır',days:5},
+ {k:'crm_followup',n:'Görüşme takibi',d:'Takip günü gelen görüşmeler görev olur.',when:'Görüşmenin takip tarihi geldiğinde',then:'Görüşme sahibine "Görüşme takibi" görevi açılır (telefonuyla)',close:'',days:null},
+ {k:'service_followup',n:'Servis takibi',d:'Servis kaydının takip günü kaçmaz.',when:'Açık servis kaydının takip günü geldiğinde',then:'Servis sorumlusuna görev açılır',close:'Servis tamamlanınca kapanır',days:null},
+ {k:'service_late',n:'Serviste bekleyen cihaz',d:'Uzun süredir serviste duran cihazları uyarır.',when:'Cihaz {d} günden uzun süredir serviste',then:'Servis sorumlusuna yüksek öncelikli görev açılır',close:'Servis tamamlanınca kapanır',days:7},
+ {k:'order_stuck',n:'İlerlemeyen sipariş',d:'Muhasebe / depo / sevkiyatta takılan siparişler.',when:'Sipariş {d} günden uzun süredir aynı aşamada',then:'Siparişi açana yüksek öncelikli görev açılır',close:'Sipariş ilerleyince veya teslim edilince kapanır',days:2},
+ {k:'maintenance_due',n:'Periyodik bakım',d:'Bakımı yaklaşan cihazlar için randevu hatırlatması.',when:'Cihazın bakım tarihine {d} gün kaldığında',then:'Ekibe (atanmamış) "Periyodik bakım" görevi açılır',close:'Bakım yapılıp yeni tarih girilince kapanır',days:7}];
+let rules={},rulesReady=null;
+async function loadRules(){const r=await q(sb.from('company_automations').select('*').eq('company_id',company()));rulesReady=!r.error;rules={};r.rows.forEach(x=>rules[x.rule_key]=x);return r}
+async function renderRules(){const t=++token;if(!(await probeTasks())){if(t===token)$('cfwkRoot').innerHTML=setupBox('Otomatik kurallar');return}await loadRules();if(t!==token||!isOpen('rules'))return;
+  $('cfwkHeadActs').innerHTML='<button type="button" class="btn light" id="cfwkRun">Şimdi çalıştır</button>';$('cfwkRun').onclick=()=>runNow(true);paintRules()}
+function paintRules(){const root=$('cfwkRoot');const on=RULES.filter(R=>rules[R.k]?.enabled).length;const last=Object.values(rules).map(x=>x.last_run_at).filter(Boolean).sort().pop();
+  root.innerHTML='<div class="cfwk-bar"><span class="cfwk-hint">'+on+' / '+RULES.length+' kural açık'+(last?' · son çalışma '+fmtDay(last)+' '+fmtTime(last):'')+' · Kurallar en fazla 10 dakikada bir çalışır; oluşturulan görevler Görevler sayfasına düşer.</span></div><div class="cfwk-rules">'+RULES.map(R=>{const x=rules[R.k]||{};const days=x.days||R.days;const en=!!x.enabled;
+    return '<article class="cfwk-rule'+(en?' on':'')+'" data-rk="'+R.k+'"><header><div><h4>'+esc(R.n)+'</h4><small>'+esc(R.d)+'</small></div><button type="button" class="cfwk-sw" role="switch" aria-checked="'+en+'" aria-label="'+esc(R.n)+' kuralını '+(en?'kapat':'aç')+'"'+(admin()?'':' disabled')+'></button></header><ul class="cfwk-steps"><li><b>Ne zaman</b><span>'+esc(R.when).replace('{d}',R.days?'<input type="number" min="1" max="90" value="'+days+'" aria-label="Gün sayısı"'+(admin()?'':' disabled')+'>':'')+'</span></li><li><b>Ne olur</b><span>'+esc(R.then)+'</span></li>'+(R.close?'<li><b>Kapanış</b><span>'+esc(R.close)+'</span></li>':'')+'</ul><footer><span>'+(x.run_count||0)+' çalışma</span><span>'+(x.created_count||0)+' görev açtı</span><span>'+(x.last_run_at?'Son: '+fmtDay(x.last_run_at)+' '+fmtTime(x.last_run_at):'Henüz çalışmadı')+'</span></footer></article>'}).join('')+'</div>';
+  root.querySelectorAll('.cfwk-rule').forEach(card=>{const k=card.dataset.rk;card.querySelector('.cfwk-sw').onclick=()=>saveRule(k,{enabled:!rules[k]?.enabled});const inp=card.querySelector('input[type=number]');if(inp)inp.onchange=()=>{const n=Math.max(1,Math.min(90,parseInt(inp.value,10)||RULES.find(R=>R.k===k).days));inp.value=n;saveRule(k,{days:n})}})}
+async function saveRule(k,patch){if(!admin())return;const R=RULES.find(x=>x.k===k);const cur=rules[k]||{};const row={company_id:company(),rule_key:k,enabled:patch.enabled??!!cur.enabled,days:patch.days??(cur.days||R.days||5)};
+  const {data,error}=await sb.from('company_automations').upsert(row,{onConflict:'company_id,rule_key'}).select('*').single();if(error){alert('Kural kaydedilemedi: '+error.message);return}rules[k]=data;paintRules();if(row.enabled&&patch.enabled)runNow(false)}
+async function runNow(manual){if(!company())return;const b=$('cfwkRun');if(b){b.disabled=true;b.textContent='Çalışıyor…'}
+  const {data,error}=await sb.rpc('cf_run_automations',{p_company:company()});if(b){b.disabled=false;b.textContent='Şimdi çalıştır'}
+  if(error){if(manual)alert('Kurallar çalıştırılamadı: '+error.message);return}
+  if(isOpen('rules')){await loadRules();paintRules();if(manual)toast(data>0?data+' yeni görev açıldı.':'Yeni görev gerekmedi (kurallar en fazla 10 dakikada bir çalışır).')}taskCount(true)}
+/* uygulama açıkken arka planda: açık kural varsa 15 dakikada bir */
+let autoAt=0;async function autoRun(){if(!me()||!company()||document.visibilityState!=='visible')return;if(Date.now()-autoAt<15*6e4)return;autoAt=Date.now();if(!(await probeTasks()))return;const {count}=await sb.from('company_automations').select('rule_key',{count:'exact',head:true}).eq('company_id',company()).eq('enabled',true);if(count>0)await sb.rpc('cf_run_automations',{p_company:company()}).then(()=>taskCount(true),()=>{})}
+
+/* ---------------- rozet sayısı (Bekleyenler) ---------------- */
+let qcAt=0,qcBusy=false;
+async function queueBadge(){if(qcBusy||!me()||!company()||isOpen('queue'))return;if(Date.now()-qcAt<120000)return;qcBusy=true;qcAt=Date.now();try{const items=await collect();queueCount(items.length)}catch(_){}finally{qcBusy=false}}
+
+let lastIdent='';
+function tick(){navButtons();const k=ident();if(k!==lastIdent){lastIdent=k;taskReady=null;peopleCache=null;qcAt=0;tcAt=0;autoAt=0;window.cfQueueCount=0;window.cfTaskCount=0;if(!overlay.hidden){overlay.hidden=true;mode=''}}
+  if(me()&&company()){queueBadge();taskCount();autoRun()}}
+let tt=0;new MutationObserver(()=>{if(tt)return;tt=setTimeout(()=>{tt=0;navButtons()},400)}).observe(document.body,{childList:true,subtree:false});
+setInterval(tick,20000);setTimeout(tick,1500);setTimeout(tick,5000);
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){qcAt=0;tick()}});
+window.cfWork={open,recheck(){taskReady=null;return probeTasks()},queue:()=>open('queue'),tasks:()=>open('tasks'),rules:()=>open('rules')};
 })();</script>
 
 <!-- ==========================================================================
