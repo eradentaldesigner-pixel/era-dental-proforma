@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-19.38)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-19.45)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -41,6 +41,12 @@ bu dosyalar orada da birer kez çalıştırılmalıdır:
     `cf_service_use_part`, `cf_service_return_part`): stoktan düşer / geri ekler ve stok hareketi yazar.
 16. `veritabani/2026-11-19-servis-imza.sql` — Teknik Servis **dijital teslim imzası** (`delivery_signature`,
     `delivery_signed_by`, `delivery_signed_at`; `cf_service_sign` fonksiyonu).
+17. `veritabani/2026-11-19-musteri-cihazlari.sql` — **müşteri cihazları** (seri no, satış tarihi, garanti bitişi) ve
+    **periyodik bakım** (`customer_devices`, `cf_device_maintenance_done`).
+18. `veritabani/2026-11-19-rehber.sql` — **Rehber** (`company_contacts`): görüşme kaydedildikçe kişi otomatik eklenir;
+    mevcut görüşmelerdeki kişiler bir kez aktarılır.
+19. `veritabani/2026-11-19-gorusme-sahibi.sql` — görüşme kaydını **yalnızca kaydı giren kişi** değiştirebilir / silebilir.
+20. `veritabani/2026-11-19-gorusme-kayip-rakip.sql` — görüşmeye **kayıp nedeni** ve **rakip** (firma, fiyat / not) alanları.
 
 ## Görünüm
 
@@ -107,6 +113,41 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Geliştirilen sayfalar
 
+- **İstihbarat geliştirmeleri:** takipteki fırsat toplamı (tahmini değerlerden) ve dönüşüm oranı; 30 gündür görüşülmeyen
+  takipteki müşteriler "💤 sessiz" (filtre ve ana sayfa uyarısı); "Kaçan" filtresinde "Neden kaybediyoruz?" ve kaybedilen
+  rakipler; ayrıntı kartında kayıp nedeni / rakip ve "📅 Demo / ziyaret planla" (takvime hazır plan).
+- **Görüşme formu:** "Olumsuz / Kaçtı"da kayıp nedeni zorunlu; rakip firma ve rakip fiyatı / not; takip tarihi boşsa
+  öneri (bilgi verildiyse 3, teklif gönderildiyse 7 gün) ve kaydederken otomatik atama. (`cf-crmextra-module`)
+- **İstihbarat — görüşme ayrıntısı:** kişiye tıklayınca düzenleme yerine salt okunur kart: durum, klinik, il, telefon,
+  ilk görüşme, görüşme sayısı, takip, ilgilendiği ürünler, teklif / proformalar ve "1. görüşme, 2. görüşme…" geçmişi
+  (tarih, kanal, görüşen, konuşulanlar). "+ N. görüşmeyi ekle", Ara, WhatsApp; düzenleme yalnızca kaydı girene.
+- **Görüşmeler — kayıt sahibi:** başkasının girdiği görüşme salt okunur açılır ("yalnızca o değiştirebilir"); kaydet / sil
+  engellenir. (`cf-crmowner-module`)
+- **Rehber:** görüşülen kişiler (ad, soyad, ünvan, telefon, e-posta, firma) — Görüşmeler ve Müşteriler sayfalarında
+  "📇 Rehber"; ara, WhatsApp, görüşme ekle, düzenle; genel aramada "Kişiler". (`cf-contacts-module`)
+- **Ana sayfa — İstihbarat** ("Son hareketler" yerine): görüşmeler satış durumuna göre — yanıp sönen sarı takipte (bilgi
+  verildi / teklif gönderildi), yeşil kazanıldı (proforma onaylandı, teklif siparişe döndü), yanıp sönen kırmızı satış kaçtı.
+  Geciken / bugünkü takipler üstte; takip tarihi yoksa tek tıkla eklenir (o gün hatırlatma); "Tekrar görüştüm".
+- **Mesajlar için telefon bildirimi:** mesaj gönderilince alıcının (genel sohbette şirketin diğer üyelerinin) telefonuna
+  "Ad · mesaj" bildirimi; bildirimi kapalı olanlara ve sessiz saatlerde gönderilmez. Dokununca sohbet açılır.
+  Zamanlanmış hatırlatmalar ayrıntılı: "3 görüşme takibi bekliyor · Burak Dental, …", "2 servis kaydının takip günü geldi · TS-…".
+  `cepfirma-push` fonksiyonu ve `push-sw.js` güncellendi.
+- **Genel arama:** üstteki arama kutusu yazarken müşteri, servis kaydı (servis no, seri no, cihaz), müşteri cihazı,
+  proforma, teklif, sipariş (sipariş / kargo / fatura no), ürün (ad, kod, marka) ve görüşmelerde arar; ↑ ↓ Enter ile açılır.
+  (`cf-search-module`)
+- **Raporlar — teknik servis raporu:** gelen / tamamlanan servis, ortalama onarım süresi, açık servis ve bekleme, garanti
+  oranı, servis cirosu; en çok servise gelen cihazlar, teknisyen performansı, aşama ve servis şekli dağılımı, tekrar eden
+  arızalar; "Servis CSV". (`cf-svcreport-module`)
+- **Veri yedeği:** Ayarlar › Firma Bilgileri › "Verilerimi Excel olarak indir" (sahip / yönetici): tek .xlsx, 11 sayfa
+  (müşteriler, ürünler, proformalar, teklifler, siparişler, servis, parçalar, cihazlar, görüşmeler, takvim, stok). (`cf-backup-module`)
+- **Seri no takibi, müşteri 360° ve periyodik bakım:** müşteriye satılan cihazlar seri numarası, satış tarihi ve garanti
+  bitişiyle kaydedilir (elle veya siparişlerdeki seri numaralarından). Servis formunda seri no yazılınca cihaz tanınır
+  (müşteri, garanti durumu; "Bilgileri forma al"), garanti alanı otomatik dolar. Müşteriler sayfasında seçili müşteri için
+  360° özet: cihazlar, açık servisler, son proformalar, son görüşme. Cihaza bakım aralığı verilir; Servis sayfasında
+  "🛠 Periyodik bakımlar" (geciken / 30 gün içinde; servis kaydı aç, plan oluştur, bakım yapıldı), ana sayfada uyarı;
+  bakımlı cihazın servisi "Teslim edildi" olunca sonraki bakım ileri alınır. (`cf-devices-module`)
+- **Teknik Servis — cihazı ürün listesinden seç:** "Cihaz / ürün adı" yazılırken ürün kataloğundaki cihazlar önerilir
+  (servis parçaları hariç); seçilince marka / model dolar. Listede olmayan cihaz elle yazılabilir. (`cf-svcdevice-module`)
 - **Telefon menüsü (premium):** profil kartı (fotoğraf, ad, rol, firma), "Menüde ara…", hızlı işlemler (Yeni teklif ·
   Plan ekle · Servis kaydı), bölümler kart içinde 52 px satırlar (renkli simge, rozet, ok), "Çıkış Yap" ayrı ve kırmızı;
   menü yüksekliği ~1800 px'ten ~1600 px'e indi ve okunur hale geldi. Alt çubuk buzlu cam görünüm. (`cf-mobmenu-module`)
@@ -246,6 +287,11 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 ## Hata düzeltmeleri
 
+- **Menü simgeleri bulanık / iç içe görünüyordu:** dolgulu simgelere eski çizgi simge kuralı uygulanıyordu; düzeltildi (`cf-iconfix-style`).
+- **Mesajlar açıkken Talepler açılmıyordu:** Talepler sayfası Mesajlar'ın arkasında açılıyordu; artık önceki sayfa kapanır.
+  Mesajlar / Gelen İşler / Talepler ile diğer bütün menüler arasındaki geçişler denendi.
+- **Bileşen dosyaları ana dizinde de aranır:** takvim, PDF, grafik ve QR dosyaları önce `vendor/` klasöründe, bulunamazsa
+  sitenin ana dizininde aranır (dosyalar klasörsüz yüklendiğinde de çalışır).
 - **Yeni takvim açılmıyordu:** canlı sitede `vendor/` klasörü yüklenmemişti; sitenin güvenlik ayarı (CSP) dış kaynaktan
   betik yüklemeyi engellediği için yedek yol da çalışmıyordu. Artık takvim bileşeni bulunamazsa neden açılmadığı açıkça
   yazılır, tercih kalıcı olarak "klasik"e çevrilmez ve "Yeni takvim"e basınca yeniden denenir.
@@ -314,7 +360,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-19.38">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-19.45">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
