@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-20.54)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-20.55)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -56,6 +56,11 @@ bu dosyalar orada da birer kez çalıştırılmalıdır:
   `company_tasks`, `company_automations` tabloları, erişim kuralları ve `cf_run_automations`
   sunucu fonksiyonu. pg_cron açıksa kurallar 30 dakikada bir sunucuda da çalışır.
   **(henüz çalıştırılmadı)**
+
+- `veritabani/2026-11-20-rotalar.sql` — **Rotalar**: `company_routes`, `company_route_stops` tabloları
+  ve erişim kuralları. **(henüz çalıştırılmadı)**
+- **Harita görselleri için Vercel ayarı:** `vercel.json` içindeki Content-Security-Policy başlığında
+  `img-src` kısmına `https://tile.openstreetmap.org` eklenmelidir. Eklenmezse harita sade il görünümünde çalışır.
 
 ## Görünüm
 
@@ -352,6 +357,18 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 - **Bekleyenler → seyahat onayı:** satıra tıklayınca Seyahatler sayfasına gitmek yerine sipariş
   detayındaki gibi bir pencere açılır; ayrıntılar ve Onayla / Reddet / İptal et aynı pencerede.
 
+- **Rotalar (yeni sayfa, Operasyon):** çok duraklı klinik ziyaret planı. Rota adı, şehir içi / dışı,
+  tarih aralığı, ulaşım, sorumlu, "Kimler gidiyor?" ve "Ayrıca kimler görsün?" seçimi, durum, not.
+  Günler tarih aralığından oluşur; her güne müşteri listesinden aranarak (veya elle) durak eklenir:
+  saat, ziyaret amacı (satış, demo, kurulum, servis, eğitim, tahsilat), adres, telefon, not.
+  Duraklar sürükleyerek / oklarla sıralanır, başka güne taşınır.
+  **Harita:** rota gün gün renkli çizgi ve numaralı işaretlerle; durağın tam yeri haritaya tıklanarak
+  veya Google Haritalar bağlantısı yapıştırılarak işaretlenir (aynı müşteri sonraki rotada bu konumla gelir).
+  Her gün için "Google Haritalar'da yol tarifi". **Paylaş:** WhatsApp, metni kopyala, yazdır / PDF.
+  **Yolda modu (telefon):** günün durakları sırayla — Ara, Yol tarifi, Ziyaret edildi / Ertelendi / İptal
+  + not; ziyaretten sonra "Görüşme kaydı aç" ve "Takip görevi ver". Liste sayfasında "Bugün rotadasınız"
+  kartı.
+
 ## Hata düzeltmeleri
 
 - **Açılışta teklif ekranı görünmesi:** site veya mobil açılırken bir an "Hızlı teklif" sayfası
@@ -442,7 +459,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-20.54">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-20.55">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
