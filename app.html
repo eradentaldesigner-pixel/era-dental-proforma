@@ -1,4 +1,4 @@
-<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-23.65"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><style id="cf-boot-splash">/* CepFirma: açılışta teklif ekranının bir an görünmesini önler — ana sayfa hazır olana kadar yükleme ekranı */
+<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-23.66"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><style id="cf-boot-splash">/* CepFirma: açılışta teklif ekranının bir an görünmesini önler — ana sayfa hazır olana kadar yükleme ekranı */
 html.cf-booting body>*{visibility:hidden!important}
 html.cf-booting body::before{content:"";position:fixed;inset:0;z-index:2147483646;background:#fafafa}
 html.cf-booting body::after{content:"";position:fixed;left:50%;top:50%;z-index:2147483647;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;border:3px solid #e4e4e7;border-top-color:#2563eb;animation:cfBootSpin .8s linear infinite}
@@ -12217,6 +12217,21 @@ html[data-cf-theme="dark"] :is(.cfgm,.cfrt-tag){filter:invert(1) hue-rotate(180d
 .cfrt-trip .t{flex:1 1 220px}
 .cfrt-trip .btn.on{border-color:#2563eb;color:#1d4ed8;background:#eff6ff}
 .cfrt-paylist{display:grid;gap:3px;font-size:12.5px;color:var(--mt-ink-2,#52525b);background:var(--mt-gray-50,#fafafa);border:1px solid var(--mt-border,#e4e4e7);border-radius:9px;padding:7px 10px}
+.cfrt-winfo dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:10px 0;font-size:13.5px}.cfrt-winfo dt{color:var(--mt-ink-3,#71717a)}.cfrt-winfo dd{margin:0}.cfrt-wtop{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.cfrt-wdays{display:grid;gap:10px}.cfrt-wday{border:1px solid var(--mt-border,#e4e4e7);border-left:4px solid var(--c);border-radius:12px;background:var(--mt-panel,#fff);padding:8px}.cfrt-wday.today{box-shadow:0 0 0 2px color-mix(in srgb,var(--c) 25%,transparent)}
+.cfrt-wday-h{display:flex;justify-content:space-between;gap:8px;padding:4px 6px 6px;font-size:13.5px}
+.cfrt-wstop{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--mt-border,#f1f1f3);padding:8px 6px;cursor:pointer;font:inherit;color:inherit;border-radius:8px}
+.cfrt-wstop:hover,.cfrt-wstop.on{background:var(--mt-hover,#f4f4f5)}.cfrt-wstop i{width:24px;height:24px;border-radius:50%;background:var(--s);color:#fff;display:grid;place-items:center;font-style:normal;font-size:12px;font-weight:700}
+.cfrt-wstop b{display:block;font-size:13.5px}.cfrt-wstop small{display:block;font-size:12px;color:var(--mt-ink-3,#71717a)}.cfrt-wstop small.note{font-style:italic}.cfrt-wstop em{font-style:normal;font-size:12px;color:var(--s);font-weight:600;white-space:nowrap}
+.cfrt-wlive{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;padding:8px 12px;border:1px solid var(--mt-border,#e4e4e7);border-radius:10px;background:var(--mt-panel,#fff)}
+.cfrt-wlive .dot,.cfrt-home .dot{width:10px;height:10px;border-radius:50%;background:#94a3b8;flex:none}.cfrt-wlive .dot.on,.cfrt-home .dot.on{background:#2563eb;box-shadow:0 0 0 0 rgba(37,99,235,.5);animation:cfrtPulse 1.8s infinite}
+@keyframes cfrtPulse{70%{box-shadow:0 0 0 8px rgba(37,99,235,0)}100%{box-shadow:0 0 0 0 rgba(37,99,235,0)}}
+@media(max-width:1099px){.cfrt-watch .cfrt-side{order:-1}}
+.cfrt-home-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:12px;align-items:stretch}.cfrt-home-map{min-height:240px;border-radius:12px;overflow:hidden;position:relative;background:#eef2f6}
+.cfrt-home-list{display:grid;gap:6px;align-content:start;max-height:300px;overflow:auto}.cfrt-home-row{display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;border:1px solid var(--mt-border,#e4e4e7);border-radius:10px;background:var(--mt-panel,#fff);padding:8px 10px;cursor:pointer;font:inherit;color:inherit}
+.cfrt-home-row:hover{border-color:#2563eb}.cfrt-home-row b{display:block;font-size:13.5px}.cfrt-home-row small{display:block;font-size:12px;color:var(--mt-ink-3,#71717a);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.cfrt-home-row em{font-style:normal;font-size:12px;color:#2563eb;white-space:nowrap}
+.cfrt-home-empty{position:absolute;inset:0;display:grid;place-content:center;text-align:center;font-size:13px;color:var(--mt-ink-3,#71717a);padding:16px}
+@media(max-width:760px){.cfrt-home-grid{grid-template-columns:1fr}.cfrt-home-map{min-height:200px}}
 .cfrt-paysum .neg b{color:#b91c1c}.cfrt-paysum .pos b{color:#0f766e}
 .cfrt-close .cfrt-paysum{margin:6px 0}
 .cfrt-extab{width:100%;border-collapse:collapse;font-size:13px;margin:6px 0}.cfrt-extab td{border-top:1px solid var(--mt-border,#e4e4e7);padding:6px 4px;vertical-align:top}.cfrt-extab td small{display:block;color:var(--mt-ink-3,#71717a);font-size:12px}.cfrt-extab .num{text-align:right;white-space:nowrap;font-weight:600}.cfrt-extab .act{text-align:right;white-space:nowrap;width:1%}
@@ -12494,9 +12509,10 @@ function renumber(){const days=routeDays();days.forEach(d=>ST.filter(s=>s.day_da
 async function openEditor(id){const t=++token;setActive();
   if(id){const r=await sb.from('company_routes').select('*').eq('company_id',company()).eq('id',id).maybeSingle();if(t!==token)return;if(!r.data){toast('Rota bulunamadı veya görme yetkiniz yok.');return renderList()}R=r.data;const s=await sb.from('company_route_stops').select('*').eq('route_id',id).order('day_date').order('position');ST=(s.data||[]).map(x=>({...x,_k:newKey()}))}
   else{const T=today();R={id:null,title:'',scope:'outstation',start_date:addDays(T,1),end_date:addDays(T,3),transport:'company_car',owner_id:me(),participant_ids:[],share_ids:[],status:'draft',notes:'',needs:{},created_by:me()};ST=[]}
-  canEdit=!R.id||R.created_by===me()||R.owner_id===me()||mgr();focusKey=null;pinKey=null;dirty=false;if(placeCol===null)placeCol=!(await sb.from('company_route_stops').select('place_id').limit(1)).error;
+  canEdit=!R.id||R.created_by===me()||R.owner_id===me();focusKey=null;pinKey=null;dirty=false;if(placeCol===null)placeCol=!(await sb.from('company_route_stops').select('place_id').limit(1)).error;
   $('cfrtTitle').textContent=R.id?R.title:'Yeni rota';$('cfrtSub').textContent=R.id?((STATUS[R.status]||STATUS.draft)[0]+' · '+fmtShort(R.start_date)+' – '+fmtShort(R.end_date)):'Günleri ve durakları ekleyin; harita ve yol tarifi kendiliğinden oluşur.';
   $('cfrtHead').innerHTML='<button type="button" class="btn light" id="cfrtBack">← Rotalar</button>';$('cfrtBack').onclick=()=>{if(guardLeave()){dirty=false;renderList()}};
+  if(R.id&&!canEdit){$('cfrtSub').textContent='İzleme · '+$('cfrtSub').textContent;paintWatch();return}
   paintEditor()}
 function peopleChips(field,dis){const list=peopleCache?.list||[];const sel=new Set(R[field]||[]);return '<div class="cfrt-people" data-pf="'+field+'">'+list.map(p=>'<button type="button" data-p="'+esc(p.id)+'" class="'+(sel.has(p.id)?'on':'')+'"'+(dis?' disabled':'')+'><i>'+esc(initials(p.name))+'</i>'+esc(p.name)+(p.id===me()?' (ben)':'')+'</button>').join('')+'</div>'}
 function paintEditor(){const dis=canEdit?'':' disabled';const list=peopleCache?.list||[];const root=$('cfrtRoot');
@@ -12775,6 +12791,7 @@ async function receiptUrl(path){const {data,error}=await sb.storage.from('route-
 async function shrink(file){if(!/^image\/(jpeg|png|webp)$/.test(file.type)||file.size<1.5e6)return file;try{const bmp=await createImageBitmap(file);const k=Math.min(1,1600/Math.max(bmp.width,bmp.height));const c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);const b=await new Promise(r=>c.toBlob(r,'image/jpeg',.82));return b&&b.size<file.size?new File([b],file.name.replace(/\.\w+$/,'')+'.jpg',{type:'image/jpeg'}):file}catch(_){return file}}
 function paintClose(){const box=$('cfrtClose');if(!box)return;const q=REQS[0];if(!R?.id||!q||!closeStates.includes(q.state)||closeReady===false){box.innerHTML=closeReady===false&&q&&closeStates.includes(q.state)&&q.submitted_by===me()?'<div class="cfrt-appr muted"><b>🧾 Görev sonrası kapanış</b><small>Kapanış için veritabanı kurulumu gerekiyor (2026-11-23-harcirah-kapanis.sql).</small></div>':'';return}
   const c=closeCalc(q);const ed=closeEditable(q);const st=REQ_ST[q.state]||['',''];
+  if(!ed&&!c.ex.length&&!['closing','closing_revision','closed'].includes(q.state)){box.innerHTML='';return}
   let h='<div class="cfrt-appr cfrt-close" style="--c:'+(q.state==='closed'?'#0f766e':'#7c3aed')+'"><div class="cfrt-appr-h"><b>🧾 Görev sonrası kapanış</b>'+(['closing','closing_revision','closed'].includes(q.state)?'<span class="cfrt-pill" style="--c:'+st[1]+'">'+st[0]+'</span>':'')+'</div>'
    +'<div class="cfrt-paysum"><span>Ödenen avans: <b>'+TL(c.paid)+'</b></span><span>Harcanan: <b>'+TL(c.spent)+'</b></span><span class="'+(c.diff<0?'neg':c.diff>0?'pos':'')+'"><b>'+esc(diffText(c.diff,q.state==='closed'))+'</b></span></div>';
   if(q.state==='closing_revision')h+='<div class="cfrt-appr-note"><b>↺ Muhasebe düzeltme istedi:</b> '+esc(q.closing_return_note||'')+'</div>';
@@ -12811,7 +12828,7 @@ function bindCloseFooter(m,q,after){m.querySelectorAll('[data-rc]').forEach(b=>b
 /* rota ekranındaki onay paneli */
 function paintAppr(){const box=$('cfrtAppr');if(!box)return;if(!R?.id||reqReady===false){box.innerHTML=reqReady===false&&canEdit?'<div class="cfrt-appr muted"><b>💰 Harcırah onayı</b><small>Onay akışı için veritabanı kurulumu gerekiyor (2026-11-22-harcirah-onay.sql).</small></div>':'';return}
   const q=REQS[0];const c=expCalc();const st=q?REQ_ST[q.state]:null;const mineReq=q&&q.submitted_by===me();const canSend=canEdit&&!dirty&&c.request>0;const M=q?reqMeta(q):null;
-  const changed=q&&['approved','partial','paid','submitted','returned'].includes(q.state)&&Math.round(+q.amount)!==Math.round(c.request);
+  const changed=canEdit&&q&&['approved','partial','paid','submitted','returned'].includes(q.state)&&Math.round(+q.amount)!==Math.round(c.request);
   let h='<div class="cfrt-appr" style="--c:'+(st?st[1]:'#71717a')+'"><div class="cfrt-appr-h"><b>💰 Harcırah onayı</b>'+(st?'<span class="cfrt-pill" style="--c:'+st[1]+'">'+st[0]+'</span>':'<span class="cfrt-pill" style="--c:#71717a">Gönderilmedi</span>')+(q?'<span class="cfrt-msg">Sürüm '+q.revision+' · talep '+TL(q.amount)+(M.approved!=null?' · onaylanan '+TL(M.approved):'')+(M.paid?' · ödenen '+TL(M.paid):'')+'</span>':'')+'</div>';
   if(!q||q.state==='withdrawn')h+='<p class="cfrt-msg">Harcırahı hazırlayıp kaydettikten sonra yöneticinin onayına gönderin. Onaylanınca muhasebeye düşer.</p>';
   if(q&&q.state==='submitted')h+='<p class="cfrt-msg">'+esc(nameOf(q.submitted_by))+' · '+fmtDT(q.submitted_at)+' tarihinde gönderildi. Yönetici onayı bekleniyor.</p>';
@@ -12916,7 +12933,7 @@ function paintTrack(){const el=$('cfrtTrack');if(!el)return;if(!R?.id||!tracking
 let trackTimer=0;function watchTrack(){clearInterval(trackTimer);trackTimer=setInterval(async()=>{if(overlay.hidden||!R?.id||dirty||document.visibilityState!=='visible'||!R.started_at||R.finished_at)return;
   const [a,b]=await Promise.all([sb.from('company_routes').select('*').eq('company_id',company()).eq('id',R.id).maybeSingle(),sb.from('company_route_stops').select('*').eq('route_id',R.id)]);if(!a.data||dirty)return;R=a.data;
   (b.data||[]).forEach(x=>{const s=ST.find(y=>y.id===x.id);if(s)Object.assign(s,{result:x.result,result_note:x.result_note,visited_at:x.visited_at,arrived_at:x.arrived_at,check_lat:x.check_lat,check_lng:x.check_lng})});
-  if($('cfrtDays')){paintTrack();paintMap(false)}else if($('cfrtGoMap')){paintGoMap();const tb=$('cfrtRoot')?.querySelector('.cfrt-trip .t');if(tb)tb.textContent=trackSummary()}},60000)}
+  if($('cfrtDays')){paintTrack();paintMap(false)}else if($('cfrtWatchDays')){paintTrack();paintWatchBody();paintMap(false)}else if($('cfrtGoMap')){paintGoMap();const tb=$('cfrtRoot')?.querySelector('.cfrt-trip .t');if(tb)tb.textContent=trackSummary()}},60000)}
 /* canlı konum: yoldayken ve uygulama ekranı açıkken birkaç dakikada bir konum gönderir (isteğe bağlı) */
 const LIVE_MS=180000;let liveTimer=0,liveRoute=null,liveLast=0,liveBusy=false;
 const liveKey=id=>'cfrt:live:'+company()+':'+id;
@@ -12930,14 +12947,14 @@ async function livePing(){if(!liveRoute||liveBusy||document.visibilityState!=='v
 function liveStart(){if(!R?.id)return;if(liveRoute===R.id&&liveTimer)return;liveRoute=R.id;liveLast=0;clearInterval(liveTimer);liveTimer=setInterval(livePing,LIVE_MS);livePing()}
 function liveStop(){clearInterval(liveTimer);liveTimer=0;liveRoute=null;liveLast=0}
 document.addEventListener('visibilitychange',()=>{if(liveRoute&&document.visibilityState==='visible'&&Date.now()-liveLast>LIVE_MS-5000)livePing()});
-function tripBanner(){if(!R?.id)return '';const can=R.created_by===me()||R.owner_id===me()||(R.participant_ids||[]).includes(me())||mgr();
+function tripBanner(){if(!R?.id)return '';const can=R.created_by===me()||R.owner_id===me()||(R.participant_ids||[]).includes(me());
   if(R.finished_at)return '<div class="cfrt-trip done"><span class="t">'+esc(trackSummary())+'</span></div>';
   if(R.started_at)return '<div class="cfrt-trip on"><span class="t">'+esc(trackSummary())+'</span>'+(can?'<button type="button" class="btn light'+(liveOn(R.id)?' on':'')+'" data-trip="live" title="Uygulama açıkken 3 dakikada bir konumunuz yöneticinize gönderilir">'+(liveOn(R.id)?'📡 Canlı konum açık · kapat':'📡 Canlı konum paylaş')+'</button><span class="cfrt-msg" data-live-t></span><button type="button" class="btn light" data-trip="ping">📍 Konumumu gönder</button><button type="button" class="btn primary" data-trip="finish">🏁 Ofise döndüm · rotayı bitir</button>':'')+'</div>';
   return can?'<div class="cfrt-trip"><span class="t">Yola çıkınca işaretleyin; yöneticiniz rotanın ilerleyişini haritada görür.</span><button type="button" class="btn primary" data-trip="start">🚗 Yola çıktım</button></div>':''}
 
 let goDay=null,goMap=null;
 async function openGo(id){const t=++token;setActive();map=null;const r=await sb.from('company_routes').select('*').eq('company_id',company()).eq('id',id).maybeSingle();if(t!==token)return;if(!r.data){toast('Rota bulunamadı.');return renderList()}R=r.data;
-  const s=await sb.from('company_route_stops').select('*').eq('route_id',id).order('day_date').order('position');ST=(s.data||[]).map(x=>({...x,_k:newKey()}));canEdit=R.created_by===me()||R.owner_id===me()||mgr();
+  const s=await sb.from('company_route_stops').select('*').eq('route_id',id).order('day_date').order('position');ST=(s.data||[]).map(x=>({...x,_k:newKey()}));canEdit=R.created_by===me()||R.owner_id===me();
   const days=routeDays();goDay=days.includes(today())?today():(days.find(d=>ST.some(x=>x.day_date===d&&x.result==='pending'))||days[0]);
   $('cfrtTitle').textContent=R.title;$('cfrtSub').textContent='Yolda modu · ziyaret sonuçlarını buradan girin.';$('cfrtHead').innerHTML='<button type="button" class="btn light" id="cfrtBack">← Rotalar</button><button type="button" class="btn light" id="cfrtEdit">Planı aç</button>';
   $('cfrtBack').onclick=()=>renderList();$('cfrtEdit').onclick=()=>openEditor(R.id);paintGo();watchTrack()}
@@ -12976,6 +12993,55 @@ function tick(){navButtons();const k=ident();if(k!==lastIdent){const was=lastIde
 let tt=0;new MutationObserver(()=>{if(tt)return;tt=setTimeout(()=>{tt=0;navButtons()},400)}).observe(document.body,{childList:true});
 setInterval(tick,20000);setTimeout(tick,1500);setTimeout(tick,5000);
 window.addEventListener('beforeunload',e=>{if(dirty&&!overlay.hidden){e.preventDefault();e.returnValue=''}});
+/* ================= izleme ekranı (rotayı düzenleyemeyenler: yönetici, katılımcı, paylaşılan) ================= */
+const traveler=()=>!!R&&(R.created_by===me()||R.owner_id===me()||(R.participant_ids||[]).includes(me()));
+function stopState(s,nt){if(s.result==='cancelled')return ['İptal',TRK.cancel,'✕'];if(s.result==='visited')return ['Ziyaret edildi'+(s.visited_at?' · '+fmtClock(s.visited_at):''),TRK.done,'✓'];if(s.arrived_at)return ['Orada · geldi '+fmtClock(s.arrived_at),TRK.now,'●'];if(s.result==='postponed')return ['Ertelendi',TRK.post,'↷'];if(nt===s)return ['Sıradaki durak',TRK.now,'→'];return ['Bekliyor',TRK.todo,'']}
+function paintWatchBody(){const box=$('cfrtWatchDays');if(!box)return;const num=stopLabelIndex();const nt=nextTarget();const T=today();
+  box.innerHTML=routeDays().map((d,i)=>{const L=ordered().filter(s=>s.day_date===d);const v=L.filter(s=>s.result==='visited').length;
+    return '<div class="cfrt-wday'+(d===T?' today':'')+'" style="--c:'+dayColor(d)+'"><div class="cfrt-wday-h"><b>'+(i+1)+'. gün · '+esc(fmtDay(d))+(d===T?' · bugün':'')+'</b><span class="cfrt-msg">'+(L.length?v+'/'+L.length+' ziyaret':'durak yok')+'</span></div>'
+     +L.map(s=>{const st=tracking()?stopState(s,nt):[RESULT[s.result]||'Bekliyor',s.result==='visited'?TRK.done:'#94a3b8',''];return '<button type="button" class="cfrt-wstop" data-wk="'+s._k+'" style="--s:'+st[1]+'"><i>'+num.get(s._k)+'</i><span><b>'+esc(s.place_name)+'</b><small>'+esc([s.city,s.visit_time?String(s.visit_time).slice(0,5):'',PURPOSE[s.purpose]||''].filter(Boolean).join(' · '))+'</small>'+(s.result_note?'<small class="note">“'+esc(s.result_note)+'”</small>':'')+'</span><em>'+st[2]+' '+esc(st[0])+'</em></button>'}).join('')+'</div>'}).join('');
+  box.querySelectorAll('[data-wk]').forEach(b=>b.onclick=()=>{const s=ST.find(x=>x._k===b.dataset.wk);if(!s||!map)return;focusKey=s._k;paintMap(false);if(s.lat!=null)map.focus?.(s,12);box.querySelectorAll('.cfrt-wstop').forEach(x=>x.classList.toggle('on',x===b))});
+  const lp=$('cfrtWatchLive');if(lp){const fresh=R.last_at&&!R.finished_at&&Date.now()-Date.parse(R.last_at)<6e5;lp.innerHTML=R.last_at&&!R.finished_at?'<span class="dot'+(fresh?' on':'')+'"></span>'+(fresh?'Canlı konum':'Son konum')+' · '+fmtClock(R.last_at)+(R.last_by?' · '+esc(nameOf(R.last_by)):'')+'<button type="button" class="cfrt-link" data-wlast>Haritada göster</button>':R.finished_at?'🏁 Rota tamamlandı':R.started_at?'Konum bilgisi henüz gelmedi':'Henüz yola çıkılmadı';
+    lp.querySelector('[data-wlast]')?.addEventListener('click',()=>map?.focus?.({lat:R.last_lat,lng:R.last_lng},11))}
+  paintSum()}
+function paintWatch(){const root=$('cfrtRoot');const ppl=[R.owner_id,...(R.participant_ids||[])].filter((v,i,a)=>v&&a.indexOf(v)===i);const st=STATUS[R.status]||STATUS.draft;
+  root.innerHTML='<div class="cfrt-ed cfrt-watch"><div class="cfrt-left"><div id="cfrtTrack"></div>'
+   +'<div class="cfrt-card2 cfrt-winfo"><div class="cfrt-wtop"><span class="cfrt-pill" style="--c:'+st[1]+'">'+(R.started_at&&!R.finished_at?'🚗 Yolda':R.finished_at?'🏁 Tamamlandı':st[0])+'</span><span class="cfrt-msg">'+(R.scope==='local'?'Şehir içi':'Şehir dışı')+' · '+esc(TRANSPORT[R.transport]||'')+'</span></div>'
+   +'<dl><dt>Tarih</dt><dd>'+esc(fmtShort(R.start_date))+(R.end_date!==R.start_date?' – '+esc(fmtShort(R.end_date)):'')+' · '+routeDays().length+' gün</dd><dt>Sorumlu</dt><dd>'+esc(nameOf(R.owner_id))+'</dd><dt>Ekip</dt><dd>'+(ppl.map(id=>esc(nameOf(id))).join(', ')||'—')+'</dd><dt>Hazırlayan</dt><dd>'+esc(nameOf(R.created_by))+'</dd>'+(R.notes?'<dt>Not</dt><dd>'+esc(R.notes).replace(/\n/g,'<br>')+'</dd>':'')+'</dl>'
+   +'<p class="cfrt-msg">🔒 Bu rotayı yalnızca hazırlayan ('+esc(nameOf(R.created_by))+')'+(R.owner_id&&R.owner_id!==R.created_by?' ve sorumlusu ('+esc(nameOf(R.owner_id))+')':'')+' değiştirebilir.</p></div>'
+   +'<div id="cfrtAppr"></div><div id="cfrtClose"></div><div class="cfrt-wdays" id="cfrtWatchDays"></div></div>'
+   +'<div class="cfrt-side"><div class="cfrt-wlive" id="cfrtWatchLive"></div><div class="cfrt-sum" id="cfrtSum"></div><div id="cfrtMap"></div>'
+   +'<div class="cfrt-card2"><div class="cfrt-acts">'+(traveler()?'<button type="button" class="btn primary" id="cfrtGo">🚗 Yolda modu</button>':'')+'<span class="sp"></span><div class="cfrt-menu"><button type="button" class="btn light" id="cfrtShareBtn">Paylaş ▾</button><div hidden id="cfrtShareMenu"><button type="button" data-sh="wa">🟢 WhatsApp ile gönder</button><button type="button" data-sh="copy">📋 Metni kopyala</button><button type="button" data-sh="print">🖨 Yazdır / PDF</button><button type="button" data-sh="exp">🧾 Harcırah talep formu</button></div></div>'
+   +(R.created_by===me()||['owner','admin'].includes(role())?'<button type="button" class="btn light" id="cfrtDel" style="color:#b91c1c">Sil</button>':'')+'</div><div class="cfrt-msg" style="margin-top:8px">Harita dakikada bir kendiliğinden yenilenir.</div></div></div></div>';
+  $('cfrtGo')?.addEventListener('click',()=>openGo(R.id));$('cfrtDel')?.addEventListener('click',delRoute);
+  const sb_=$('cfrtShareBtn'),sm=$('cfrtShareMenu');sb_.onclick=e=>{e.stopPropagation();sm.hidden=!sm.hidden};document.addEventListener('click',e=>{if(!e.target.closest('.cfrt-menu'))sm&&(sm.hidden=true)});sm.querySelectorAll('[data-sh]').forEach(b=>b.onclick=()=>{sm.hidden=true;share(b.dataset.sh)});
+  map=null;goMap=null;pinOffice=false;pinKey=null;const mel=$('cfrtMap');paintWatchBody();paintTrack();REQS=[];loadReqs(R.id).then(()=>{if($('cfrtAppr'))paintAppr()});watchTrack();
+  if(!office())ensureOffice().then(o=>{if(o&&$('cfrtWatchDays')){ROADS.clear();paintMap(true);refreshRoads()}});
+  makeMap(mel,{onMarker:m=>{if(m.key){focusKey=m.key;paintMap(false);const b=document.querySelector('.cfrt-wstop[data-wk="'+m.key+'"]');b?.scrollIntoView({block:'center',behavior:'smooth'});document.querySelectorAll('.cfrt-wstop').forEach(x=>x.classList.toggle('on',x===b))}},onTiles:ok=>{if(!ok)paintMap(false)}}).then(m=>{if(!mel.isConnected)return;map=m;paintMap(true);refreshRoads()})}
+
+/* ================= anasayfa: yoldaki ekip (canlı) ================= */
+let homeMap=null,homeTimer=0,homeBusy=false,homeSig='';
+const homeVisible=()=>{const d=$('dashboardOverlay'),r=$('hdRoot');return !!(r&&d&&!d.hidden&&d.offsetParent!==null&&document.visibilityState==='visible')};
+async function homeLive(force){const root=$('hdRoot');if(!root||!me()||!company()||homeBusy)return;if(!force&&!homeVisible())return;homeBusy=true;
+  try{const r=await sb.from('company_routes').select('id,title,owner_id,participant_ids,created_by,started_at,started_by,last_lat,last_lng,last_at,last_by,start_date,end_date').eq('company_id',company()).not('started_at','is',null).is('finished_at',null).order('started_at',{ascending:false}).limit(20);
+    let panel=$('cfrtHomeLive');if(r.error||!(r.data||[]).length){if(panel){panel.remove();homeMap=null;homeSig=''}return}
+    await people();const L=r.data;const ids=L.map(x=>x.id);const s=await sb.from('company_route_stops').select('route_id,place_name,city,result,arrived_at,visited_at,day_date,position,lat,lng').in('route_id',ids).order('day_date').order('position');const S=s.data||[];
+    if(!panel){panel=document.createElement('section');panel.id='cfrtHomeLive';panel.className='hd-panel cfrt-home';const flow=$('cfFlow');if(flow&&flow.parentElement===root)flow.after(panel);else root.prepend(panel)}
+    const now=Date.now();const rows=L.map(x=>{const st=S.filter(y=>y.route_id===x.id);const v=st.filter(y=>y.result==='visited').length;const nx=st.find(y=>y.result!=='visited'&&y.result!=='cancelled'&&y.result!=='postponed');const at=st.filter(y=>y.arrived_at&&y.result!=='visited').slice(-1)[0];
+      const fresh=x.last_at&&now-Date.parse(x.last_at)<6e5;const who=[x.owner_id,...(x.participant_ids||[])].filter((v,i,a)=>v&&a.indexOf(v)===i).map(nameOf).join(', ');
+      return {x,v,n:st.length,where:at?'📍 '+at.place_name+(at.city?' · '+at.city:''):nx?'→ '+nx.place_name+(nx.city?' · '+nx.city:''):'Ofise dönüşte',fresh,who}});
+    const html='<div class="hd-panel-head"><h3>🚗 Yoldaki ekip <small class="cfrt-msg">'+L.length+' rota</small></h3><button class="text-action" type="button" data-hl-all>Rotaları aç →</button></div><div class="cfrt-home-grid"><div class="cfrt-home-map" id="cfrtHomeMap"></div><div class="cfrt-home-list">'
+     +rows.map(o=>'<button type="button" class="cfrt-home-row" data-hl="'+o.x.id+'"><span class="dot'+(o.fresh?' on':'')+'"></span><span><b>'+esc(o.who||o.x.title)+'</b><small>'+esc(o.x.title)+' · '+o.v+'/'+o.n+' ziyaret</small><small>'+esc(o.where)+'</small></span><em>'+(o.x.last_at?(o.fresh?'canlı ':'')+fmtClock(o.x.last_at):'konum yok')+'</em></button>').join('')+'</div></div>';
+    const pts0=rows.filter(o=>o.x.last_lat!=null).map(o=>o.x.id+':'+o.x.last_lat+','+o.x.last_lng).join('|');if(panel._h===html&&panel._p===pts0&&homeMap)return;panel._h=html;panel._p=pts0;panel.innerHTML=html;
+    panel.querySelector('[data-hl-all]').onclick=()=>window.cfRoutes?.open();panel.querySelectorAll('[data-hl]').forEach(b=>b.onclick=()=>window.cfRoutes?.open(+b.dataset.hl));
+    const pts=rows.filter(o=>o.x.last_lat!=null&&now-Date.parse(o.x.last_at)<12*36e5).map(o=>({lat:o.x.last_lat,lng:o.x.last_lng,label:initials(o.who||o.x.title),color:o.fresh?'#2563eb':'#64748b',title:(o.who||'')+' · '+o.x.title+' · '+fmtClock(o.x.last_at),key:'r'+o.x.id,zoom:10}));
+    const mel=$('cfrtHomeMap');if(!pts.length){mel.innerHTML='<div class="cfrt-home-empty">Konum paylaşan yok.<br><small>Personel “Yola çıktım” veya “📡 Canlı konum paylaş” deyince burada görünür.</small></div>';homeMap=null;return}
+    const sig=pts.map(p=>p.key+p.lat+p.lng).join('|');const m=new MiniMap(mel,{onMarker:mk=>window.cfRoutes?.open(+String(mk.key).slice(1))});m.set(pts,[]);requestAnimationFrame(()=>m.fit());homeMap=m;homeSig=sig}
+  catch(_){}finally{homeBusy=false}}
+function homeLiveStart(){clearInterval(homeTimer);homeTimer=setInterval(()=>homeLive(false),60000);setTimeout(()=>homeLive(true),1500)}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')homeLive(false)});
+try{if(typeof loadDashboard==='function'){const base=loadDashboard;loadDashboard=async function(){const r=await base.apply(this,arguments);homeLive(true);return r}}}catch(_){}
+homeLiveStart();
 })();</script>
 <!-- ==========================================================================
      CepFirma — Metis yazı ölçüleri

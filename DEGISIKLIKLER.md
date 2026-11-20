@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-23.65)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-23.66)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -76,10 +76,21 @@ bu dosyalar orada da birer kez çalıştırılmalıdır:
 
 - `veritabani/2026-11-23-harcirah-kapanis.sql` — **Görev sonrası kapanış**: gerçekleşen giderler
   (`company_route_expenses`), özel fiş / fatura deposu (`route-receipts`, dosya başına 10 MB) ve
-  `cf_route_close` (kapanışa gönder / düzeltme iste / hesabı kapat). **(henüz çalıştırılmadı)**
+  `cf_route_close` (kapanışa gönder / düzeltme iste / hesabı kapat). **(çalıştırıldı)**
 
 - `supabase-fonksiyon/cepfirma-push.ts` — harcırah bildirimleri (`action: 'route'`) eklendi; Supabase'de
-  `cepfirma-push` fonksiyonuna yeniden yapıştırılıp **Deploy** edilmeli. `push-sw.js` de yeniden yüklenmeli.
+  `cepfirma-push` fonksiyonuna yapıştırılıp deploy edildi. **(yapıldı)**
+
+- `veritabani/2026-11-23-rota-yetki.sql` — **Rota yetkisi**: rotayı yalnızca hazırlayan ve rota sorumlusu
+  değiştirir; yöneticiler izler. Yola çık / konum / ziyaret sonucu yalnızca rotada görevli olanlar. **(henüz çalıştırılmadı)**
+
+### 2026-11-23.66 — Rota izleme ekranı ve anasayfada yoldaki ekip
+- Rotayı **yalnızca hazırlayan ve rota sorumlusu** düzenler. Diğerleri (yönetici, katılımcı, paylaşılan kişi) rotaya
+  tıklayınca **izleme ekranı** açılır: solda rota bilgisi, gün gün duraklar (✓ ziyaret edildi / ● orada / → sıradaki),
+  harcırah durumu; sağda canlı harita (son konum, renkli ilerleme). Dakikada bir kendiliğinden yenilenir.
+  Katılımcılar buradan "🚗 Yolda modu"na geçer.
+- **Anasayfa · Yoldaki ekip**: yola çıkmış rotalar haritada (baş harfli mavi nokta; canlıysa nabız atar) ve listede
+  (kim, hangi rota, nerede / sıradaki durak, son konum saati). Yalnızca yolda rota varsa görünür; tıklayınca izleme açılır.
 
 ### 2026-11-23.65 — Harcırah kapanışı, canlı konum, bildirimler
 - **Görev sonrası kapanış**: avans ödendikten sonra çalışan rota ekranında gerçekleşen giderleri girer
