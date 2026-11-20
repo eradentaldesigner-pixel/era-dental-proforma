@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-22.64)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-23.65)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -69,10 +69,31 @@ bu dosyalar orada da birer kez çalıştırılmalıdır:
   istenirse: `GOOGLE_MAPS_SERVER_KEY`, `GOOGLE_MAPS_BROWSER_KEY`. `vercel.json` Google harita izinleriyle güncellendi.
 
 - `veritabani/2026-11-22-harcirah-onay.sql` — **Harcırah onay akışı**: `company_route_requests` tablosu ve
-  `cf_route_request` fonksiyonu (gönder / geri çek / onayla / revizyon / reddet / avans ödendi). **(henüz çalıştırılmadı)**
+  `cf_route_request` fonksiyonu (gönder / geri çek / onayla / revizyon / reddet / avans ödendi). **(çalıştırıldı)**
 
 - `veritabani/2026-11-22-harcirah-odeme-takip.sql` — onaylanan tutar, ödeme satırları (`company_route_payments`),
-  muhasebe iadesi ve yolculuk takibi (`cf_route_trip`, durakta geliş saati / konumu). **(henüz çalıştırılmadı)**
+  muhasebe iadesi ve yolculuk takibi (`cf_route_trip`, durakta geliş saati / konumu). **(çalıştırıldı)**
+
+- `veritabani/2026-11-23-harcirah-kapanis.sql` — **Görev sonrası kapanış**: gerçekleşen giderler
+  (`company_route_expenses`), özel fiş / fatura deposu (`route-receipts`, dosya başına 10 MB) ve
+  `cf_route_close` (kapanışa gönder / düzeltme iste / hesabı kapat). **(henüz çalıştırılmadı)**
+
+- `supabase-fonksiyon/cepfirma-push.ts` — harcırah bildirimleri (`action: 'route'`) eklendi; Supabase'de
+  `cepfirma-push` fonksiyonuna yeniden yapıştırılıp **Deploy** edilmeli. `push-sw.js` de yeniden yüklenmeli.
+
+### 2026-11-23.65 — Harcırah kapanışı, canlı konum, bildirimler
+- **Görev sonrası kapanış**: avans ödendikten sonra çalışan rota ekranında gerçekleşen giderleri girer
+  (kategori, tutar, tarih, açıklama) ve fiş / fatura fotoğrafı ekler (telefonda kamera açılır, büyük fotoğraflar
+  küçültülür). "Ödenen avans / Harcanan" farkı anlık gösterilir ("Çalışan firmaya … iade edecek" / "Firma çalışana … ödeyecek").
+  "📤 Kapanışa gönder" ile muhasebeye düşer; muhasebe fişleri açıp "↺ Düzeltme iste" veya "✓ Hesabı kapat"
+  (iade / ek ödeme şekli, tarih, not) der. A4 formuna "Gerçekleşen giderler" tablosu ve "HESAP KAPANDI" damgası eklendi.
+- **Bekleyenler**: muhasebeye "Kapanış kontrolü", çalışana "Görev kapanışı bekliyor" (görev bitmiş, avans ödenmiş)
+  ve "Kapanış düzeltmesi" kartları.
+- **Canlı konum**: "Yola çık" ekranında isteğe bağlı "📡 Canlı konum paylaş". Uygulama açıkken 3 dakikada bir
+  konum gönderilir; yönetici haritada mavi noktayı ve "📡 canlı konum hh:mm" bilgisini görür. Rota bitince kapanır.
+- **Telefon bildirimleri**: onaya gönderildi → yöneticiler; onaylandı → talep eden + muhasebe; revizyon / ret →
+  talep eden; avans ödendi → talep eden; kapanışa gönderildi → muhasebe; düzeltme / hesap kapandı → talep eden.
+  Alıcıları sunucu belirler; bildirime dokununca talep penceresi açılır.
 
 ## Görünüm
 
