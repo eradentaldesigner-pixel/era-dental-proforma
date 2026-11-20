@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-21.57)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-21.58)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -392,6 +392,14 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
   düzenlenebilir. Yeni **"👥 Bu şehirdeki müşterilerim"**: o ildeki müşteriler, konumu kayıtlı olanlar
   işaretli, tek tıkla rotaya ekleme. Google anahtarı girilirse Google araması / haritası ayrıca açılır.
 
+- **Rotalar — "Durak ekle" yenilendi:** arama sonuçları açılır listede kart içinde kesildiği için
+  görünmüyordu. Artık gün kartının içinde açılan net bir panel: büyük arama kutusu, altında
+  **Müşterilerim** ve **Adresler / yerler** (il, ilçe, mahalle, cadde, bina etiketiyle; ör. "Samsun").
+  Bulunamazsa: **📍 Haritaya tıklayarak ekle** (haritada yere tıklayınca durak oluşur, il ve adres
+  otomatik dolar), **✎ Sadece adıyla ekle**, **🔗 Google Haritalar bağlantısıyla ekle**. Her eklemeden
+  sonra harita tüm durakları gösterecek şekilde yakınlaşır. Telefonda taşma giderildi.
+- Rotalar / Görevler sayfası, sayfa açıldıktan hemen sonra açılırsa kendiliğinden kapanabiliyordu; düzeltildi.
+
 ## Hata düzeltmeleri
 
 - **Açılışta teklif ekranı görünmesi:** site veya mobil açılırken bir an "Hızlı teklif" sayfası
@@ -482,7 +490,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-21.57">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-21.58">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
