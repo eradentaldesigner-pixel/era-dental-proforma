@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-21.62)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-22.63)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -67,6 +67,9 @@ bu dosyalar orada da birer kez çalıştırılmalıdır:
 - `supabase-fonksiyon/cepfirma-maps.ts` — sunucu fonksiyonu (adı: `cepfirma-maps`). Ücretsiz sürümde yalnızca
   telefondaki kısa Google Haritalar bağlantılarını çözmek için kullanılır (anahtar gerekmez). Google anahtarı
   istenirse: `GOOGLE_MAPS_SERVER_KEY`, `GOOGLE_MAPS_BROWSER_KEY`. `vercel.json` Google harita izinleriyle güncellendi.
+
+- `veritabani/2026-11-22-harcirah-onay.sql` — **Harcırah onay akışı**: `company_route_requests` tablosu ve
+  `cf_route_request` fonksiyonu (gönder / geri çek / onayla / revizyon / reddet / avans ödendi). **(henüz çalıştırılmadı)**
 
 ## Görünüm
 
@@ -425,6 +428,16 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
   önceden yanlış bulunup rotaya kaydedilmiş otomatik konumlar yeniden aranır;
   ofise dönüş, durağı olan son güne eklenir (sonraki günler boş olsa da).
 
+- **Harcırah onay akışı:** rota ekranında "💰 Harcırah onayı" paneli. Rotayı oluşturan / sorumlusu (satış,
+  teknik servis, lojistik…) **📤 Onaya gönder** der; o andaki form dondurulur (sürüm 1, 2…). Yönetici (şirket
+  sahibi / yönetici) **Bekleyenler**'de "Harcırah onayı"nı görür; formun PDF'teki hâlinin aynısı açılır:
+  **✓ Onayla / ↺ Revizyon iste / ✕ Reddet** (revizyon ve ret için not zorunlu). Kendi talebini onaylayamaz
+  (başka yetkili varsa). Onaylanınca **muhasebenin Bekleyenler'ine** "Avans ödenecek" düşer: tutar, ödeme şekli
+  (havale / nakit / şirket kartı), tarih, not → **💵 Avans ödendi**. Revizyon / ret, talep edenin Bekleyenler'ine
+  düşer. Formda damga (ONAY BEKLİYOR / ONAYLANDI / REVİZYON / REDDEDİLDİ / TASLAK), talep eden, onaylayan
+  (sistem onayı, tarih-saat) ve muhasebe (avans ödendi) bilgisi otomatik yazar. Onaydan sonra tutar değişirse
+  "yeniden onaya gönder" uyarısı çıkar. Rota kartlarında harcırah durumu etiketi.
+
 ## Hata düzeltmeleri
 
 - **Açılışta teklif ekranı görünmesi:** site veya mobil açılırken bir an "Hızlı teklif" sayfası
@@ -515,7 +528,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-21.62">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-22.63">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
