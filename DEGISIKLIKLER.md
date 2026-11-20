@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-21.58)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-21.59)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -400,6 +400,15 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
   sonra harita tüm durakları gösterecek şekilde yakınlaşır. Telefonda taşma giderildi.
 - Rotalar / Görevler sayfası, sayfa açıldıktan hemen sonra açılırsa kendiliğinden kapanabiliyordu; düzeltildi.
 
+- **Rotalar — Harcırah ve masraf planı:** rota ekranında açılır kart: kişi sayısı, konaklama (gece × oda ×
+  gecelik fiyat), yeme-içme (kişi başı günlük × gün × kişi), araçla gidişte yakıt (km × L/100 km × litre fiyatı;
+  km çıkış ilinden tüm duraklara gidiş-dönüş otomatik hesaplanır, elle de girilebilir), uçak / otobüs bileti,
+  köprü-otoyol, otopark, diğer; verilen avans ve kalan / iade. Toplam ve kişi başı tutar anında görünür;
+  bilgiler rotayla kaydedilir (yeni SQL gerekmez).
+  **Görevlendirme ve harcırah yazısı:** firma antetli, sayı / tarih, konu, düzenlenebilir yazı metni, görev
+  bilgileri, gün gün plan, gider tablosu, avans; altında gidenlerin adı ve imza alanları ile "Görevlendiren"
+  ve "Onaylayan (yetkili, kaşe)" imza yerleri. Yazdır / PDF olarak alınır; Paylaş menüsünde de var.
+
 ## Hata düzeltmeleri
 
 - **Açılışta teklif ekranı görünmesi:** site veya mobil açılırken bir an "Hızlı teklif" sayfası
@@ -483,19 +492,4 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 - Raporlar menü öğesi açıkken **vurgulanmıyordu** — düzeltildi.
 - **Proformalar müşteri kartına bağlanmıyordu** (`customer_id` hiç yazılmıyordu) — artık
   kaydedilen her düzenlenebilir proforma güvenli eşleşmeyle müşteri kartına bağlanır.
-- Belge kaydedilirken **aynı vergi numaralı başka bir müşteri kartının adı eziliyordu** —
-  artık ad farklıysa kart değiştirilmez ve uyarı gösterilir.
-
-## Teknik
-
-- **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
-  çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-21.58">` — sonraki yayınlarda bu değeri artırın.
-- Inter yazı tipi Google Fonts'tan yüklenir.
-
-## Geri alma
-
-Eklenen her özellik `app.html` içinde kendi `id`'li bloğundadır (`cf-…-module`, `cf-…-style`).
-Bir bloğu silmek o özelliği kaldırır. Uygulama kodunda yapılan küçük değişiklikler
-(ürün kaydına kategori, proforma–müşteri bağlantısı, müşteri kartı koruması) dosyada
-"CepFirma düzeltme" açıklamasıyla işaretlidir.
+- 
