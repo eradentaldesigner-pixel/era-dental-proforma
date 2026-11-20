@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-22.63)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-22.64)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -70,6 +70,9 @@ bu dosyalar orada da birer kez çalıştırılmalıdır:
 
 - `veritabani/2026-11-22-harcirah-onay.sql` — **Harcırah onay akışı**: `company_route_requests` tablosu ve
   `cf_route_request` fonksiyonu (gönder / geri çek / onayla / revizyon / reddet / avans ödendi). **(henüz çalıştırılmadı)**
+
+- `veritabani/2026-11-22-harcirah-odeme-takip.sql` — onaylanan tutar, ödeme satırları (`company_route_payments`),
+  muhasebe iadesi ve yolculuk takibi (`cf_route_trip`, durakta geliş saati / konumu). **(henüz çalıştırılmadı)**
 
 ## Görünüm
 
@@ -438,6 +441,17 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
   (sistem onayı, tarih-saat) ve muhasebe (avans ödendi) bilgisi otomatik yazar. Onaydan sonra tutar değişirse
   "yeniden onaya gönder" uyarısı çıkar. Rota kartlarında harcırah durumu etiketi.
 
+- **Harcırah — talep / onaylanan / ödenen:** yönetici onaylarken tutarı değiştirebilir ("✎ Değiştirerek onayla",
+  gerekçe zorunlu). Muhasebe ödemeyi istediği tutarla kaydeder; onaylanandan azsa **"Kısmen ödendi · kalan …"**,
+  kalan sonra ikinci ödemeyle kapatılır (her ödeme ayrı satır: tutar, şekil, tarih, not, kim). Muhasebe ödeme
+  yapmadan önce talebi notla **"↩ Yöneticiye geri gönder"** edebilir. Formda talep edilen, onaylanan (gerekçeli),
+  her ödeme ve kalan otomatik yazar. Bekleyenler: yöneticiye "muhasebe iade etti", muhasebeye "kalan ödeme".
+- **Yolculuk takibi:** yolda modunda **🚗 Yola çıktım**, durakta **📍 Geldim** (saat + konum) ve "Ziyaret edildi",
+  **📍 Konumumu gönder**, **🏁 Ofise döndüm**. Haritada yol renkleri: **yeşil** gidildi, **turuncu** şu an gidilen,
+  **gri** sırada, kırmızı iptal; son konum mavi nokta. Yönetici / müdür rota ekranında "Yolda · son: … geldi 10:40 ·
+  1/3 ziyaret · sıradaki …" şeridini görür; rota yoldayken ekran dakikada bir kendiliğinden yenilenir.
+  Rota kartlarında "🚗 Yolda / 🏁 Tamamlandı". Konum yalnızca çalışan düğmeye bastığında ve izin verdiğinde alınır.
+
 ## Hata düzeltmeleri
 
 - **Açılışta teklif ekranı görünmesi:** site veya mobil açılırken bir an "Hızlı teklif" sayfası
@@ -528,7 +542,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-22.63">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-22.64">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
