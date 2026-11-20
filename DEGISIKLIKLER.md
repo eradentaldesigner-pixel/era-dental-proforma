@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-20.55)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-21.57)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -61,6 +61,12 @@ bu dosyalar orada da birer kez çalıştırılmalıdır:
   ve erişim kuralları. **(henüz çalıştırılmadı)**
 - **Harita görselleri için Vercel ayarı:** `vercel.json` içindeki Content-Security-Policy başlığında
   `img-src` kısmına `https://tile.openstreetmap.org` eklenmelidir. Eklenmezse harita sade il görünümünde çalışır.
+
+- `veritabani/2026-11-21-google-harita.sql` — müşteri konumu (lat / lng / place_id), durakta yer
+  kimliği, günlük kullanım sayacı. Ücretsiz sürüm için de gerekli (müşteri konumu). **(henüz çalıştırılmadı)**
+- `supabase-fonksiyon/cepfirma-maps.ts` — sunucu fonksiyonu (adı: `cepfirma-maps`). Ücretsiz sürümde yalnızca
+  telefondaki kısa Google Haritalar bağlantılarını çözmek için kullanılır (anahtar gerekmez). Google anahtarı
+  istenirse: `GOOGLE_MAPS_SERVER_KEY`, `GOOGLE_MAPS_BROWSER_KEY`. `vercel.json` Google harita izinleriyle güncellendi.
 
 ## Görünüm
 
@@ -369,6 +375,23 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
   + not; ziyaretten sonra "Görüşme kaydı aç" ve "Takip görevi ver". Liste sayfasında "Bugün rotadasınız"
   kartı.
 
+- **Rotalar — Google Haritalar:** "Durak ekle"de Google'daki gibi arama — klinik adı / adres yazınca
+  "Müşterilerim" ve "Google'da" sonuçları; seçilince ad, adres, telefon ve tam konum gelir. Müşteri değilse
+  "Müşteri olarak kaydet". Konumu bulunan müşterinin konumu müşteri kartına da yazılır.
+  Harita Google Haritası olur (normal / uydu); duraklar arası **gerçek yol** çizgisi, her gün için
+  **km ve sürüş süresi**, duraklar arası mesafe; **"En kısa sıraya diz"** (ilk ve son durak sabit);
+  **"Yakındaki klinikler"**: şehirdeki diş klinikleri, hangilerinin zaten müşteri olduğu, tek tıkla rotaya ekleme.
+  Google anahtarı tarayıcıda değil, `cepfirma-maps` sunucu fonksiyonunda; şirket başına günlük sınır var.
+  Kurulum yapılmadıysa Rotalar eskisi gibi (OpenStreetMap haritası) çalışır.
+
+- **Rotalar — ücretsiz harita servisleri (Google anahtarı gerekmez):** duraklar arası **gerçek yol çizgisi**,
+  her gün için **km ve sürüş süresi**, duraklar arası mesafe ve **"⚡ En kısa sıraya diz"** artık ücretsiz
+  OpenStreetMap / OSRM servisiyle çalışır. "Durak ekle"de **Müşterilerim + Adres / yer araması** (ücretsiz)
+  ve **"🔍 Google Haritalar'da bul"**: klinik Google Haritalar'da açılır, "Paylaş › Bağlantıyı kopyala" ile
+  gelen bağlantı yapıştırılınca ad ve tam konum alınır (telefondaki kısa bağlantılar da). Durak adı
+  düzenlenebilir. Yeni **"👥 Bu şehirdeki müşterilerim"**: o ildeki müşteriler, konumu kayıtlı olanlar
+  işaretli, tek tıkla rotaya ekleme. Google anahtarı girilirse Google araması / haritası ayrıca açılır.
+
 ## Hata düzeltmeleri
 
 - **Açılışta teklif ekranı görünmesi:** site veya mobil açılırken bir an "Hızlı teklif" sayfası
@@ -459,7 +482,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-20.55">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-21.57">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
