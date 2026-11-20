@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-21.59)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-21.60)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -409,6 +409,18 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
   bilgileri, gün gün plan, gider tablosu, avans; altında gidenlerin adı ve imza alanları ile "Görevlendiren"
   ve "Onaylayan (yetkili, kaşe)" imza yerleri. Yazdır / PDF olarak alınır; Paylaş menüsünde de var.
 
+- **Rotalar — ofis başlangıcı:** rota firma ofisinden başlar, ofiste biter. Ofis konumu Ayarlar'daki firma
+  adresinden otomatik bulunur; yanlışsa "📍 Haritada düzelt" ile bir kez işaretlenir ve hatırlanır. Haritada 🏢
+  işareti; 1. gün ofisten, sonraki günler bir önceki günün son durağından (konaklanan yerden) başlar, son gün
+  ofise dönüşle biter. Günlük km / süre ve "en kısa sıra" buna göre hesaplanır.
+- **Harcırah talebi (otomatik):** kişi, gün ve gece sayısı rotadan otomatik; ücretler (gecelik oda, kişi başı
+  yemek, günlük harcırah, şehir içi ulaşım, otopark) bir kez girilir, sonraki rotalarda otomatik gelir.
+  **UTTS**: araçla gidişte yakıt şirket öder, harcıraha girmez (km bilgisi yine yazılır). Köprü / otoyol,
+  diğer giderler. **Talep edilen tutar** (toplam, yukarı yuvarlanır; değiştirilebilir).
+- **Harcırah talep ve görevlendirme formu — tek A4 sayfa:** antet, sayı / tarih, konu, metin, görev bilgileri
+  (çıkış: ofis, UTTS, toplam km), gün gün plan, harcırah hesabı ve **talep edilen tutar**, görevli personelin
+  imza tablosu; Talep eden / Muhasebe / Onaylayan imza yerleri. Uzun rotalarda tek sayfaya sığacak şekilde küçülür.
+
 ## Hata düzeltmeleri
 
 - **Açılışta teklif ekranı görünmesi:** site veya mobil açılırken bir an "Hızlı teklif" sayfası
@@ -499,7 +511,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-21.59">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-21.60">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma
