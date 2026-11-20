@@ -1,4 +1,4 @@
-<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-21.60"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><style id="cf-boot-splash">/* CepFirma: açılışta teklif ekranının bir an görünmesini önler — ana sayfa hazır olana kadar yükleme ekranı */
+<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-21.61"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><style id="cf-boot-splash">/* CepFirma: açılışta teklif ekranının bir an görünmesini önler — ana sayfa hazır olana kadar yükleme ekranı */
 html.cf-booting body>*{visibility:hidden!important}
 html.cf-booting body::before{content:"";position:fixed;inset:0;z-index:2147483646;background:#fafafa}
 html.cf-booting body::after{content:"";position:fixed;left:50%;top:50%;z-index:2147483647;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;border:3px solid #e4e4e7;border-top-color:#2563eb;animation:cfBootSpin .8s linear infinite}
@@ -12308,14 +12308,23 @@ const useGoogleRoads=()=>!!(gcfg?.enabled&&(map?.isGoogle||goMap?.isGoogle));
 const ROADS=new Map();let roadsT=0,roadsBusy=false;
 const located=s=>s.lat!=null&&s.result!=='cancelled';
 /* ofis: rotanın başlangıç ve dönüş noktası (firma adresinden bulunur, haritada düzeltilebilir) */
-const OKEY=()=>'cfrt:office:'+company();let pinOffice=false;
+const OKEY=()=>'cfrt:office2:'+company();let pinOffice=false;
 function office(){const st=R?.needs?.start;if(st&&st.lat!=null)return st;try{const o=JSON.parse(localStorage.getItem(OKEY())||'null');if(o&&o.lat!=null)return o}catch(_){}return null}
 function officeOn(){return !!(R&&R.needs?.start_off!==true&&office())}
 function officeLabel(){const cs=window._companySettings||{};return (cs.company_display_name||cs.legal_name||document.getElementById('profileCompany')?.textContent||'Firma').trim()+' ofisi'}
 function setOffice(o,remember){R.needs=R.needs&&typeof R.needs==='object'?R.needs:{};R.needs.start=o;if(remember)try{localStorage.setItem(OKEY(),JSON.stringify(o))}catch(_){}}
 let officeTry='';async function ensureOffice(){if(office())return office();const cs=window._companySettings||{};const addr=String(cs.address||'').trim();if(!addr||officeTry===company())return null;officeTry=company();
-  const parts=addr.split(/[,/]/).map(x=>x.trim()).filter(Boolean);const tries=[addr,parts.slice(-2).join(' '),parts.slice(-1)[0]].filter((v,i,a)=>v&&a.indexOf(v)===i);
-  for(const q of tries){const r=await photonSearch(q,null);if(r&&r.length){const x=r[0];const o={lat:+x.lat.toFixed(6),lng:+x.lng.toFixed(6),label:officeLabel(),address:addr,src:'auto'};setOffice(o,true);return o}}return null}
+  /* adresi parçala: mahalle, cadde / sokak, ilçe, il — en ayrıntılıdan başlayarak ara */
+  const clean_=addr.replace(/\bNo\s*[:.]?\s*\d+\w*(\s*\/\s*\d+\w*)?/gi,' ').replace(/\b(Kat|Daire|D\.)\s*[:.]?\s*\d+/gi,' ').replace(/\s+/g,' ').trim();
+  const segs=clean_.split(/[,/]/).map(x=>x.trim()).filter(Boolean);const city=segs.length>1?segs[segs.length-1]:'';const pre=segs.length>1?segs.slice(0,-1).join(' '):segs[0]||'';
+  const words=pre.split(' ');const district=words[words.length-1]||'';const mah=(pre.match(/([\wçğıöşüÇĞİÖŞÜ.]+(?:\s[\wçğıöşüÇĞİÖŞÜ.]+)?)\s+Mah/i)||[])[1]||'';
+  const street=(pre.match(/([\wçğıöşüÇĞİÖŞÜ.]+(?:\s[\wçğıöşüÇĞİÖŞÜ.]+)?\s+(?:Cad|Cd|Caddesi|Sok|Sk|Sokak|Sokağı|Bulv|Blv|Bulvarı)\.?)/i)||[])[1]||'';
+  const tries=[[street,mah,district,city],[mah,district,city],[street,district,city],[district,city],[city]].map(a=>a.filter(Boolean).join(' ').replace(/\b(Mah|Mahallesi|Cad|Cd|Sok|Sk)\.?/gi,m=>m).trim()).filter((v,i,a)=>v&&a.indexOf(v)===i);
+  const cityP=provOf(city);
+  for(const q of tries){const r=await photonSearch(q,cityP?{lat:cityP[1],lng:cityP[2]}:null);const ok=(r||[]).filter(x=>!cityP||provOf(x.city)?.[0]===cityP[0]||(Math.abs(x.lat-cityP[1])<1.2&&Math.abs(x.lng-cityP[2])<1.6));
+    const hit=ok.find(x=>district&&lc((x.sub||'')+' '+(x.address||'')+' '+x.main).includes(lc(district)))||(q===city?ok[0]:null);
+    if(hit){const o={lat:+hit.lat.toFixed(6),lng:+hit.lng.toFixed(6),label:officeLabel(),address:addr,src:'auto'};setOffice(o,true);return o}}
+  return null}
 function paintOffice(){const el=$('cfrtOffice');if(!el)return;const o=office();const on=officeOn();
   el.innerHTML='<span class="cfrt-lbl">Başlangıç ve dönüş noktası</span><div class="cfrt-office-row"><span class="cfrt-office-ic">🏢</span><div><b>'+esc(o?(o.label||officeLabel()):'Ofis konumu bulunamadı')+'</b><small>'+esc(o?(o.address||'')+(o.src==='auto'?' · konum adresten bulundu, yanlışsa haritada düzeltin':''):'Ayarlar › Firma bilgilerinde adres yoksa haritada işaretleyin')+'</small></div>'
    +(canEdit?'<button type="button" class="btn light" data-opin>📍 Haritada '+(o?'düzelt':'işaretle')+'</button>'+(o?'<label class="cfrt-chk"><input type="checkbox" data-oon'+(on?' checked':'')+'> Rota ofisten başlar, ofiste biter</label>':''):'')+'</div>';
@@ -12326,7 +12335,9 @@ function dayPts(d){const days=routeDays();const di=days.indexOf(d);const L=order
   /* sonraki günler bir önceki günün son durağından (konaklanan yerden) başlar */
   let prev=null;for(let k=di-1;k>=0&&!prev;k--){const PL=ordered().filter(s=>s.day_date===days[k]&&located(s));if(PL.length)prev=PL[PL.length-1]}
   const o=officeOn()?office():null;if(di===0||!prev){if(o)L.unshift({lat:o.lat,lng:o.lng,office:true})}else L.unshift({lat:prev.lat,lng:prev.lng,prev:true});
-  if(o&&di===days.length-1)L.push({lat:o.lat,lng:o.lng,office:true});return L}
+  /* dönüş: durağı olan son güne eklenir */
+  let lastDay=-1;for(let k=days.length-1;k>=0;k--){if(ordered().some(s=>s.day_date===days[k]&&located(s))){lastDay=k;break}}
+  if(o&&di===lastDay)L.push({lat:o.lat,lng:o.lng,office:true});return L}
 function daySig(d){return dayPts(d).map(p=>p.lat.toFixed(5)+','+p.lng.toFixed(5)).join('|')}
 function decodePath(enc){if(window.google?.maps?.geometry)return google.maps.geometry.encoding.decodePath(enc).map(p=>({lat:p.lat(),lng:p.lng()}));const out=[];let i=0,lat=0,lng=0;while(i<enc.length){let b,s=0,r=0;do{b=enc.charCodeAt(i++)-63;r|=(b&31)<<s;s+=5}while(b>=32);lat+=r&1?~(r>>1):r>>1;s=0;r=0;do{b=enc.charCodeAt(i++)-63;r|=(b&31)<<s;s+=5}while(b>=32);lng+=r&1?~(r>>1):r>>1;out.push({lat:lat/1e5,lng:lng/1e5})}return out}
 const fmtKm=m=>m>=10000?Math.round(m/1000)+' km':(m/1000).toFixed(1).replace('.',',')+' km';
