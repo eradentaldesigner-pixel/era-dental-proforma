@@ -492,4 +492,19 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 - Raporlar menü öğesi açıkken **vurgulanmıyordu** — düzeltildi.
 - **Proformalar müşteri kartına bağlanmıyordu** (`customer_id` hiç yazılmıyordu) — artık
   kaydedilen her düzenlenebilir proforma güvenli eşleşmeyle müşteri kartına bağlanır.
-- 
+- Belge kaydedilirken **aynı vergi numaralı başka bir müşteri kartının adı eziliyordu** —
+  artık ad farklıysa kart değiştirilmez ve uyarı gösterilir.
+
+## Teknik
+
+- **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
+  çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
+  `<meta name="cf-version" content="2026-11-21.59">` — sonraki yayınlarda bu değeri artırın.
+- Inter yazı tipi Google Fonts'tan yüklenir.
+
+## Geri alma
+
+Eklenen her özellik `app.html` içinde kendi `id`'li bloğundadır (`cf-…-module`, `cf-…-style`).
+Bir bloğu silmek o özelliği kaldırır. Uygulama kodunda yapılan küçük değişiklikler
+(ürün kaydına kategori, proforma–müşteri bağlantısı, müşteri kartı koruması) dosyada
+"CepFirma düzeltme" açıklamasıyla işaretlidir.

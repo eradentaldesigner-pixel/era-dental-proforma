@@ -12639,4 +12639,94 @@ function routeText(){const days=routeDays();const num=stopLabelIndex();const lin
 async function share(kind){if(kind==='exp'){expenseDoc();return}if(dirty&&!confirm('Kaydedilmemiş değişiklikler var; paylaşılan metin kayıtlı hâli değil, ekrandaki hâli içerir. Devam edilsin mi?'))return;const txt=routeText();
   if(kind==='wa'){window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank','noopener');return}
   if(kind==='copy'){try{await navigator.clipboard.writeText(txt);toast('Rota metni kopyalandı.')}catch(_){prompt('Metni kopyalayın:',txt)}return}
-  if(kind==='team'){const ppl=[R.created_by,R.owner_id,...(R.participant_ids||[]),...(R.share_ids||[])].filter((v,i,a)=>v&&a.indexOf(v)===i).map(nameOf);alert('Bu rotayı Rotalar sayfasında görenler:\n\n• '+ppl.join('\
+  if(kind==='team'){const ppl=[R.created_by,R.owner_id,...(R.participant_ids||[]),...(R.share_ids||[])].filter((v,i,a)=>v&&a.indexOf(v)===i).map(nameOf);alert('Bu rotayı Rotalar sayfasında görenler:\n\n• '+ppl.join('\n• ')+'\n\nAyrıca şirket sahibi, yönetici ve müdürler tüm rotaları görür. Kişi eklemek için "Kimler gidiyor?" veya "Ayrıca kimler görsün?" bölümünden seçip kaydedin.');return}
+  if(kind==='print'){const days=routeDays();const num=stopLabelIndex();const co=document.getElementById('profileCompany')?.textContent||'';
+    const html='<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>'+esc(R.title)+'</title><style>body{font:13px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#18181b;margin:28px}h1{font-size:22px;margin:0}.m{color:#52525b;margin:4px 0 18px}.d{margin:16px 0 6px;font-size:15px;font-weight:700;border-bottom:2px solid #e4e4e7;padding-bottom:4px}table{width:100%;border-collapse:collapse}td{padding:7px 6px;border-bottom:1px solid #eee;vertical-align:top}td.n{width:26px;font-weight:700}.s{color:#71717a;font-size:12px}.f{margin-top:24px;color:#71717a;font-size:11px}@media print{body{margin:12mm}}</style></head><body><h1>'+esc(R.title)+'</h1><div class="m">'+esc(co)+' · '+esc(fmtShort(R.start_date))+' – '+esc(fmtShort(R.end_date))+' · '+esc(TRANSPORT[R.transport]||'')+' · Ekip: '+esc([R.owner_id,...(R.participant_ids||[])].filter((v,i,a)=>v&&a.indexOf(v)===i).map(nameOf).join(', '))+'</div>'
+     +days.map((d,i)=>{const L=ordered().filter(s=>s.day_date===d);if(!L.length)return '';return '<div class="d">'+(i+1)+'. gün · '+esc(fmtDay(d))+' — '+esc([...new Set(L.map(s=>s.city).filter(Boolean))].join(', '))+'</div><table>'+L.map(s=>'<tr><td class="n">'+num.get(s._k)+'</td><td><b>'+esc(s.place_name)+'</b> <span class="s">'+esc(PURPOSE[s.purpose]||'')+'</span><br><span class="s">'+esc([s.address,s.city,s.phone].filter(Boolean).join(' · '))+'</span>'+(s.note?'<br><span class="s">📝 '+esc(s.note)+'</span>':'')+'</td><td style="width:60px">'+esc((s.visit_time||'').slice(0,5))+'</td><td style="width:110px" class="s">'+(s.result!=='pending'?esc(RESULT[s.result]):'☐ Ziyaret')+'</td></tr>').join('')+'</table>'}).join('')+(R.notes?'<p><b>Not:</b> '+esc(R.notes)+'</p>':'')+'<div class="f">CepFirma · Rota çıktısı · '+new Date().toLocaleString('tr-TR')+'</div><script>window.onload=function(){setTimeout(function(){window.print()},200)}<\/script></body></html>';
+    const url=URL.createObjectURL(new Blob([html],{type:'text/html'}));const w=window.open(url,'_blank');if(!w)toast('Açılır pencere engellendi; tarayıcıda izin verin.');setTimeout(()=>URL.revokeObjectURL(url),60000)}}
+
+/* ---------- yolda modu ---------- */
+let goDay=null,goMap=null;
+async function openGo(id){const t=++token;setActive();map=null;const r=await sb.from('company_routes').select('*').eq('company_id',company()).eq('id',id).maybeSingle();if(t!==token)return;if(!r.data){toast('Rota bulunamadı.');return renderList()}R=r.data;
+  const s=await sb.from('company_route_stops').select('*').eq('route_id',id).order('day_date').order('position');ST=(s.data||[]).map(x=>({...x,_k:newKey()}));canEdit=R.created_by===me()||R.owner_id===me()||mgr();
+  const days=routeDays();goDay=days.includes(today())?today():(days.find(d=>ST.some(x=>x.day_date===d&&x.result==='pending'))||days[0]);
+  $('cfrtTitle').textContent=R.title;$('cfrtSub').textContent='Yolda modu · ziyaret sonuçlarını buradan girin.';$('cfrtHead').innerHTML='<button type="button" class="btn light" id="cfrtBack">← Rotalar</button><button type="button" class="btn light" id="cfrtEdit">Planı aç</button>';
+  $('cfrtBack').onclick=()=>renderList();$('cfrtEdit').onclick=()=>openEditor(R.id);paintGo()}
+function paintGo(){const days=routeDays();const num=stopLabelIndex();const L=ordered().filter(s=>s.day_date===goDay);const next=L.find(s=>s.result==='pending');const c=dayColor(goDay);const g=gmapsDay(goDay);
+  $('cfrtRoot').innerHTML='<div class="cfrt-go"><div class="cfrt-daytabs">'+days.map((d,i)=>{const n=ST.filter(s=>s.day_date===d).length;return '<button type="button" data-d="'+d+'" class="'+(d===goDay?'on':'')+'" style="--c:'+COLORS[i%COLORS.length]+'">'+(i+1)+'. gün · '+esc(fmtShort(d))+(d===today()?' · bugün':'')+' ('+n+')</button>'}).join('')+'</div>'
+   +'<div id="cfrtGoMap"></div><div class="cfrt-msg" data-goroad>'+esc(roadText(goDay).replace(/^ · /,''))+'</div>'+(g?'<a class="btn light" href="'+esc(g)+'" target="_blank" rel="noopener" style="justify-self:start">🧭 Günün rotasını Google Haritalar\'da aç ↗</a>':'')
+   +(L.length?L.map(s=>{const tel=String(s.phone||'').replace(/[^\d+]/g,'');const dest=s.lat!=null&&s.loc_source!=='city'?s.lat+','+s.lng:[s.place_name,s.address,s.city].filter(Boolean).join(', ');
+     return '<article class="cfrt-gostop'+(s===next?' next':'')+'" style="--c:'+c+'" data-sk="'+s._k+'"><h3><span class="cfrt-num" style="--c:'+c+';cursor:default">'+num.get(s._k)+'</span>'+esc(s.place_name)+(s.result!=='pending'?'<span class="cfrt-res '+s.result+'">'+RESULT[s.result]+'</span>':s===next?'<span class="cfrt-res" style="background:#dbeafe;color:#1d4ed8">Sıradaki</span>':'')+'</h3>'
+      +'<div class="sub">'+esc([s.visit_time?s.visit_time.slice(0,5):'',PURPOSE[s.purpose],s.city].filter(Boolean).join(' · '))+(s.address?'<br>'+esc(s.address):'')+(s.note?'<br>📝 '+esc(s.note):'')+'</div>'
+      +'<div class="cfrt-gobtns">'+(tel?'<a href="tel:'+esc(tel)+'">📞 Ara</a>':'')+'<a href="https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(dest)+'&travelmode=driving" target="_blank" rel="noopener">🧭 Yol tarifi</a><button type="button" data-r="visited" class="ok'+(s.result==='visited'?' on':'')+'">✓ Ziyaret edildi</button><button type="button" data-r="postponed" class="'+(s.result==='postponed'?'on':'')+'">⏸ Ertelendi</button><button type="button" data-r="cancelled" class="'+(s.result==='cancelled'?'on':'')+'">✕ İptal</button>'+(s.result!=='pending'?'<button type="button" data-r="pending">↺ Geri al</button>':'')+'</div>'
+      +'<textarea data-rn rows="2" maxlength="1000" placeholder="Ziyaret notu (kiminle görüşüldü, sonuç, sonraki adım)" style="width:100%;box-sizing:border-box;border:1px solid var(--mt-border,#e4e4e7);border-radius:9px;padding:8px 10px;font:inherit;font-size:14px">'+esc(s.result_note||'')+'</textarea>'
+      +(s.result==='visited'?'<div class="cfrt-gobtns"><button type="button" data-crm>💬 Görüşme kaydı aç</button>'+(window.cfNewTask?'<button type="button" data-task>＋ Takip görevi ver</button>':'')+'</div>':'')+'</article>'}).join(''):'<div class="cfrt-empty">Bu gün için durak yok.</div>')+'</div>';
+  const root=$('cfrtRoot');root.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{goDay=b.dataset.d;paintGo()});
+  root.querySelectorAll('.cfrt-gostop').forEach(card=>{const s=ST.find(x=>x._k===card.dataset.sk);if(!s)return;const note=card.querySelector('[data-rn]');
+    card.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>setResult(s,b.dataset.r,note.value.trim()));
+    note.addEventListener('change',()=>{if(s.result!=='pending')setResult(s,s.result,note.value.trim(),true)});
+    card.querySelector('[data-crm]')?.addEventListener('click',()=>openCrm(s));
+    card.querySelector('[data-task]')?.addEventListener('click',()=>window.cfNewTask({related_type:s.customer_id?'customer':null,related_id:s.customer_id?String(s.customer_id):null,related_label:s.customer_id?s.place_name:null,title:'Takip: '+s.place_name,notes:s.result_note||'',assignee_id:me()}))});
+  goMap=null;paintGoMap(true)}
+function paintGoMap(fit){const el=$('cfrtGoMap');if(!el)return;const num=stopLabelIndex();const L=ordered().filter(s=>s.day_date===goDay);const next=L.find(s=>s.result==='pending');const c=dayColor(goDay);
+  const draw=()=>{const pts=L.filter(s=>s.lat!=null);const r=ROADS.get(goDay);const lines=pts.length>1?[(r&&r.sig===daySig(goDay)&&r.path)?{path:r.path,color:c,road:true}:{pts:pts.filter(s=>s.result!=='cancelled'),color:c}]:[];
+    goMap.set(pts.map(s=>({lat:s.lat,lng:s.lng,label:String(num.get(s._k)),color:s.result==='visited'?'#16a34a':s.result==='pending'?c:'#a1a1aa',key:s._k,on:s===next,zoom:R.scope==='local'?13:11})),lines);if(fit)setTimeout(()=>goMap.fit(),20)};
+  if(goMap&&goMap.el===el){draw();return}el.style.height='260px';el.style.position='relative';
+  makeMap(el,{onMarker:m=>document.querySelector('.cfrt-gostop[data-sk="'+m.key+'"]')?.scrollIntoView({block:'center',behavior:'smooth'})}).then(m=>{if(!el.isConnected)return;goMap=m;draw();refreshRoads()})}
+async function setResult(s,r,note,silent){const {data,error}=await sb.from('company_route_stops').update({result:r,result_note:note||null}).eq('route_id',R.id).eq('id',s.id).select('*').single();if(error){toast('Kaydedilemedi: '+error.message);return}Object.assign(s,data);if(!silent){toast(r==='visited'?'Ziyaret kaydedildi.':r==='pending'?'Geri alındı.':'Kaydedildi.');
+  if(R.status==='planned'&&r!=='pending'&&canEdit){await sb.from('company_routes').update({status:'active'}).eq('company_id',company()).eq('id',R.id);R.status='active'}paintGo()}}
+async function openCrm(s){try{await appNavigate('crm');await new Promise(r=>setTimeout(r,250));if(typeof newInteraction==='function')newInteraction();await new Promise(r=>setTimeout(r,150));const set=(id,v)=>{const el=document.getElementById(id);if(el&&v){el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}))}};set('ciCompany',s.place_name);set('ciPhone',s.phone);set('ciCity',s.city);const n=document.getElementById('ciNotes')||document.getElementById('ciNote');if(n&&s.result_note&&!n.value){n.value='Rota ziyareti ('+R.title+'): '+s.result_note;n.dispatchEvent(new Event('input',{bubbles:true}))}document.getElementById('crmForm')?.scrollIntoView({block:'start'})}catch(e){alert(e.message||e)}}
+
+/* ---------- başlat ---------- */
+let lastIdent='';
+function tick(){navButtons();const k=ident();if(k!==lastIdent){const was=lastIdent;lastIdent=k;ready=null;peopleCache=null;/* yalnızca kullanıcı / şirket değişince kapat (ilk açılışta değil) */if(was&&!overlay.hidden){overlay.hidden=true}}}
+let tt=0;new MutationObserver(()=>{if(tt)return;tt=setTimeout(()=>{tt=0;navButtons()},400)}).observe(document.body,{childList:true});
+setInterval(tick,20000);setTimeout(tick,1500);setTimeout(tick,5000);
+window.addEventListener('beforeunload',e=>{if(dirty&&!overlay.hidden){e.preventDefault();e.returnValue=''}});
+})();</script>
+<!-- ==========================================================================
+     CepFirma — Metis yazı ölçüleri
+     Metis (Bootstrap 5 + Inter) tipografisi: gövde 14px, sayfa başlığı 20px/600,
+     kart başlığı 15px/600, özet etiketi 11px büyük harf, özet değeri 26px/600,
+     tablo başlığı büyük harf, menü / buton 14px. Belge (PDF) şablonlarına dokunmaz.
+     Kaldırmak için id değeri cf-typography-style olan stil bloğunu silmeniz yeterlidir.
+     ========================================================================== -->
+<style id="cf-typography-style">
+@media screen{
+/* Sayfa başlıkları (Metis: h3 = 20px / 600) */
+html:not(#cfm) body:not(#cfm) :is(.pr-page-head,.dash-hero,.service-page-head,.org-head,.er-head,.ops-heading,.calendar-head,.catalog-head,.settings-head,.customer-head,.crm-head,.stock-head,.archive-head,.offers-head,.cf-work-overlay header) :is(h1,h2):not(.pr-page *):not(.paper *){font-size:20px!important;font-weight:600!important;letter-spacing:-.01em!important;line-height:1.3!important;margin-bottom:2px!important}
+html:not(#cfm) body:not(#cfm) .dashboard-overlay h1#dashGreeting,html:not(#cfm) body:not(#cfm) .dashboard-overlay .hd-hero h1{font-size:20px!important;font-weight:600!important}
+/* Sayfa alt başlığı (Metis: 14px, soluk) */
+html:not(#cfm) body:not(#cfm) :is(.pr-page-head,.dash-hero,.service-page-head,.org-head,.er-head,.ops-heading,.calendar-head,.catalog-head,.settings-head,.customer-head,.crm-head,.stock-head,.archive-head) :is(p,.muted,small:not(.workspace-kicker)){font-size:14px!important;line-height:1.5}
+html:not(#cfm) body:not(#cfm) #dashCompany{font-size:14px!important}
+html:not(#cfm) body:not(#cfm) .workspace-kicker{font-size:11px!important;letter-spacing:.06em!important}
+/* Kart başlıkları (Metis: 15px / 600) */
+html:not(#cfm) body:not(#cfm) :is(.settings-card,.dash-panel,.hd-panel,.cfb-card,.cf-users-card,.cfh-section,.cf-chart-card,.svc-workspace-panel,.catalog-side,.archive-side,.calendar-side,.cfct-wrap,.cffm-box) > :is(h3,h4),html:not(#cfm) body:not(#cfm) :is(.dash-panel-head,.hd-panel-head,.cfb-card-head,.cfh-section > summary) :is(h3,h4){font-size:15px!important;font-weight:600!important;letter-spacing:-.005em}
+/* Özet kartları: etiket 11px büyük harf, değer 26px / 600 */
+html:not(#cfm) body:not(#cfm) :is(.hd-metric,.home-stock-stat,.cfb-stat,.cf-files-stat,.cf-users-stat,.crm-metric,.archive-stat,.stock-stat,.ops-stage,.service-summary-card,.cf-report-kpis article,.cfh-tile) :is(small,.label,em:first-child):not(.cfb-stat em):not(.cf-files-stat em):not(.cf-users-stat em){font-size:11px!important;font-weight:500!important;letter-spacing:.06em!important;text-transform:uppercase}
+html:not(#cfm) body:not(#cfm) .hd-metric span>span:first-child:not(:only-child){font-size:11px!important;font-weight:500!important;letter-spacing:.06em!important;text-transform:uppercase}
+html:not(#cfm) body:not(#cfm) :is(.hd-metric,.home-stock-stat,.cfb-stat,.cf-files-stat,.cf-users-stat,.crm-metric,.archive-stat,.stock-stat,.ops-stage,.service-summary-card,.cf-report-kpis article,.cfh-tile,.dash-card) :is(b,strong){font-size:26px!important;font-weight:600!important;letter-spacing:-.02em!important;line-height:1.2!important;font-variant-numeric:tabular-nums}
+html:not(#cfm) body:not(#cfm) .cfb-stats.six .cfb-stat b{font-size:24px!important}
+/* Menü (Metis: 14px; grup başlığı 11px / 600) */
+html:not(#cfm) body:not(#cfm) .desktop-side .ds-btn{font-size:14px!important;font-weight:500!important}
+html:not(#cfm) body:not(#cfm) .desktop-side .ds-btn.active{font-weight:600!important}
+html:not(#cfm) body:not(#cfm) .desktop-side :is(.pn-group,[data-cfnav-group]){font-size:11px!important;font-weight:600!important;letter-spacing:.06em!important}
+html:not(#cfm) body:not(#cfm) .mobile-drawer .md-menu button{font-size:14px!important}
+/* Butonlar ve form alanları (Metis: 14px) */
+html:not(#cfm) body:not(#cfm) .btn:not(.pr-page *):not(.paper *):not(#prPrintRoot *){font-size:14px!important}
+html:not(#cfm) body:not(#cfm) :is(.cfct-actions,.cffm-sel,.cfh-table,.cf-users-actions,.cf-files-actions,.cfb-seg) .btn{font-size:12.5px!important}
+html:not(#cfm) body:not(#cfm) :is(input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea):not(.pr-page *):not(.paper *):not(#prPrintRoot *){font-size:14px!important}
+html:not(#cfm) body:not(#cfm) label:not(.pr-page *):not(.paper *):not(#prPrintRoot *):not(.dash-search):not(.mobile-drawer-backdrop):not(.cfb-status){font-size:13px!important;font-weight:500!important}
+/* Tablolar (Metis: başlık büyük harf 600; hücre 14px) */
+html:not(#cfm) body:not(#cfm) :is(.archive-table,.stock-table,.crm-table,.customer-table,.service-table,.audit-table,.data-table,.cfct-table,.cffm-table,.cf-users-table,.cf-files-table,.cfb-table,.cfh-table) th{font-size:12.5px!important;font-weight:600!important;letter-spacing:.04em!important;text-transform:uppercase}
+html:not(#cfm) body:not(#cfm) :is(.archive-table,.stock-table,.crm-table,.customer-table,.service-table,.data-table,.cfct-table,.cffm-table,.cf-users-table,.cf-files-table) td{font-size:14px!important}
+/* Belge düzenleyici başlığı, pencere / çekmece başlıkları, hızlı belge kartları */
+html:not(#cfm) body:not(#cfm) .quote-editor-head :is(h1,h2){font-size:20px!important;font-weight:600!important;letter-spacing:-.01em!important;line-height:1.3!important}
+html:not(#cfm) body:not(#cfm) :is(#cfHistoryTitle,#cfNotifyTitle,#presenceTitle,#securityTitle,#serviceFormTitle,#uiDrawerTitle,#pgTitle){font-size:18px!important;font-weight:600!important;letter-spacing:-.01em!important}
+html:not(#cfm) body:not(#cfm) :is(.cf-quick-customer,.cf-quick-products,.cf-quick-summary) > :is(h2,h3,header h2,header h3),html:not(#cfm) body:not(#cfm) :is(.cf-quick-customer,.cf-quick-products,.cf-quick-summary) :is(h2,h3):not(.pr-page *){font-size:15px!important;font-weight:600!important}
+html:not(#cfm) body:not(#cfm) .hd-fx :is(h2,h3),html:not(#cfm) body:not(#cfm) .home-fx-card :is(h2,h3){font-weight:600!important}
+/* Üst çubuk arama (Metis: 14px) */
+html:not(#cfm) body:not(#cfm) .dash-search input{font-size:14px!important}
+}
+</style>
+</body></html>
