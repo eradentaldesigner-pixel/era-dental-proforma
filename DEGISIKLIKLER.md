@@ -1,4 +1,4 @@
-# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-21.61)
+# CepFirma — Metis arayüz güncellemesi (sürüm 2026-11-21.62)
 
 Bu güncelleme `app.html` dosyasının yeni hâlidir. Uygulamanın işleyişi, veritabanı
 kuralları ve PDF / baskı çıktıları korunmuştur; değişikliklerin büyük kısmı
@@ -422,6 +422,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
   imza tablosu; Talep eden / Muhasebe / Onaylayan imza yerleri. Uzun rotalarda tek sayfaya sığacak şekilde küçülür.
 
 - Rotalar: ofis konumu adresten daha doğru bulunur (cadde + mahalle + ilçe; ör. Beşyol / Küçükçekmece);
+  önceden yanlış bulunup rotaya kaydedilmiş otomatik konumlar yeniden aranır;
   ofise dönüş, durağı olan son güne eklenir (sonraki günler boş olsa da).
 
 ## Hata düzeltmeleri
@@ -514,7 +515,7 @@ Her öğe uygulamanın kendi rol yetkilerine göre görünür (9 rolün tamamı 
 
 - **Yeni sürüm uyarısı:** site güncellendiğinde açık sekmelerde "Yeni sürüm hazır" çubuğu
   çıkar (yalnızca dosya başlık bilgisi sorulur). Dosya başında sürüm etiketi:
-  `<meta name="cf-version" content="2026-11-21.61">` — sonraki yayınlarda bu değeri artırın.
+  `<meta name="cf-version" content="2026-11-21.62">` — sonraki yayınlarda bu değeri artırın.
 - Inter yazı tipi Google Fonts'tan yüklenir.
 
 ## Geri alma

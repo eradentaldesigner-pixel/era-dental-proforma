@@ -1,4 +1,4 @@
-<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-21.61"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><style id="cf-boot-splash">/* CepFirma: açılışta teklif ekranının bir an görünmesini önler — ana sayfa hazır olana kadar yükleme ekranı */
+<!doctype html><html lang="tr"><head><meta name="cf-version" content="2026-11-21.62"><script id="cf-bank-format">/* CepFirma: IBAN biçimi ve hesap para birimi etiketi (TL / EUR / USD) */window.cfIbanFmt=function(v){var s=String(v||"").replace(/[\s-]/g,"").toUpperCase();if(!s)return "";if(/^\d{24}$/.test(s))s="TR"+s;return s.replace(/(.{4})/g,"$1 ").trim()};window.cfCurLabel=function(c){c=String(c||"").trim().toUpperCase();return({TRY:"TL",TL:"TL",EUR:"EUR",EURO:"EUR",USD:"USD",DOLAR:"USD"})[c]||c};window.cfBankLine=function(b){var c=window.cfCurLabel(b&&b.currency);return (c?c+" ":"")+"IBAN: "+(window.cfIbanFmt(b&&b.iban)||"—")};</script><style id="cf-boot-splash">/* CepFirma: açılışta teklif ekranının bir an görünmesini önler — ana sayfa hazır olana kadar yükleme ekranı */
 html.cf-booting body>*{visibility:hidden!important}
 html.cf-booting body::before{content:"";position:fixed;inset:0;z-index:2147483646;background:#fafafa}
 html.cf-booting body::after{content:"";position:fixed;left:50%;top:50%;z-index:2147483647;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;border:3px solid #e4e4e7;border-top-color:#2563eb;animation:cfBootSpin .8s linear infinite}
@@ -12309,7 +12309,9 @@ const ROADS=new Map();let roadsT=0,roadsBusy=false;
 const located=s=>s.lat!=null&&s.result!=='cancelled';
 /* ofis: rotanın başlangıç ve dönüş noktası (firma adresinden bulunur, haritada düzeltilebilir) */
 const OKEY=()=>'cfrt:office2:'+company();let pinOffice=false;
-function office(){const st=R?.needs?.start;if(st&&st.lat!=null)return st;try{const o=JSON.parse(localStorage.getItem(OKEY())||'null');if(o&&o.lat!=null)return o}catch(_){}return null}
+/* eski yöntemle (yanlış) otomatik bulunmuş konumlar yok sayılır, yeniden aranır */
+const officeValid=o=>o&&o.lat!=null&&!(o.src==='auto'&&o.v!==2);
+function office(){const st=R?.needs?.start;if(officeValid(st))return st;try{const o=JSON.parse(localStorage.getItem(OKEY())||'null');if(officeValid(o))return o}catch(_){}return null}
 function officeOn(){return !!(R&&R.needs?.start_off!==true&&office())}
 function officeLabel(){const cs=window._companySettings||{};return (cs.company_display_name||cs.legal_name||document.getElementById('profileCompany')?.textContent||'Firma').trim()+' ofisi'}
 function setOffice(o,remember){R.needs=R.needs&&typeof R.needs==='object'?R.needs:{};R.needs.start=o;if(remember)try{localStorage.setItem(OKEY(),JSON.stringify(o))}catch(_){}}
@@ -12323,7 +12325,7 @@ let officeTry='';async function ensureOffice(){if(office())return office();const
   const cityP=provOf(city);
   for(const q of tries){const r=await photonSearch(q,cityP?{lat:cityP[1],lng:cityP[2]}:null);const ok=(r||[]).filter(x=>!cityP||provOf(x.city)?.[0]===cityP[0]||(Math.abs(x.lat-cityP[1])<1.2&&Math.abs(x.lng-cityP[2])<1.6));
     const hit=ok.find(x=>district&&lc((x.sub||'')+' '+(x.address||'')+' '+x.main).includes(lc(district)))||(q===city?ok[0]:null);
-    if(hit){const o={lat:+hit.lat.toFixed(6),lng:+hit.lng.toFixed(6),label:officeLabel(),address:addr,src:'auto'};setOffice(o,true);return o}}
+    if(hit){const o={lat:+hit.lat.toFixed(6),lng:+hit.lng.toFixed(6),label:officeLabel(),address:addr,src:'auto',v:2};setOffice(o,true);if(R?.id)dirty=true;return o}}
   return null}
 function paintOffice(){const el=$('cfrtOffice');if(!el)return;const o=office();const on=officeOn();
   el.innerHTML='<span class="cfrt-lbl">Başlangıç ve dönüş noktası</span><div class="cfrt-office-row"><span class="cfrt-office-ic">🏢</span><div><b>'+esc(o?(o.label||officeLabel()):'Ofis konumu bulunamadı')+'</b><small>'+esc(o?(o.address||'')+(o.src==='auto'?' · konum adresten bulundu, yanlışsa haritada düzeltin':''):'Ayarlar › Firma bilgilerinde adres yoksa haritada işaretleyin')+'</small></div>'
