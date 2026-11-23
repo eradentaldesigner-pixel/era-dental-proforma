@@ -15016,4 +15016,9 @@ if(typeof closeServiceForm==='function'){const prev=closeServiceForm;let asking=
 /* Esc ile servis formunu kapat */
 document.addEventListener('keydown',e=>{if(e.key!=='Escape'||e.defaultPrevented)return;if(document.querySelector('.cfmx'))return;const m=document.getElementById('serviceFormModal');if(m&&m.classList.contains('open')&&typeof closeServiceForm==='function'){e.preventDefault();closeServiceForm()}});
 })();</script>
+<style id="cf-page-bg">
+/* koyu tema: sayfa katmanlarının zemini (geniş ekranda iki yanda beyaz / mavi şerit kalmasın) */
+html[data-cfp="dark"]:not(#z1):not(#z2):not(#z3):not(#z4):not(#z5):not(#z6):not(#z7):not(#z8):not(#z9):not(#z10):not(#z11):not(#z12):not(#z13):not(#z14) body:not(#z15) :is(.pr-page-view,.dashboard-overlay,.ops-overlay){background:var(--mt-app,#0c0d0e)!important;background-image:none!important}
+html[data-cfp="dark"]:not(#z1):not(#z2):not(#z3):not(#z4):not(#z5):not(#z6):not(#z7):not(#z8):not(#z9):not(#z10):not(#z11):not(#z12):not(#z13):not(#z14) body:not(#z15) #calendarOverlay :is(.calendar-head h2,.pr-page-head h1,.pr-page-head h2,h1,h2){color:var(--mt-ink,#eceef0)!important}
+</style>
 </body></html>
