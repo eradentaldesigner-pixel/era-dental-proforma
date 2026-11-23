@@ -9973,7 +9973,6 @@ function build(){const d=document.querySelector('.mobile-drawer');const nav=d?.q
   /* hızlı işlemler */
   if(!d.querySelector('.cfmm-quick')){const acts=[];
     if(can('new'))acts.push(['#2563eb','＋','Yeni teklif',()=>{const b=nav.querySelector('[data-pn-action="newOffer"]');if(b)b.click();else{close();try{newProforma?.()}catch(_){}}}]);
-    acts.push(['#16a34a','📅','Plan ekle',()=>{close();setTimeout(()=>{if(window.cfQuickPlan?.open)window.cfQuickPlan.open();else{try{appNavigate('calendar')}catch(_){}}},80)}]);
     if(can('service'))acts.push(['#ea580c','🔧','Servis kaydı',()=>{close();setTimeout(async()=>{try{await appNavigate('service')}catch(_){}setTimeout(()=>{try{newServiceRecord()}catch(_){}},300)},80)}]);
     if(acts.length){const qd=document.createElement('div');qd.className='cfmm-quick';qd.style.gridTemplateColumns='repeat('+acts.length+',minmax(0,1fr))';acts.forEach(([c,i,l,fn])=>{const b=document.createElement('button');b.type='button';b.innerHTML='<span style="background:'+c+'">'+i+'</span>'+esc(l);b.onclick=fn;qd.append(b)});d.querySelector('.cfmm-search').after(qd)}}
   decorate()}
@@ -15557,5 +15556,9 @@ html body:not(.cfp-keep) #serviceOverlay .service-page-head>div:last-child>butto
 const RE=/^(?:[×✕]|(?:[×✕xX]\s*)?(?:Kapat|Ana sayfaya dön))$/;
 function mark(){if(innerWidth>767)return;document.querySelectorAll('.pr-page-head button,.pr-page-head a.btn').forEach(b=>{if(b.classList.contains('cfma-close'))return;if(RE.test((b.textContent||'').trim()))b.classList.add('cfma-close')})}
 let t=0;new MutationObserver(()=>{if(t)return;t=setTimeout(()=>{t=0;mark()},300)}).observe(document.body,{childList:true,subtree:true});mark();
+/* menüde bir satıra dokununca menü her durumda kapansın; zaten ana sayfadaysa da ana sayfaya dönsün */
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.mobile-drawer .md-menu>button');if(!b||innerWidth>767)return;const home=/mobileNavigate\('home'\)/.test(b.getAttribute('onclick')||'')||b.dataset.pnAction==='home'||b.dataset.cfModule==='home';
+ setTimeout(()=>{if(typeof setMobileMenu==='function'&&document.getElementById('mobileNavToggle')?.checked)setMobileMenu(false);document.body.classList.remove('drawer-open');
+  if(home){const d=document.getElementById('dashboardOverlay');if(!d||!d.classList.contains('open')||[...document.querySelectorAll('body>.pr-page-view,body>[id$=Overlay]')].some(x=>x.id!=='dashboardOverlay'&&!x.hidden&&getComputedStyle(x).display!=='none'&&x.getBoundingClientRect().height>200)){try{appNavigate('home')}catch(_){}}}},150)},true);
 })();</script>
 </body></html>
