@@ -15355,17 +15355,18 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)halt()});
 if(visible())start();
 })();</script>
 <script id="cf-post-login">(function(){
-/* giriş yapıldığında: giriş ekranı kapanır kapanmaz ana sayfa açılana kadar düzenleyiciyi gizli tut */
-if(/[?&](proforma|offerPdf|plan|order|service|stok|messages|invite|mode|notifications|edit|quote)=/.test(location.search))return;
-const H=document.documentElement;let was=false,t=0,tm=0;
+/* giriş yapıldığında: çalışma alanı yüklenip ana sayfa açılana kadar tam ekran yükleniyor perdesi */
+if(/[?&](proforma|offerPdf|plan|order|service|stok|messages|invite|edit|quote)=/.test(location.search))return;
+const st=document.createElement('style');st.id='cf-post-login-style';
+st.textContent='#cfPostLogin{position:fixed;inset:0;z-index:2147483600;background:#0b0c0b;display:grid;place-items:center;opacity:1;transition:opacity .35s ease}#cfPostLogin.out{opacity:0;pointer-events:none}#cfPostLogin i{width:38px;height:38px;border-radius:50%;border:3px solid #ffffff1f;border-top-color:#c4f24c;animation:cfPlSpin .8s linear infinite}#cfPostLogin span{position:absolute;top:calc(50% + 36px);left:0;right:0;text-align:center;font:600 13px Inter,system-ui,sans-serif;color:#9aa196}@keyframes cfPlSpin{to{transform:rotate(360deg)}}html[data-cfp=light] #cfPostLogin{background:#fafafa}html[data-cfp=light] #cfPostLogin i{border-color:#e4e4e7;border-top-color:#2563eb}';
+document.head.appendChild(st);
+let was=false,cover=null,t=0,tm=0,t0=0;
 const vis=()=>{const a=document.getElementById('authGate');return !!a&&getComputedStyle(a).display!=='none'};
 const dash=()=>{const d=document.getElementById('dashboardOverlay');return !!d&&d.classList.contains('open')};
-const other=()=>{for(const o of document.querySelectorAll('.pr-page-view,.ops-overlay'))if(!o.hidden&&getComputedStyle(o).display!=='none')return true;return false};
-const off=()=>{H.classList.remove('cf-boot');clearInterval(t);t=0;clearTimeout(tm)};
-setInterval(()=>{const v=vis();
-  if(was&&!v&&!dash()&&!t){H.classList.add('cf-boot');
-    t=setInterval(()=>{if(dash()||other()||vis())off()},40);tm=setTimeout(off,7000)}
-  was=v},50);
+const off=()=>{clearInterval(t);t=0;clearTimeout(tm);document.documentElement.classList.remove('cf-boot');if(cover){const c=cover;cover=null;c.classList.add('out');setTimeout(()=>c.remove(),400)}};
+const on=()=>{if(cover)return;cover=document.createElement('div');cover.id='cfPostLogin';cover.className='cfp-keep';cover.innerHTML='<i></i><span>Çalışma alanınız hazırlanıyor…</span>';document.body.appendChild(cover);document.documentElement.classList.add('cf-boot');t0=Date.now();
+  let hooked=null;t=setInterval(()=>{if(vis()){off();return}if(dash()){setTimeout(off,120);return}const bp=window._bootPromise;if(bp&&bp!==hooked){hooked=bp;bp.then(()=>setTimeout(()=>{if(cover)off()},250),()=>off())}const ss=document.getElementById('syncStatus');if(ss&&/hata/i.test(ss.textContent||''))off()},60);tm=setTimeout(off,12000)};
+setInterval(()=>{const v=vis();if(was&&!v&&!dash())on();was=v},50);
 ['startNewProforma','resetForm','newOffer'].forEach(n=>{const f=window[n];if(typeof f==='function')window[n]=function(){off();return f.apply(this,arguments)}});
 })();</script>
 </body></html>
