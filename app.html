@@ -13892,9 +13892,8 @@ const set=(el,html)=>{if(el&&el.innerHTML!==html)el.innerHTML=html};
 
 /* ---------- üst çubuk ---------- */
 function topbar(){const top=document.querySelector('.dash-topbar.pr-global-header');if(!top)return;
-  if(!top.querySelector('.cfp-ws')){const b=document.createElement('button');b.type='button';b.className='cfp-ws';b.title='Firma ayarları';b.onclick=()=>{try{appNavigate('settings')}catch(_){}};top.prepend(b)}
-  const name=txt($('dashWorkspaceName'))||'Firma';const ini=name.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0].toLocaleUpperCase('tr-TR')).join('');
-  set(top.querySelector('.cfp-ws'),'<i>'+ini+'</i>'+name.replace(/[<>&]/g,'')+SV(IC.chev));
+  /* sol üstteki firma düğmesi kaldırıldı: sağ üstteki profil alanı aynı işi yapıyor */
+  top.querySelector('.cfp-ws')?.remove();
   const acts=top.querySelector('.dash-top-actions');const nw=acts&&acts.querySelector('.cfnav-new');
   if(acts&&nw&&!acts.querySelector('.cfp-newpf')&&typeof window.startNewProforma==='function'){const b=document.createElement('button');b.type='button';b.className='cfp-newpf';b.innerHTML=SV(IC.file)+'Yeni proforma';b.onclick=()=>{try{window.startNewProforma()}catch(_){}};acts.insertBefore(b,nw)}
   const sp=nw&&nw.querySelector('summary span');if(sp&&sp.textContent!=='Oluştur')sp.textContent='Oluştur'}
