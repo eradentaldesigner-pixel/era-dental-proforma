@@ -14101,9 +14101,10 @@ const SKIP_SEL=/paper|pr-page\b|prPrint|prInline|html2canvas|data-cf-theme|cfp-k
 function convDecl(st){const decl=[];
   const take=(props,fn)=>props.forEach(p=>{const v=st.getPropertyValue(p);if(!v||v.includes('var('))return;const nv=rewrite(v,fn);if(nv)decl.push(p+':'+nv+(st.getPropertyPriority(p)?'!important':''))});
   take(BG_PROPS,mapBg);take(TEXT_PROPS,mapText);take(BORDER_PROPS,mapBorder);return decl}
-function scopeSel(sel){return sel.split(/,(?![^()]*\))/).map(x=>{x=x.trim();if(!x||/^(html|:root)\s*$/.test(x))return '';const i=x.search(/::/);const base=i<0?x:x.slice(0,i),pe=i<0?'':x.slice(i);if(!base)return '';return base+':not('+EXCL+' *):not('+EXCL+')'+pe}).filter(Boolean).join(',')}
+function scopeSel(sel){return sel.split(/,(?![^()]*\))/).map(x=>{x=x.trim();if(!x||/^(html|:root)\s*$/.test(x))return '';const i=x.search(/::/);const base=i<0?x:x.slice(0,i),pe=i<0?'':x.slice(i);if(!base)return '';return base+':where(:not('+EXCL+' *):not('+EXCL+'))'+pe}).filter(Boolean).join(',')}
 const gen=document.createElement('style');gen.id='cf-dark-gen';let genSheet=null;
-const seen=new WeakSet();
+const seen=new WeakSet();const GEN=[];let genT=0;
+function flushGen(){genT=0;const t=GEN.join('\n');if(gen.textContent!==t)gen.textContent=t;const own=document.getElementById('cf-dark-premium-style');if(gen.parentNode!==document.body||document.body.lastElementChild!==(own||gen)){document.body.appendChild(gen);if(own)document.body.appendChild(own)}}
 function walk(rules,acc){for(const r of rules){
   if(r.type===4){const mt=r.media.mediaText;if(/print/.test(mt)&&!/screen/.test(mt))continue;const inner=[];walk(r.cssRules,inner);if(inner.length)acc.push('@media '+mt+'{'+inner.join('')+'}');continue}
   if(r.type===12||r.cssRules&&r.type!==1){try{walk(r.cssRules,acc)}catch(_){}continue}
@@ -14111,8 +14112,8 @@ function walk(rules,acc){for(const r of rules){
   const d=convDecl(r.style);if(!d.length)continue;const sel=scopeSel(r.selectorText);if(sel)acc.push(sel+'{'+d.join(';')+'}')}}
 function processSheet(el){if(el===gen||seen.has(el)||el.id==='cf-dark-gen'||el.id==='cf-dark-premium-style')return;seen.add(el);let rules;try{rules=el.sheet&&el.sheet.cssRules}catch(_){return}if(!rules)return;
   const acc=[];walk(rules,acc);if(!acc.length)return;if(!gen.isConnected)document.body.appendChild(gen);genSheet=gen.sheet;
-  acc.forEach(t=>{try{genSheet.insertRule(t,genSheet.cssRules.length)}catch(_){}})}
-function all(){document.querySelectorAll('style,link[rel="stylesheet"]').forEach(processSheet);const own=document.getElementById('cf-dark-premium-style');if(own)document.body.appendChild(own)}
+  GEN.push(...acc);if(!genT)genT=requestAnimationFrame(flushGen)}
+function all(){document.querySelectorAll('style,link[rel="stylesheet"]').forEach(processSheet);if(genT){cancelAnimationFrame(genT);genT=0}flushGen()}
 /* satır içi stiller (JS ile yazılan renkler) */
 function fixInline(el){if(!el.getAttribute)return;const s=el.getAttribute('style');if(!s||!/#|rgb|white|black/.test(s)||el.closest(EXCL.slice(4,-1)))return;if(el.dataset.cfpOrig===s)return;
   const st=el.style;let ch=false;const set=(p,fn)=>{const v=st.getPropertyValue(p);if(!v||v.includes('var('))return;const nv=rewrite(v,fn);if(nv){st.setProperty(p,nv,st.getPropertyPriority(p));ch=true}};
@@ -15020,5 +15021,9 @@ document.addEventListener('keydown',e=>{if(e.key!=='Escape'||e.defaultPrevented)
 /* koyu tema: sayfa katmanlarının zemini (geniş ekranda iki yanda beyaz / mavi şerit kalmasın) */
 html[data-cfp="dark"]:not(#z1):not(#z2):not(#z3):not(#z4):not(#z5):not(#z6):not(#z7):not(#z8):not(#z9):not(#z10):not(#z11):not(#z12):not(#z13):not(#z14) body:not(#z15) :is(.pr-page-view,.dashboard-overlay,.ops-overlay){background:var(--mt-app,#0c0d0e)!important;background-image:none!important}
 html[data-cfp="dark"]:not(#z1):not(#z2):not(#z3):not(#z4):not(#z5):not(#z6):not(#z7):not(#z8):not(#z9):not(#z10):not(#z11):not(#z12):not(#z13):not(#z14) body:not(#z15) #calendarOverlay :is(.calendar-head h2,.pr-page-head h1,.pr-page-head h2,h1,h2){color:var(--mt-ink,#eceef0)!important}
+html[data-cfp="dark"]:not(#z1):not(#z2):not(#z3):not(#z4):not(#z5):not(#z6):not(#z7):not(#z8):not(#z9):not(#z10):not(#z11):not(#z12):not(#z13):not(#z14) body:not(#z15) .cffc-mini-head b{color:var(--mt-ink,#eceef0)!important}
+html[data-cfp="dark"]:not(#z1):not(#z2):not(#z3):not(#z4):not(#z5):not(#z6):not(#z7):not(#z8):not(#z9):not(#z10):not(#z11):not(#z12):not(#z13):not(#z14) body:not(#z15) .cf-users-role{color:#cbd5e1!important;background:rgba(148,163,184,.14)!important;border-color:transparent!important}
+html[data-cfp="dark"]:not(#z1):not(#z2):not(#z3):not(#z4):not(#z5):not(#z6):not(#z7):not(#z8):not(#z9):not(#z10):not(#z11):not(#z12):not(#z13):not(#z14) body:not(#z15) .cf-users-role.owner{color:#93c5fd!important;background:rgba(59,130,246,.16)!important}
+html[data-cfp="dark"]:not(#z1):not(#z2):not(#z3):not(#z4):not(#z5):not(#z6):not(#z7):not(#z8):not(#z9):not(#z10):not(#z11):not(#z12):not(#z13):not(#z14) body:not(#z15) .cf-users-role.admin{color:#c4b5fd!important;background:rgba(139,92,246,.16)!important}
 </style>
 </body></html>
