@@ -14983,4 +14983,37 @@ let t=0,watched=null;const tick=()=>{if(!t)t=setTimeout(()=>{t=0;try{ensure();co
 const sideObs=new MutationObserver(tick);new MutationObserver(tick).observe(document.body,{childList:true,subtree:true});
 setInterval(tick,2000);tick();
 })();</script>
+<style id="cf-modal-fix-style">
+/* Koyu temada pencereler: net perde, opak kart. Kaldırmak için cf-modal-fix-style ve cf-modal-fix bloklarını silin. */
+html[data-cfp="dark"]:not(#k1):not(#k2):not(#k3):not(#k4):not(#k5):not(#k6):not(#k7):not(#k8):not(#k9):not(#k10):not(#k11):not(#k12) body:not(#k13) :is(#serviceFormModal,.service-form-modal,.calendar-modal,.ops-modal){background:rgba(0,0,0,.66)!important;backdrop-filter:blur(3px)}
+html[data-cfp="dark"]:not(#k1):not(#k2):not(#k3):not(#k4):not(#k5):not(#k6):not(#k7):not(#k8):not(#k9):not(#k10):not(#k11):not(#k12) body:not(#k13) :is(.service-form-card,.calendar-card){background:var(--mt-app,#0c0d0e)!important;border:1px solid var(--mt-border-strong,rgba(236,238,240,.13))!important;box-shadow:0 24px 80px rgba(0,0,0,.55)!important}
+/* uygulama içi onay */
+.cfmx{position:fixed;inset:0;z-index:2147482500;display:grid;place-items:center;background:rgba(0,0,0,.5);opacity:0;transition:opacity .15s cubic-bezier(.22,1,.36,1)}
+.cfmx.on{opacity:1}
+.cfmx .box{width:min(420px,calc(100vw - 32px));padding:20px;border-radius:14px;border:1px solid var(--mt-border-strong,#d4d4d8);background:var(--mt-panel,#fff);color:var(--mt-ink,#18181b);box-shadow:0 24px 70px rgba(0,0,0,.45);transform:translateY(8px);transition:transform .2s cubic-bezier(.22,1,.36,1)}
+.cfmx.on .box{transform:none}
+.cfmx h3{margin:0 0 6px;font-size:16px;font-weight:600}
+.cfmx p{margin:0 0 16px;font-size:14px;line-height:1.5;color:var(--mt-ink-2,#52525b)}
+.cfmx .acts{display:flex;justify-content:flex-end;gap:8px}
+.cfmx .acts button{height:38px;padding:0 14px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;border:1px solid var(--mt-border-strong,#d4d4d8);background:var(--mt-panel,#fff);color:var(--mt-ink,#18181b)}
+.cfmx .acts button.danger{background:#dc2626;border-color:#dc2626;color:#fff}
+@media (prefers-reduced-motion:reduce){.cfmx,.cfmx .box{transition:none}}
+</style>
+<script id="cf-modal-fix">(function(){'use strict';
+if(window.cfPdfRoute)return;
+/* tarayıcı onay penceresi yerine uygulama içi onay (tarayıcıda pencereler engellenmişse form kapanmıyordu) */
+function ask(title,text,okText){return new Promise(res=>{const w=document.createElement('div');w.className='cfmx';w.setAttribute('role','alertdialog');w.setAttribute('aria-modal','true');
+  w.innerHTML='<div class="box"><h3></h3><p></p><div class="acts"><button type="button" data-k="0">Formda kal</button><button type="button" class="danger" data-k="1"></button></div></div>';
+  w.querySelector('h3').textContent=title;w.querySelector('p').textContent=text;w.querySelector('[data-k="1"]').textContent=okText;
+  const prev=document.activeElement;const done=v=>{w.classList.remove('on');document.removeEventListener('keydown',key,true);setTimeout(()=>w.remove(),160);try{prev?.focus()}catch(_){}res(v)};
+  const key=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();done(false)}else if(e.key==='Tab'){const bs=[...w.querySelectorAll('button')];const i=bs.indexOf(document.activeElement);e.preventDefault();bs[(i+(e.shiftKey?-1:1)+bs.length)%bs.length].focus()}};
+  w.addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b)done(b.dataset.k==='1');else if(e.target===w)done(false)});
+  document.addEventListener('keydown',key,true);document.body.append(w);requestAnimationFrame(()=>{w.classList.add('on');w.querySelector('[data-k="0"]').focus()})})}
+window.cfAsk=ask;
+if(typeof closeServiceForm==='function'){const prev=closeServiceForm;let asking=false;
+  closeServiceForm=function(...a){const dirty=typeof serviceDirty!=='undefined'&&serviceDirty;if(!dirty)return prev.apply(this,a);if(asking)return false;asking=true;
+    ask('Değişiklikler kaydedilmedi','Bu servis formunda kaydedilmemiş değişiklikler var. Kapatırsanız silinir.','Kaydetmeden kapat').then(ok=>{asking=false;if(!ok)return;try{serviceDirty=false}catch(_){}prev.apply(this,a)});return false}}
+/* Esc ile servis formunu kapat */
+document.addEventListener('keydown',e=>{if(e.key!=='Escape'||e.defaultPrevented)return;if(document.querySelector('.cfmx'))return;const m=document.getElementById('serviceFormModal');if(m&&m.classList.contains('open')&&typeof closeServiceForm==='function'){e.preventDefault();closeServiceForm()}});
+})();</script>
 </body></html>
