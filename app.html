@@ -7978,6 +7978,8 @@ async function fetchEvents(info,ok,fail){const token=++fetchToken;const st=$('cf
     try{for(const x of rows){const i=calendarEvents.findIndex(v=>String(v.id)===String(x.id));if(i>=0)calendarEvents[i]=x;else calendarEvents.push(x)}}catch(_){}
     counts={};for(const x of rows){const k=typeKey(x.event_type);counts[k]=(counts[k]||0)+1}paintFilters();
     const list=rows.filter(x=>typeOn.has(typeKey(x.event_type))&&(!mineOnly||involves(x))).map(toEvent);
+    /* seyahatler (Rotalar): kim hangi gün nerede, ne iş yapacak */
+    try{const rt=(await window.cfRoutes?.calendar?.(from,to))||[];if(token!==fetchToken)return;const meId=currentUser?.id;rt.filter(e=>!mineOnly||e.people.includes(meId)).forEach(e=>list.push({id:e.id,title:e.title,start:e.date,allDay:true,classNames:['cffc-ev','cffc-route','cffc-rt-'+e.type],editable:false,extendedProps:{row:{location:e.detail,personnel:e.routeTitle},color:e.color,route:e.route}}))}catch(_){}
     if(st)st.textContent=list.length?'':(rows.length?'Seçili filtrelerde plan yok.':'Bu aralıkta plan yok. Boş bir güne tıklayarak plan ekleyin.');ok(list)}
   catch(e){if(token===fetchToken){if(st){st.className='cffc-state err';st.textContent='Planlar alınamadı: '+(e.message||'bağlantıyı kontrol edin')}fail(e)}}}
 function toEvent(x){const d=String(x.event_date).slice(0,10),s=x.start_time?String(x.start_time).slice(0,8):'',e=x.end_time?String(x.end_time).slice(0,8):'';const c=colorOf(typeKey(x.event_type));
@@ -8004,7 +8006,7 @@ let fcLoading=false;function build(){const box=mount();if(!box||cal)return;if(!w
     dayMaxEvents:3,nowIndicator:true,selectable:true,selectMirror:true,editable:true,eventDurationEditable:true,slotMinTime:'06:00:00',slotMaxTime:'23:00:00',scrollTime:'08:00:00',slotLabelFormat:{hour:'2-digit',minute:'2-digit',hour12:false},eventTimeFormat:{hour:'2-digit',minute:'2-digit',hour12:false},allDayText:'Gün boyu',noEventsText:'Bu aralıkta plan yok',
     events:fetchEvents,eventContent,
     eventDidMount:a=>{a.el.style.setProperty('--cffc-c',a.event.extendedProps.color);const x=a.event.extendedProps.row||{};a.el.title=[a.event.title,x.location,x.personnel].filter(Boolean).join(' · ')},
-    eventClick:a=>{a.jsEvent.preventDefault();openPlan(a.event.id)},
+    eventClick:a=>{a.jsEvent.preventDefault();if(a.event.extendedProps.route){window.cfRoutes?.open(a.event.extendedProps.route);return}openPlan(a.event.id)},
     select:a=>{cal.unselect();const d=iso(a.start);if(a.allDay)newPlan(d);else newPlan(d,hm(a.start),a.end&&iso(a.end)===d?hm(a.end):'')},
     eventDrop:moved,eventResize:moved,
     datesSet:a=>{store.set(window.innerWidth<768?'cfCalFcViewM':'cfCalFcView',a.view.type);const mid=new Date((a.start.getTime()+a.end.getTime())/2);if(mid.getMonth()!==mini.getMonth()||mid.getFullYear()!==mini.getFullYear()){mini=new Date(mid.getFullYear(),mid.getMonth(),1);paintMini();loadMiniDays()}}});
@@ -12554,7 +12556,7 @@ const liveNow=x=>['planned','active'].includes(x.status)&&x.start_date<=today()&
 async function renderList(){const t=++token;headList();await loadList();if(t!==token||overlay.hidden)return;paintList()}
 function paintList(){const T=today();const F={upcoming:x=>!['completed','cancelled'].includes(x.status)&&x.end_date>=T,live:x=>x.status==='active'||liveNow(x),draft:x=>x.status==='draft',done:x=>x.status==='completed'||(x.end_date<T&&x.status!=='cancelled'&&x.status!=='draft'),mine:x=>mine(x),all:()=>true};
   const cnt=k=>routes.filter(F[k]).length;let L=routes.filter(F[filter]);if(search){const s=lc(search);L=L.filter(x=>lc(x.title+' '+(stopsSum.get(x.id)||[]).map(y=>y.city).join(' ')).includes(s))}
-  if(filter==='upcoming')L=L.slice().sort((a,b)=>a.start_date.localeCompare(b.start_date));
+  L=L.slice().sort((a,b)=>filter==='done'?b.start_date.localeCompare(a.start_date):a.start_date.localeCompare(b.start_date));
   const live=routes.filter(x=>liveNow(x)&&mine(x));
   const chip=(k,l)=>'<button type="button" data-f="'+k+'" class="'+(filter===k?'on':'')+'">'+l+'<b>'+cnt(k)+'</b></button>';
   $('cfrtRoot').innerHTML=(live.length?live.map(x=>{const st=(stopsSum.get(x.id)||[]).filter(s=>s.day_date===T);return '<div class="cfrt-today"><div><b>Bugün rotadasınız: '+esc(x.title)+'</b><br><span>'+(st.length?st.length+' durak · '+[...new Set(st.map(s=>s.city).filter(Boolean))].join(', '):'Bugün için durak yok')+'</span></div><button type="button" data-go="'+x.id+'">Bugünkü rotam →</button></div>'}).join(''):'')
@@ -12601,6 +12603,7 @@ function wzMount(){const root=$('cfrtRoot');const L=root?.querySelector('.cfrt-l
   const sum=document.createElement('div');sum.id='cfrtWzSum';sum.className='cfrt-card2 cfrt-wzsum';L.appendChild(sum);
   const nav=document.createElement('div');nav.className='cfrt-wznav';L.appendChild(nav);
   const side=root.querySelector('.cfrt-side');if(side&&!$('cfrtWarn')){const w=document.createElement('div');w.id='cfrtWarn';const mp=$('cfrtMap');mp?mp.before(w):side.prepend(w)}
+  if(!R?.id){const sel=$('cfrtF_status');if(sel)[...sel.options].forEach(o=>{if(!['draft','planned'].includes(o.value))o.remove()})}
   wzPaint(false);warnSoon();sugMount()}
 function wzPaint(anim){const E=wzEls();if(!E)return;const bar=E.L.querySelector('.cfrt-wz'),nav=E.L.querySelector('.cfrt-wznav');if(!bar||!nav)return;const s=WZ.step;
   bar.innerHTML=(WZ.on?'<div class="cfrt-wz-steps">'+WZS.map((x,i)=>'<button type="button" data-ws="'+i+'" class="'+(i<s?'done':i===s?'on':'')+'"><i><b></b></i><span>'+(i<s?'✓ ':(i+1)+'. ')+x[1]+'</span></button>').join('')+'</div>':'')+'<div class="cfrt-wz-mode"><button type="button" class="cfrt-link" data-wmode>'+(WZ.on?'Tüm formu tek sayfada göster':'Adım adım göster')+'</button></div>';
@@ -12623,7 +12626,7 @@ function paintWzSum(){const el=$('cfrtWzSum');if(!el)return;const days=routeDays
    +(W.length?'<div class="cfrt-wzs-w">⚠ '+W.length+' konu kontrol edilmeli: '+W.slice(0,3).map(w=>esc(w.t)).join(' · ')+(W.length>3?' …':'')+'</div>':'<div class="cfrt-wzs-ok">✓ Her şey hazır görünüyor.</div>')}
 /* ---- 7) canlı özet ---- */
 function sumExtra(){let hrs=0,ok=0;routeDays().forEach(d=>{const r=ROADS.get(d);if(r&&r.sig===daySig(d)){hrs+=r.duration/3600;ok++}});let req=0;try{req=expCalc().request}catch(_){}
-  return (ok?'<div title="Direksiyon başında geçen tahmini süre"><small>Yolda</small><b>'+hrs.toFixed(1).replace('.',',')+' sa</b></div>':'')+'<div class="hl" title="'+(req?'Harcırah kartındaki tahmini talep tutarı':'Tutarlar harcırah adımında girilince hesaplanır')+'"><small>Harcırah</small><b>'+(req?Math.round(req).toLocaleString('tr-TR')+' TL':'—')+'</b></div>'}
+  return (ok&&isCar(R.transport)?'<div title="Direksiyon başında geçen tahmini süre"><small>Yolda</small><b>'+hrs.toFixed(1).replace('.',',')+' sa</b></div>':'')+'<div class="hl" title="'+(req?'Harcırah kartındaki tahmini talep tutarı':'Tutarlar harcırah adımında girilince hesaplanır')+'"><small>Harcırah</small><b>'+(req?Math.round(req).toLocaleString('tr-TR')+' TL':'—')+'</b></div>'}
 const SUMPREV=new Map();
 function liveSum(el){const num=t=>{const m=String(t).match(/[\d.]+(,\d+)?/);return m?parseFloat(m[0].replace(/\./g,'').replace(',','.')):NaN};
   el.querySelectorAll(':scope>div').forEach(box=>{const k=box.querySelector('small')?.textContent||'';const b=box.querySelector('b');if(!b)return;const txt=b.textContent;const prev=SUMPREV.get(k);SUMPREV.set(k,txt);if(prev==null||prev===txt||/\//.test(txt))return;
@@ -12645,10 +12648,10 @@ function sugLoad(city){const k=lowTR(city);if(SUGP.has(k))return SUGP.get(k);
     const score=x=>(x.maint?100:0)+(x.offer?50:0)+(!x.last?25:Math.min(24,Math.floor(dayDiff(x.last,today())/15)));out.sort((a,b)=>score(b)-score(a));
     SUGD.set(city,out);warnSoon();return out})();
   SUGP.set(k,p);return p}
-function dayCity(d){const N=R.needs&&R.needs.sugcity||{};const cnt={};ST.filter(s=>s.day_date===d).forEach(s=>{if(s.city)cnt[s.city]=(cnt[s.city]||0)+1});return Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0]?.[0]||N[d]||''}
+function dayCity(d){const N=R.needs&&R.needs.sugcity||{};const cnt={};ST.filter(s=>s.day_date===d).forEach(s=>{if(s.city)cnt[s.city]=(cnt[s.city]||0)+1});const own=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0]?.[0];if(own||N[d])return own||N[d];const O=ordered();return O.filter(s=>s.day_date<d&&s.city).pop()?.city||O.find(s=>s.day_date>d&&s.city)?.city||''}
 function sugMount(){if(!canEdit)return;document.querySelectorAll('#cfrtDays .cfrt-day[data-day]').forEach(sec=>{const d=sec.dataset.day;if(teamType(d)==='kisisel')return;let box=sec.querySelector(':scope>.cfrt-sug');if(!box){box=document.createElement('div');box.className='cfrt-sug';const tools=sec.querySelector('.cfrt-daytools')||sec.querySelector('header');tools.after(box)}
   const city=dayCity(d);
-  if(!city){box.innerHTML='<label class="cfrt-sug-q">📍 Bu gün hangi şehirdesiniz? <input list="cfrtProv" placeholder="Şehir yazın" data-sc></label>';const i=box.querySelector('[data-sc]');i.onchange=()=>{const v=String(i.value||'').trim();if(!v)return;R.needs=R.needs||{};R.needs.sugcity=R.needs.sugcity||{};R.needs.sugcity[d]=v;sugMount()};return}
+  if(!city){box.remove();return}
   const have=new Set(ST.map(s=>String(s.customer_id||'')).filter(Boolean));const rows=SUGD.get(city);
   if(!rows){box.innerHTML='<span class="cfrt-msg">📍 '+esc(city)+' · müşteriler yükleniyor…</span>';sugLoad(city).then(()=>{if(sec.isConnected)sugMount()});return}
   const L=rows.filter(x=>!have.has(String(x.id))).slice(0,5);
@@ -12662,7 +12665,11 @@ function sugMount(){if(!canEdit)return;document.querySelectorAll('#cfrtDays .cfr
 /* ---- 9) akıllı uyarılar ---- */
 const WDIS=new Set();let WDK=null;const wdisKey=()=>'cfrt:wdis:'+(R?.id||'new');function wdisSync(){const k=wdisKey();if(WDK===k)return;WDK=k;WDIS.clear();try{JSON.parse(localStorage.getItem(k)||'[]').forEach(x=>WDIS.add(x))}catch(_){}}
 function wzDay(d){wzGo(1);setTimeout(()=>document.querySelector('#cfrtDays [data-day="'+d+'"]')?.scrollIntoView({block:'center',behavior:'smooth'}),260)}
-function warnList(){const W=[];if(!R)return W;wdisSync();const days=routeDays();const add=(id,c,ic,t,s,label,fn)=>{if(!WDIS.has(id))W.push({id,c,ic,t,s,label,fn})};
+const CONF={key:'',list:[]};
+function confLoad(){if(!R?.start_date||!R?.end_date)return;const ppl=travelers();const k=[R.id,R.start_date,R.end_date,ppl.join(',')].join('|');if(CONF.key===k)return;CONF.key=k;CONF.list=[];if(!ppl.length)return;
+  let q=sb.from('company_routes').select('id,title,start_date,end_date,owner_id,participant_ids,status,finished_at').eq('company_id',company()).lte('start_date',R.end_date).gte('end_date',R.start_date).not('status','in','(cancelled,completed)').limit(50);if(R.id)q=q.neq('id',R.id);
+  q.then(r=>{if(CONF.key!==k||r.error)return;const P=new Set(ppl);CONF.list=(r.data||[]).filter(y=>!y.finished_at).map(y=>{const both=[y.owner_id,...(y.participant_ids||[])].filter((u,i,a)=>u&&P.has(u)&&a.indexOf(u)===i);if(!both.length)return null;const a=R.start_date>y.start_date?R.start_date:y.start_date,b=R.end_date<y.end_date?R.end_date:y.end_date;return {y,both,a,b}}).filter(Boolean);warnSoon()})}
+function warnList(){const W=[];if(!R)return W;wdisSync();try{confLoad()}catch(_){}const days=routeDays();const add=(id,c,ic,t,s,label,fn)=>{if(!WDIS.has(id))W.push({id,c,ic,t,s,label,fn})};CONF.list.forEach(c=>add('conf'+c.y.id+'_'+c.a+c.b,'#ef4444','⛔',c.both.map(nameOf).join(', ')+' '+fmtShort(c.a)+(c.a!==c.b?'–'+fmtShort(c.b):'')+' başka rotada','“'+c.y.title+'” ('+fmtShort(c.y.start_date)+'–'+fmtShort(c.y.end_date)+') · aynı kişi iki yerde olamaz, tarihleri kontrol edin','Tarihlere git',()=>{wzGo(0);setTimeout(()=>$('cfrtF_start')?.focus(),250)}));
   if(!String(R.title||'').trim())add('title','#ef4444','✏','Rota adı yazılmadı','Listede ve harcırah formunda görünür','Yaz',()=>{wzGo(0);setTimeout(()=>$('cfrtF_title')?.focus(),200)});
   if(days.length&&!ST.length)add('nostop','#f59e0b','📍','Henüz durak eklenmedi','Günlere klinik / müşteri ekleyin · şehir yazınca müşterileriniz önerilir','Duraklara git',()=>wzGo(1));
   if(!days.length)add('dates','#ef4444','📅','Tarih seçilmedi','Başlangıç ve bitiş tarihini seçin','Seç',()=>wzGo(0));
@@ -12670,7 +12677,7 @@ function warnList(){const W=[];if(!R)return W;wdisSync();const days=routeDays();
     if(t==='gorev'&&!L.length&&ST.length)add('empty'+d,'#f59e0b','📭',fmtDay(d)+' günü boş','Görev günü ama durak yok · durak ekleyin ya da günü yol / kişisel yapın','Güne git',()=>wzDay(d));
     const r=ROADS.get(d);const hrs=r&&r.sig===daySig(d)?r.duration/3600:0;
     if(t==='gorev'&&L.length>=6)add('busy'+d,'#f59e0b','⏱',fmtDay(d)+' çok yoğun',L.length+' durak'+(hrs?' · ~'+hrs.toFixed(1).replace('.',',')+' sa yol':'')+' · bazı durakları başka güne kaydırmayı düşünün','Güne git',()=>wzDay(d));
-    else if(t==='gorev'&&hrs>7.5)add('long'+d,'#0ea5e9','🛣',fmtDay(d)+' uzun yol günü','~'+hrs.toFixed(1).replace('.',',')+' sa direksiyon · mola ve konaklamayı planlayın','Güne git',()=>wzDay(d));
+    else if(t==='gorev'&&hrs>7.5&&isCar(R.transport))add('long'+d,'#0ea5e9','🛣',fmtDay(d)+' uzun yol günü','~'+hrs.toFixed(1).replace('.',',')+' sa direksiyon · mola ve konaklamayı planlayın','Güne git',()=>wzDay(d));
     if(t==='kisisel'&&L.length)add('pers'+d,'#0ea5e9','🧳',fmtDay(d)+' kişisel gün ama '+L.length+' ziyaret var','Harcırahta sayılmaz · bilerek böyle planladıysanız ✕ ile gizleyin','Görev günü yap',()=>{const m=DTS();m._all=m._all||{};m._all[d]='gorev';dirty=true;paintExp();paintDays();warnSoon()})});
   if(['flight','bus','mixed'].includes(R.transport)&&days.length){const L=TK();const out=L.some(t=>t.dir==='gidis'&&t.date),back=L.some(t=>t.dir==='donus'&&t.date);
     if(!out||!back)add('legs','#ef4444','✈',(!out&&!back?'Gidiş ve dönüş':!out?'Gidiş':'Dönüş')+' yolculuğu eklenmedi','Muhasebe bilet alamaz','Rotadan öner',()=>{const sg=suggestLegs();if(!L.length)TK().push(...sg);else{if(!out&&sg[0])TK().unshift(sg[0]);if(!back&&sg.length)TK().push(sg[sg.length-1])}dirty=true;paintExp();wzGo(2)})}
@@ -12692,21 +12699,122 @@ function readyScreen(){if(!R?.id)return;const days=routeDays();const cities=city
   if(!matchMedia('(prefers-reduced-motion: reduce)').matches)for(let i=0;i<36;i++){const f=document.createElement('i');f.className='cfrt-conf';f.style.left=(Math.random()*100)+'%';f.style.background=cols[i%5];f.style.animationDelay=(Math.random()*.45)+'s';dlg.appendChild(f);setTimeout(()=>f.remove(),2400)}
   const close=()=>{m.remove();document.removeEventListener('keydown',onKey,true)};const onKey=e=>{if(e.key==='Escape'){e.stopPropagation();close()}};document.addEventListener('keydown',onKey,true);m.onclick=e=>{if(e.target===m)close()};
   m.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{const a=b.dataset.r;close();if(a==='exp')wzGo(2);else if(a==='wa')share('wa');else if(a==='go')$('cfrtGo')?.click()})}
+/* ---- takvim bağlantısı: rotalar gün gün takvimde (kim, nerede, ne iş) ---- */
+const TICON={flight:'✈',bus:'🚌',train:'🚆',ferry:'⛴',mixed:'🧭'};
+async function routeCalendar(from,to){const c=company();if(!c||!from||!to)return [];
+  const r=await sb.from('company_routes').select('*').eq('company_id',c).lte('start_date',to).gte('end_date',from).neq('status','cancelled').limit(200);if(r.error||!r.data?.length)return [];
+  const ids=r.data.map(x=>x.id);const s=await sb.from('company_route_stops').select('route_id,day_date,city,place_name,purpose,result,position').in('route_id',ids).order('day_date').order('position');const stops=s.error?[]:(s.data||[]);
+  try{await people()}catch(_){}
+  const out=[];const oR=R,oST=ST;
+  try{for(const x of r.data){R={...x,needs:JSON.parse(JSON.stringify(x.needs||{}))};ST=stops.filter(y=>y.route_id===x.id);const ppl=travelers();
+    const names=ppl.map(u=>{const n=String(nameOf(u)||'').split('@')[0].trim();const f=n.split(/\s+/)[0];return f?f.charAt(0).toLocaleUpperCase('tr-TR')+f.slice(1):''}).filter(Boolean);const who=names.join(', ');
+    const all=routeDays();const firstCity=ST.find(y=>y.city)?.city||'';let lastCity='';const ic=TICON[x.transport]||'🚗';
+    all.forEach(d=>{if(d<from||d>to){const L0=ST.filter(y=>y.day_date===d&&y.city);if(L0.length)lastCity=L0[L0.length-1].city;return}
+      const L=ST.filter(y=>y.day_date===d&&y.result!=='cancelled');const cities=[...new Set(L.map(y=>y.city).filter(Boolean))];const prev=lastCity;if(cities.length)lastCity=cities[cities.length-1];
+      const next=ST.find(y=>y.day_date>d&&y.city)?.city||'';const here=cities.join(', ')||lastCity||next||firstCity;const t=teamType(d);
+      const legs=TK().filter(k=>k.date===d);const lg=legs.map(k=>tripLeg(k)||TDIR[k.dir]||'').filter(Boolean).join(' · ');
+      const purp=[...new Set(L.map(y=>PURPOSE[y.purpose]||'').filter(Boolean))];let title,detail;
+      if(t==='gorev'){title='🧭 '+(who?who+' · ':'')+(here||x.title)+(purp.length?' · '+purp.join(', '):'');detail=L.length?L.length+' ziyaret: '+L.map(y=>y.place_name+(y.purpose&&PURPOSE[y.purpose]?' ('+PURPOSE[y.purpose]+')':'')).join(', '):'Görev günü · durak eklenmedi'}
+      else if(t==='yol'){title=ic+' '+(who?who+' · ':'')+'Yolda'+(lg?' · '+lg:(here?' · '+(prev&&prev!==here?prev+' → ':'')+here:''));detail='Seyahat günü'+(lg?' · '+lg:'')}
+      else if(t==='bekleme'){title='⏸ '+(who?who+' · ':'')+(here||'Seyahatte')+' · bekleme';detail='Görevler arası zorunlu bekleme günü'}
+      else if(legs.length){title=ic+' '+(who?who+' · ':'')+'Yolda · '+(lg||here)+' (kişisel tercih)';detail='Personelin tercihiyle seyahat günü · mesai dışı'}
+      else{title='🧳 '+(who?who+' · ':'')+(here||'Seyahatte')+' · kişisel gün';detail='Personelin kendi tercihi · mesai dışı'+(lg?' · '+lg:'')}
+      out.push({id:'rt'+x.id+'_'+d,route:x.id,date:d,type:t,title,detail,color:(DT[t]||DT.gorev)[1],people:ppl,routeTitle:x.title})})}}
+  finally{R=oR;ST=oST}
+  return out}
+window.cfRoutes.calendar=routeCalendar;
+/* ===================== Rotalar: görünüm ve kullanım iyileştirmeleri ===================== */
+/* ---- Türkiye mini haritası (kartlar ve boş ekran) ---- */
+const TR_OUT=[[26.6,41.7],[27.4,42.0],[28.0,41.95],[28.9,41.3],[29.9,41.15],[31.2,41.1],[32.3,41.7],[33.3,42.0],[34.9,42.05],[35.2,41.7],[36.1,41.6],[36.6,41.3],[37.9,41.05],[39.4,41.1],[40.5,41.0],[41.5,41.5],[42.5,41.5],[43.4,41.2],[43.7,40.7],[44.8,39.7],[44.3,39.4],[44.4,38.4],[44.2,37.9],[44.8,37.2],[44.0,37.3],[42.8,37.3],[42.3,37.1],[41.2,37.1],[40.0,36.8],[38.7,36.7],[37.8,36.7],[36.7,36.8],[36.6,36.2],[36.2,35.85],[35.9,35.95],[36.0,36.6],[35.5,36.6],[34.7,36.8],[33.7,36.2],[32.6,36.1],[31.5,36.8],[30.6,36.85],[30.4,36.2],[29.6,36.2],[28.9,36.7],[28.2,36.75],[27.4,37.0],[27.2,37.6],[26.3,38.2],[26.9,38.5],[26.7,39.3],[26.1,39.5],[26.2,40.0],[26.7,40.4],[26.2,40.6],[26.05,40.7],[26.3,41.25]];
+const mp=(lat,lng)=>[(lng-25.6)/19.3*260,(42.25-lat)/6.55*113];
+const f1=v=>v.toFixed(1);
+const TR_PATH='M'+TR_OUT.map(([g,a])=>mp(a,g).map(f1).join(' ')).join('L')+'Z';
+function cardMap(x,cities,col){const P=cities.map(c=>{const p=provOf(c);return p?mp(p[1],p[2]):null}).filter(Boolean);if(!P.length)return '';
+  const d=P.map((p,i)=>(i?'L':'M')+f1(p[0])+' '+f1(p[1])).join(' ');const live=(x.started_at&&!x.finished_at)||liveNow(x);
+  const tc=(stopsSum.get(x.id)||[]).find(s=>s.day_date===today()&&s.city)?.city;const tq=tc&&provOf(tc);const tp=tq?mp(tq[1],tq[2]):null;
+  return '<svg class="cfrt-trmap" viewBox="0 0 260 113" aria-hidden="true"><path class="tr" d="'+TR_PATH+'"/>'+(P.length>1?'<path class="rt" d="'+d+'" stroke="'+col+'" pathLength="100"/>':'')
+   +P.map((p,i)=>'<circle cx="'+f1(p[0])+'" cy="'+f1(p[1])+'" r="'+(i===0||i===P.length-1?3.6:2.6)+'" fill="'+(i===0||i===P.length-1?col:'var(--mt-panel,#fff)')+'" stroke="'+col+'" stroke-width="1.6"/>').join('')
+   +(live&&tp?'<circle class="pulse" cx="'+f1(tp[0])+'" cy="'+f1(tp[1])+'" r="5" fill="'+col+'"/>':'')
+   +(live&&P.length>1?'<circle class="car" r="4.2" fill="#fff" stroke="'+col+'" stroke-width="2"><animateMotion dur="'+Math.max(3.5,P.length*1.6)+'s" repeatCount="indefinite" path="'+d+'"/></circle>':'')+'</svg>'}
+/* ---- 3D kart eğilmesi (yalnızca fareyle) ---- */
+if(matchMedia('(hover:hover) and (pointer:fine)').matches&&!matchMedia('(prefers-reduced-motion: reduce)').matches){let tEl=null;
+  document.addEventListener('pointermove',e=>{const c=e.target.closest?.('.cfrt-card.cfrt-rich');if(tEl&&tEl!==c){tEl.classList.remove('tilt');tEl=null}if(!c)return;tEl=c;const r=c.getBoundingClientRect();const px=(e.clientX-r.left)/r.width,py=(e.clientY-r.top)/r.height;c.classList.add('tilt');c.style.setProperty('--rx',((.5-py)*7).toFixed(2)+'deg');c.style.setProperty('--ry',((px-.5)*9).toFixed(2)+'deg');c.style.setProperty('--mx',(px*100).toFixed(0)+'%');c.style.setProperty('--my',(py*100).toFixed(0)+'%')},{passive:true})}
+/* ---- zaman çizelgesi ---- */
+let VIEW=(()=>{try{return localStorage.getItem('cfrt:view')||'cards'}catch(_){return 'cards'}})();
+const WDN=['Pz','Pt','Sa','Ça','Pe','Cu','Ct'];
+function timeline(ids){const L=routes.filter(x=>ids.includes(String(x.id)));if(!L.length)return '';const T=today();
+  let a=L.reduce((m,x)=>x.start_date<m?x.start_date:m,L[0].start_date),b=L.reduce((m,x)=>x.end_date>m?x.end_date:m,L[0].end_date);
+  if(Math.abs(dayDiff(T,a))<=30&&addDays(T,-2)<a)a=addDays(T,-2);if(dayDiff(a,b)>74){if(a<addDays(T,-7))a=addDays(T,-7);if(dayDiff(a,b)>74)b=addDays(a,74)}if(dayDiff(a,b)<20)b=addDays(a,20);
+  const n=dayDiff(a,b)+1,W=30,days=[...Array(n)].map((_,i)=>addDays(a,i));
+  const P=[];L.forEach(x=>[x.owner_id,...(x.participant_ids||[])].forEach(u=>{if(u&&!P.includes(u))P.push(u)}));
+  const head='<div class="tl-row tl-head"><div class="tl-n">Kişi</div><div class="tl-g" style="width:'+n*W+'px">'+days.map((d,i)=>{const dt=new Date(d+'T12:00:00');const wd=dt.getDay();return '<span class="'+(wd===0||wd===6?'we':'')+(d===T?' td':'')+'">'+(i===0||d.slice(8)==='01'?'<em>'+dt.toLocaleDateString('tr-TR',{month:'short'})+'</em>':'')+'<small>'+WDN[wd]+'</small>'+(+d.slice(8))+'</span>'}).join('')+'</div></div>';
+  const rows=P.map(u=>{const mine=L.filter(x=>[x.owner_id,...(x.participant_ids||[])].includes(u)&&x.end_date>=a&&x.start_date<=b).sort((p,q)=>p.start_date.localeCompare(q.start_date));const lanes=[],conf=new Set();
+    mine.forEach(x=>{mine.forEach(y=>{if(y!==x&&!['cancelled'].includes(y.status)&&!['cancelled'].includes(x.status)&&y.start_date<=x.end_date&&y.end_date>=x.start_date)conf.add(x.id)});let li=lanes.findIndex(e=>e<x.start_date);if(li<0){lanes.push(x.end_date);li=lanes.length-1}else lanes[li]=x.end_date;x._lane=li});
+    const h=Math.max(1,lanes.length)*30+8;
+    return '<div class="tl-row"><div class="tl-n"><i class="cfrt-av">'+esc(initials(nameOf(u)))+'</i><span>'+esc(String(nameOf(u)||'').split('@')[0])+'</span></div><div class="tl-g" style="width:'+n*W+'px;height:'+h+'px">'
+     +days.map((d,i)=>{const wd=new Date(d+'T12:00:00').getDay();return wd===0||wd===6?'<b class="tl-we" style="left:'+i*W+'px;width:'+W+'px"></b>':''}).join('')
+     +mine.map(x=>{const s=x.start_date<a?a:x.start_date,e=x.end_date>b?b:x.end_date;const st=STATUS[x.status]||STATUS.draft;const c=liveNow(x)?'#d97706':st[1];return '<button type="button" class="tl-bar'+(conf.has(x.id)?' conf':'')+'" data-rid="'+x.id+'" style="left:'+(dayDiff(a,s)*W+2)+'px;width:'+((dayDiff(s,e)+1)*W-4)+'px;top:'+(4+x._lane*30)+'px;--c:'+c+'" title="'+esc(x.title+' · '+fmtShort(x.start_date)+' – '+fmtShort(x.end_date)+(conf.has(x.id)?' · tarih çakışması':''))+'">'+(conf.has(x.id)?'⚠ ':'')+esc(x.title)+'</button>'}).join('')
+     +(T>=a&&T<=b?'<i class="tl-now" style="left:'+(dayDiff(a,T)*W+W/2)+'px"></i>':'')+'</div></div>'}).join('');
+  return '<div class="cfrt-tl"><div class="tl-in">'+head+rows+'</div></div>'}
+/* ---- boş liste ekranı ---- */
+function emptyHero(){const C=[['İstanbul',41.01,28.98],['Ankara',39.93,32.86],['Samsun',41.29,36.33],['Kayseri',38.73,35.49],['İzmir',38.42,27.14]].map(c=>mp(c[1],c[2]));const d=C.map((p,i)=>(i?'L':'M')+f1(p[0])+' '+f1(p[1])).join(' ');
+  return '<div class="cfrt-empty2"><svg viewBox="0 0 260 113" aria-hidden="true"><path class="tr" d="'+TR_PATH+'"/><path class="rt" d="'+d+'" pathLength="100"/>'+C.map((p,i)=>'<g class="pin" style="--d:'+(0.5+i*.35)+'s"><circle cx="'+f1(p[0])+'" cy="'+f1(p[1])+'" r="3.4"/></g>').join('')+'</svg><h3>İlk rotanızı oluşturun</h3><p>Günleri ve durakları ekleyin; harita, yol süresi, harcırah ve takvim kendiliğinden oluşur.</p><button type="button" class="btn primary" data-first>+ Yeni rota</button></div>'}
+function listExtras(){const root=$('cfrtRoot');if(!root||!root.querySelector('.cfrt-bar'))return;const bar=root.querySelector('.cfrt-bar');
+  if(!bar.querySelector('.cfrt-vt')){const v=document.createElement('div');v.className='cfrt-vt';v.innerHTML='<button type="button" data-v="cards" class="'+(VIEW!=='tl'?'on':'')+'">▦ Kartlar</button><button type="button" data-v="tl" class="'+(VIEW==='tl'?'on':'')+'">▤ Zaman çizelgesi</button>';(bar.querySelector('.sp')||bar.lastChild).before(v);
+    v.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{VIEW=b.dataset.v;try{localStorage.setItem('cfrt:view',VIEW)}catch(_){}paintList()})}
+  if(VIEW==='tl'){const cards=root.querySelector('.cfrt-cards');if(cards){const ids=[...cards.querySelectorAll('[data-rid]')].map(b=>b.dataset.rid);const h=timeline(ids);if(h){cards.insertAdjacentHTML('afterend',h);cards.hidden=true;root.querySelectorAll('.tl-bar[data-rid]').forEach(b=>b.onclick=()=>openEditor(+b.dataset.rid));const tl=root.querySelector('.cfrt-tl'),now=tl.querySelector('.tl-now');if(now)tl.scrollLeft=Math.max(0,now.offsetLeft-160)}}}
+  if(!routes.length){const e=root.querySelector('.cfrt-empty');if(e){e.outerHTML=emptyHero();root.querySelector('[data-first]').onclick=()=>openEditor(null)}}}
+/* ---- rotayı kopyala ---- */
+function copyRoute(ns){const off=dayDiff(R.start_date,ns);const sh=d=>d?addDays(d,off):d;const N=JSON.parse(JSON.stringify(R.needs||{}));
+  if(N.dt&&typeof N.dt==='object'){const m={};for(const [u,v] of Object.entries(N.dt)){if(v&&typeof v==='object'){m[u]={};for(const [d,t] of Object.entries(v))m[u][sh(d)]=t}}N.dt=m}
+  if(Array.isArray(N.tickets))N.tickets=N.tickets.map(t=>{const c={...t,date:sh(t.date)};delete c.id;return c});
+  if(N.sugcity&&typeof N.sugcity==='object'){const m={};for(const [d,c] of Object.entries(N.sugcity))m[sh(d)]=c;N.sugcity=m}
+  if(N.exp&&typeof N.exp==='object'){delete N.exp.request;delete N.exp.doc_no}
+  R={id:null,title:(String(R.title||'Rota')+' (kopya)').slice(0,160),scope:R.scope,start_date:ns,end_date:sh(R.end_date),transport:R.transport,owner_id:R.owner_id||me(),participant_ids:(R.participant_ids||[]).slice(),share_ids:(R.share_ids||[]).slice(),status:'draft',notes:R.notes||'',needs:N,created_by:me()};
+  ST=ST.filter(s=>s.result!=='cancelled').map(s=>({city:s.city,customer_id:s.customer_id,place_name:s.place_name,address:s.address,phone:s.phone,visit_time:s.visit_time,purpose:s.purpose,note:s.note,lat:s.lat,lng:s.lng,loc_source:s.loc_source,place_id:s.place_id,day_date:sh(s.day_date),position:s.position,result:'pending',_k:newKey()}));
+  canEdit=true;focusKey=null;pinKey=null;dirty=true;WZ.key=null;CONF.key='';MAPSIG='';REQS=[];
+  $('cfrtTitle').textContent='Yeni rota (kopya)';$('cfrtSub').textContent='Kopyalandı · tarihleri ve durakları kontrol edip "Rotayı oluştur" deyin.';paintEditor();toast('Rota kopyalandı; henüz kaydedilmedi.')}
+function copyModal(){if(!R?.start_date)return;const len=dayDiff(R.start_date,R.end_date);let def=addDays(today(),7);
+  const m=document.createElement('div');m.className='cfrt-modal';m.innerHTML='<div class="cfrt-dlg cfrt-copy" role="dialog" aria-modal="true" aria-label="Rotayı kopyala"><h3>⧉ Rotayı kopyala</h3><p class="cfrt-msg">Aynı duraklar, ekip, ulaşım ve harcırah ücretleriyle yeni bir rota taslağı açılır. Ziyaret sonuçları ve onaylar kopyalanmaz.</p><label class="cfrt-lbl" for="cfrtCpD">Yeni başlangıç tarihi</label><input id="cfrtCpD" type="date" value="'+def+'"><p class="cfrt-msg" data-cpi></p><div class="cfrt-copy-a"><button type="button" class="btn light" data-x>Vazgeç</button><button type="button" class="btn primary" data-ok>Kopyala</button></div></div>';
+  document.body.append(m);const inp=m.querySelector('#cfrtCpD'),info=m.querySelector('[data-cpi]');const upd=()=>{info.textContent=inp.value?fmtLong(inp.value)+' – '+fmtLong(addDays(inp.value,len))+' · '+(len+1)+' gün':''};upd();inp.oninput=upd;
+  const close=()=>{m.remove();document.removeEventListener('keydown',onKey,true)};const onKey=e=>{if(e.key==='Escape'){e.stopPropagation();close()}};document.addEventListener('keydown',onKey,true);m.onclick=e=>{if(e.target===m)close()};
+  m.querySelector('[data-x]').onclick=close;m.querySelector('[data-ok]').onclick=()=>{if(!inp.value){inp.focus();return}if(!guardLeave())return;close();copyRoute(inp.value)};setTimeout(()=>inp.focus(),50)}
+function editorExtras(){const acts=$('cfrtRoot')?.querySelector('.cfrt-side .cfrt-acts');if(acts&&R?.id&&!acts.querySelector('[data-copy]')){const b=document.createElement('button');b.type='button';b.className='btn light';b.dataset.copy='';b.textContent='⧉ Kopyala';b.title='Bu rotayı başka tarihe kopyala';const sp=acts.querySelector('.sp');sp?sp.before(b):acts.append(b);b.onclick=copyModal}}
+/* ---- sürükle-bırak: günleri vurgula ---- */
+document.addEventListener('dragstart',e=>{if(e.target.closest?.('#cfrtDays'))$('cfrtDays')?.classList.add('dragging')});
+document.addEventListener('dragend',()=>$('cfrtDays')?.classList.remove('dragging'));
+document.addEventListener('drop',()=>setTimeout(()=>$('cfrtDays')?.classList.remove('dragging'),0));
+/* ---- haritada çizgi ve iğne animasyonu ---- */
+let MAPSIG='',ANIM={until:0,keys:new Set(),lines:false};
+function mapDecor(){if(Date.now()>ANIM.until||!map?.el)return;const left=Math.max(0,ANIM.until-Date.now());
+  if(ANIM.lines)map.svg?.querySelectorAll('polyline').forEach(p=>{p.setAttribute('pathLength','1');p.classList.add('cfrt-draw');p.style.animationDuration=Math.max(.2,left/1000)+'s'});
+  const M=map.markers||[];map.el.querySelectorAll('.cfmap-m[data-i]').forEach(el=>{const m=M[+el.dataset.i];if(m&&m.key&&ANIM.keys.has(m.key)){el.style.setProperty('--pd',(ANIM.all?(+el.dataset.i)*.07:0)+'s');el.classList.add('drop')}})}
+function mapAnim(){if(!map||!map.el||!map.svg||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  if(!map.__cfAnim&&typeof map.render==='function'){const orig=map.render.bind(map);map.render=function(){const r=orig.apply(this,arguments);try{mapDecor()}catch(_){}return r};map.__cfAnim=1}
+  const keys=ordered().filter(s=>s.lat!=null).map(s=>s._k);const sig=keys.join(',')+'|'+(R?.id??'new');if(sig===MAPSIG)return;
+  const old=MAPSIG.split('|');const first=!MAPSIG||old[1]!==String(R?.id??'new');const prev=new Set((old[0]||'').split(',').filter(Boolean));MAPSIG=sig;
+  const fresh=keys.filter(k=>first||!prev.has(k));if(!fresh.length&&!first)return;
+  ANIM={until:Date.now()+1300,keys:new Set(fresh),lines:first||keys.length>prev.size,all:first};mapDecor()}
 /* ---- bağlantılar: mevcut fonksiyonları sarmala ---- */
 {const _pe=paintEditor;paintEditor=function(){const r=_pe.apply(this,arguments);try{wzMount()}catch(e){console.warn('rota sihirbazı',e)}return r}}
 {const _pd=paintDays;paintDays=function(){const r=_pd.apply(this,arguments);try{sugMount();warnSoon()}catch(e){console.warn(e)}return r}}
 {const _ps=paintSum;paintSum=function(){const r=_ps.apply(this,arguments);try{const el=$('cfrtSum');if(el&&!el.querySelector('.hl'))el.insertAdjacentHTML('beforeend',sumExtra());if(el)liveSum(el)}catch(e){console.warn(e)}return r}}
 {const _pt=paintExpTot;paintExpTot=function(){const r=_pt.apply(this,arguments);try{paintSum();warnSoon()}catch(_){}return r}}
 {const _sv=save;save=async function(){const was=!R?.id;const r=await _sv.apply(this,arguments);if(was&&R?.id&&!dirty)setTimeout(readyScreen,300);return r}}
+{const _pl=paintList;paintList=function(){const r=_pl.apply(this,arguments);try{listExtras()}catch(e){console.warn(e)}return r}}
+{const _pm=paintMap;paintMap=function(){const r=_pm.apply(this,arguments);try{mapAnim()}catch(_){}return r}}
+{const _pe2=paintEditor;paintEditor=function(){const r=_pe2.apply(this,arguments);try{editorExtras()}catch(e){console.warn(e)}return r}}
 /* ---- 6) zengin rota kartları: mini rota çizimi, ilerleme halkası, geri sayım ---- */
 function cardSketch(cities,col){const C=cities.slice(0,7);if(C.length<2)return '';const W=260,H=46,n=C.length;const pts=C.map((c,i)=>[14+i*(W-28)/(n-1),i%2?14:32]);
   const d=pts.map((p,i)=>i?('Q'+((pts[i-1][0]+p[0])/2)+' '+(i%2?2:44)+' '+p[0]+' '+p[1]):('M'+p[0]+' '+p[1])).join(' ');
   return '<svg class="cfrt-sk" viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none" aria-hidden="true"><path d="'+d+'" fill="none" stroke="'+col+'" stroke-width="2" stroke-dasharray="4 4" pathLength="100"/>'+pts.map((p,i)=>'<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+(i===0||i===n-1?4.5:3)+'" fill="'+(i===0||i===n-1?col:'var(--mt-panel,#fff)')+'" stroke="'+col+'" stroke-width="2"/>').join('')+'</svg>'}
+function cardConflicts(x){if(['cancelled','completed'].includes(x.status)||x.finished_at)return '';const P=new Set([x.owner_id,...(x.participant_ids||[])].filter(Boolean));const out=[];
+  (routes||[]).forEach(y=>{if(y.id===x.id||['cancelled','completed'].includes(y.status)||y.finished_at)return;if(y.start_date>x.end_date||y.end_date<x.start_date)return;const both=[y.owner_id,...(y.participant_ids||[])].filter(u=>u&&P.has(u));if(!both.length)return;const a=x.start_date>y.start_date?x.start_date:y.start_date,b=x.end_date<y.end_date?x.end_date:y.end_date;out.push(fmtShort(a)+(a!==b?'–'+fmtShort(b):'')+' “'+y.title+'” ile çakışıyor')});return out.join(' · ')}
 function cardWhen(x){const T=today();if(x.finished_at||x.end_date<T)return ['bitti','🏁 Bitti'];if(x.start_date<=T)return ['now','● Şu an yolda'];const n=dayDiff(T,x.start_date);return n===1?['soon','Yarın başlıyor']:n<=7?['soon',n+' gün sonra']:['later',n+' gün sonra']}
 {const _cd=card;card=function(x){let h=_cd.apply(this,arguments);try{const S=stopsSum.get(x.id)||[];const cities=[];S.forEach(s=>{if(s.city&&cities[cities.length-1]!==s.city)cities.push(s.city)});const done=S.filter(s=>s.result==='visited').length;const pct=S.length?done/S.length:0;
-  const col=(h.match(/--c:([^;"]+)/)||[])[1]||'#84cc16';const w=cardWhen(x);
+  const col=(h.match(/--c:([^;"]+)/)||[])[1]||'#84cc16';const w=cardWhen(x);const cf=cardConflicts(x);
   const ring='<span class="cfrt-ring" title="'+done+' / '+S.length+' ziyaret"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="var(--mt-border,#e4e4e7)" stroke-width="3.5"/><circle cx="18" cy="18" r="15" fill="none" stroke="'+col+'" stroke-width="3.5" stroke-linecap="round" pathLength="100" stroke-dasharray="'+Math.round(pct*100)+' 100" transform="rotate(-90 18 18)"/></svg><b>'+(S.length?done+'/'+S.length:'—')+'</b></span>';
-  h=h.replace('class="cfrt-card"','class="cfrt-card cfrt-rich"').replace('<h3>','<span class="cfrt-when '+w[0]+'">'+w[1]+'</span>'+ring+'<h3>').replace('<div class="cfrt-chain">',cardSketch(cities,col)+'<div class="cfrt-chain">')}catch(e){console.warn(e)}return h}}
+  h=h.replace('class="cfrt-card"','class="cfrt-card cfrt-rich"').replace('<h3>',(w[0]==='soon'||w[0]==='later'?'<span class="cfrt-when '+w[0]+'">'+w[1]+'</span>':'')+(cf?'<span class="cfrt-when conf" title="'+esc(cf)+'">⚠ '+esc(cf)+'</span>':'')+ring+'<h3>').replace('<div class="cfrt-chain">',(cardMap(x,cities,col)||cardSketch(cities,col))+'<div class="cfrt-chain">')}catch(e){console.warn(e)}return h}}
 
 function paintEditor(){const dis=canEdit?'':' disabled';const list=peopleCache?.list||[];const root=$('cfrtRoot');
   root.innerHTML='<div class="cfrt-ed"><div class="cfrt-left"><div id="cfrtTrack"></div>'
@@ -12738,7 +12846,7 @@ function paintEditor(){const dis=canEdit?'':' disabled';const list=peopleCache?.
   $('cfrtDel')?.addEventListener('click',delRoute);
   const sb_=$('cfrtShareBtn'),sm=$('cfrtShareMenu');if(sb_){sb_.onclick=e=>{e.stopPropagation();sm.hidden=!sm.hidden};document.addEventListener('click',e=>{if(!e.target.closest('.cfrt-menu'))sm&&(sm.hidden=true)});sm.querySelectorAll('[data-sh]').forEach(b=>b.onclick=()=>{sm.hidden=true;share(b.dataset.sh)})}
   const mopt={onClick:ll=>{if(pinOffice){setOfficeAt(ll);return}if(pinAdd){addAtMap(ll);return}if(pinKey)setPin(pinKey,ll)},onMarker:m=>{if(m.key){focusKey=m.key;paintDays();paintMap(false);document.querySelector('[data-sk="'+m.key+'"]')?.scrollIntoView({block:'center',behavior:'smooth'})}},onTiles:ok=>{if(!ok)paintMap(false)}};
-  map=null;goMap=null;pinOffice=false;const mel=$('cfrtMap');paintOffice();paintDays();paintExp();REQS=[];loadReqs(R.id).then(()=>{if($('cfrtAppr'))paintAppr()});paintTrack();watchTrack();if(!office())ensureOffice().then(o=>{if(o&&$('cfrtOffice')){paintOffice();ROADS.clear();paintDays();paintMap(true);expKm(true)}});makeMap(mel,mopt).then(m=>{if(!mel.isConnected)return;map=m;paintMap(true);paintDays()})}
+  map=null;goMap=null;pinOffice=false;const mel=$('cfrtMap');paintOffice();paintDays();paintExp();REQS=[];loadReqs(R.id).then(async()=>{const q=REQS.find(x=>!['withdrawn','rejected'].includes(x.state));if(q){try{await loadBuys([q.id])}catch(_){}}if($('cfrtAppr'))paintAppr();try{paintExpTot()}catch(_){}});paintTrack();watchTrack();if(!office())ensureOffice().then(o=>{if(o&&$('cfrtOffice')){paintOffice();ROADS.clear();paintDays();paintMap(true);expKm(true)}});makeMap(mel,mopt).then(m=>{if(!mel.isConnected)return;map=m;paintMap(true);paintDays()})}
 function shiftStops(){const days=routeDays();if(!days.length)return;ST.forEach(s=>{if(!days.includes(s.day_date))s.day_date=s.day_date<days[0]?days[0]:days[days.length-1]});renumber()}
 function stopLabelIndex(){const o=ordered();const m=new Map();o.forEach((s,i)=>m.set(s._k,i+1));return m}
 function gmapsDay(d){const L=ordered().filter(s=>s.day_date===d&&s.result!=='cancelled');if(!L.length)return '';const q=s=>s.lat!=null&&s.loc_source!=='city'?s.lat.toFixed(6)+','+s.lng.toFixed(6):[s.place_name,s.address,s.city].filter(Boolean).join(', ');
@@ -12750,7 +12858,7 @@ function paintDays(){const box=$('cfrtDays');if(!box)return;const days=routeDays
   box.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>addPicker(b.closest('.cfrt-add'),b.dataset.add));
   box.querySelectorAll('[data-opt]').forEach(b=>b.onclick=()=>optimizeDay(b.dataset.opt));box.querySelectorAll('[data-near]').forEach(b=>b.onclick=()=>nearbyModal(b.dataset.near));box.querySelectorAll('[data-mycust]').forEach(b=>b.onclick=()=>myCustomersModal(b.dataset.mycust));
   box.querySelectorAll('.cfrt-stop').forEach(row=>{const k=row.dataset.sk;const s=ST.find(x=>x._k===k);if(!s)return;
-    row.addEventListener('click',e=>{if(e.target.closest('input,select,textarea,button,a,label'))return;if(focusKey===k)return;focusKey=k;paintDays();paintMap(false,true)});
+    row.addEventListener('click',e=>{if(e.target.closest('input,select,textarea,button,a,label'))return;if(focusKey===k){if(!e.target.closest('.cfrt-more')){focusKey=null;paintDays();paintMap(false,true)}return}focusKey=k;paintDays();paintMap(false,true)});
     row.querySelectorAll('[data-sf]').forEach(el=>el.addEventListener(el.tagName==='SELECT'||el.type==='time'?'change':'input',()=>{const f=el.dataset.sf;s[f]=el.value||null;dirty=true;if(f==='day_date'){s.position=999;renumber();paintDays();paintMap(false)}if(f==='city'&&s.loc_source!=='pin'&&s.loc_source!=='link'){const p=provOf(el.value);if(p){s.lat=p[1];s.lng=p[2];s.loc_source='city'}paintMap(false)}}));
     row.querySelector('[data-link]')?.addEventListener('change',e=>{const ll=parseLink(e.target.value);if(ll){s.lat=ll.lat;s.lng=ll.lng;s.loc_source='link';dirty=true;e.target.value='';toast('Konum bağlantıdan alındı.');paintDays();paintMap(false,true)}else if(e.target.value.trim())toast('Bağlantıda konum bulunamadı. Google Haritalar\'da yeri açıp "Paylaş › Bağlantıyı kopyala" ile deneyin.')});
     row.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>tool(s,b.dataset.t));row.querySelector('[data-savecust]')?.addEventListener('click',()=>saveAsCustomer(s));
@@ -12912,8 +13020,8 @@ function ticketsCalc(){const e=EXP();const rows=[];let owed=0,diffAll=0;const T=
   for(const t of TK()){const amt=numv(t.amount);if(!amt||t.mode==='car')continue;const who=t.who&&t.who!=='_all'?[t.who]:(T.length?T:[null]);
     for(const u of who){const ty=t.date?personType(u,t.date):'gorev';const personal=ty==='kisisel';const ref=numv(t.ref);let share=amt,diff=0;
       if(personal&&ref>0&&ref<amt){diff=amt-ref;if(!e.cover_diff)share=ref}
-      const company=t.buyer==='sirket';if(company&&diff>0&&!e.cover_diff)owed+=diff;if(!e.cover_diff)diffAll+=diff;
-      rows.push({name:(TMODE[t.mode]||'Bilet')+' · '+(TDIR[t.dir]||'')+(u&&(T.length>1||t.who!=='_all')?' · '+nameOf(u):''),calc:(t.date?fmtLong(t.date):'tarih ?')+(personal?' · personel tercihi (kişisel gün)':'')+' · '+(company?'şirket aldı':'personel aldı')+(diff?(e.cover_diff?' · fark şirkete':' · görev tarihi fiyatı '+TL(ref)+', fark '+TL(diff)+' personele'):''),share,company,personal,diff,date:t.date,dir:t.dir,u})}}
+      const company=t.buyer==='sirket';const bo=company?boughtLeg(t.id):null;if(company&&diff>0&&!e.cover_diff)owed+=diff;if(!e.cover_diff)diffAll+=diff;
+      rows.push({name:(TMODE[t.mode]||'Bilet')+' · '+(TDIR[t.dir]||'')+(u&&(T.length>1||t.who!=='_all')?' · '+nameOf(u):''),calc:(t.date?fmtLong(t.date):'tarih ?')+(personal?' · personel tercihi (kişisel gün)':'')+' · '+(company?(bo?'muhasebe aldı · '+TL(bo.amount):'bileti şirket alacak · alınmazsa tutar personele ödenir'):'bileti personel alacak')+(diff?(e.cover_diff?' · fark şirkete':' · görev tarihi fiyatı '+TL(ref)+', fark '+TL(diff)+' personele'):''),share,company,bought:!!bo,personal,diff,date:t.date,dir:t.dir,u})}}
   return {rows,owed,diff:diffAll}}
 function travelText(){const L=TK().filter(t=>t.date);const pick=dir=>L.filter(t=>t.dir===dir).sort((a,b)=>a.date<b.date?-1:1);const g=pick('gidis')[0],d=pick('donus').slice(-1)[0];
   const all=routeDays();const dd=dutyDays(null);const parts=[];const pers=t=>{const who=t.who&&t.who!=='_all'?[t.who]:(travelers().length?travelers():[null]);return who.some(u=>personType(u,t.date)==='kisisel')};
@@ -13001,7 +13109,7 @@ function expCalc(){const e=EXP();const a=autoVals();const d=a.days;const T=trave
   if(numv(e.toll))add('Köprü / otoyol (HGS)','tahmini',numv(e.toll));
   if(isCar(R.transport)){if(e.utts!==false)add('Yakıt',(km?'≈ '+Math.round(km).toLocaleString('tr-TR')+' km · ':'')+'UTTS ile şirket öder',0,true);else add('Yakıt',(km?Math.round(km).toLocaleString('tr-TR')+' km':'km ?')+' × '+String(e.fuel_l100||0).replace('.',',')+' L/100 km × '+TL(e.fuel_price)+'/L',km*numv(e.fuel_l100)/100*numv(e.fuel_price))}
   const tk=ticketsCalc();
-  if(tk.rows.length)tk.rows.forEach(t=>add(t.name+(t.company?' (şirket ödedi)':''),t.calc,t.share,false,{company:t.company}));
+  if(tk.rows.length)tk.rows.forEach(t=>add(t.name+(t.company?(t.bought?' (muhasebe aldı)':' (şirket alacak)'):''),t.calc,t.share,false,{company:t.company}));
   else if(isTicket(R.transport)&&numv(e.ticket_pp))add(R.transport==='flight'?'Uçak bileti':R.transport==='bus'?'Otobüs bileti':'Bilet',people+' kişi × '+TL(e.ticket_pp)+' (gidiş-dönüş)',people*numv(e.ticket_pp));
   if(tk.owed>0)add('Bilet farkı (personel payı, avanstan düşülür)','kişisel tarihli bilet',0,true);
   if(numv(e.other))add('Diğer'+(e.other_note?' ('+e.other_note+')':''),'',numv(e.other));
@@ -13044,7 +13152,7 @@ function paintExp(){const box=$('cfrtExp');if(!box)return;const e=EXP();const a=
   box.querySelector('[data-lt-total]')?.addEventListener('input',ev=>{EXP().lt_total=ev.target.value;dirty=true;paintExpTot()});
   box.querySelector('[data-expdoc]').onclick=()=>expenseDoc();paintExpTot();expKm()}
 function paintExpTot(){const box=$('cfrtExpTot');if(!box)return;const c=expCalc();
-  box.innerHTML='<table><tbody>'+c.lines.map(l=>'<tr'+(l.note?' class="note"':'')+'><td>'+esc(l.name)+'<small>'+esc(l.calc)+'</small></td><td>'+(l.note?'—':TL(l.amt))+'</td></tr>').join('')+'</tbody><tfoot><tr><th>Toplam tahmini gider</th><th>'+TL(c.total)+'</th></tr><tr><td>Kişi başı ('+c.people+' kişi · '+c.days+' gün'+(c.nights?' · '+c.nights+' gece':'')+')</td><td>'+TL(c.per)+'</td></tr><tr class="req"><th>Talep edilen tutar</th><th>'+TL(c.request)+'</th></tr>'+(c.companyTk?'<tr><td>Bunun '+TL(c.companyTk)+' kadarı şirketin alacağı biletler (tahmini) · personele ödenecek tahmini</td><td>'+TL(Math.max(0,c.request-c.companyTk))+'</td></tr>':'')+'</tfoot></table>';
+  box.innerHTML='<table><tbody>'+c.lines.map(l=>'<tr'+(l.note?' class="note"':'')+'><td>'+esc(l.name)+'<small>'+esc(l.calc)+'</small></td><td>'+(l.note?'—':TL(l.amt))+'</td></tr>').join('')+'</tbody><tfoot><tr><th>Toplam tahmini gider</th><th>'+TL(c.total)+'</th></tr><tr><td>Kişi başı ('+c.people+' kişi · '+c.days+' gün'+(c.nights?' · '+c.nights+' gece':'')+')</td><td>'+TL(c.per)+'</td></tr><tr class="req"><th>Talep edilen tutar</th><th>'+TL(c.request)+'</th></tr>'+(c.companyTk?'<tr><td>Bunun '+TL(c.companyTk)+' kadarı muhasebenin alacağı biletler · muhasebe biletleri alırsa personele ödenecek</td><td>'+TL(Math.max(0,c.request-c.companyTk))+'</td></tr>':'')+'</tfoot></table>';
   if($('cfrtAppr')&&R?.id)paintAppr();
   const s=$('cfrtExpSum');if(s)s.textContent=c.total?' · Talep '+TL(c.request)+' · '+c.people+' kişi, '+c.days+' gün':' · ücretleri girin, tutar otomatik hesaplanır'}
 function defaultLetter(){const dd=dutyDays(null);const L=dutyStops();const cities=[...new Set(L.map(s=>s.city).filter(Boolean))];const n=L.length;const o=officeOn()?office():null;const a=dd[0]||R.start_date,z=dd[dd.length-1]||R.end_date;
@@ -13062,6 +13170,7 @@ const isAccounting=()=>['owner','admin','accounting'].includes(role());
 const TEAM={service:'Teknik servis',sales:'Satış',logistics:'Depo / lojistik',manager:'Müdür',owner:'Yönetim',admin:'Yönetim',call_center:'Çağrı merkezi',accounting:'Muhasebe'};
 let REQS=[],reqReady=null,PAYS=new Map();
 const BUYS=new Map();
+function boughtLeg(id){if(!id||!Array.isArray(REQS))return null;const q=REQS.find(x=>!['withdrawn','rejected'].includes(x.state));if(!q)return null;return (BUYS.get(q.id)||[]).find(x=>x.leg_id===id)||null}
 async function loadBuys(ids){ids=(ids||[]).filter(Boolean);if(!ids.length)return;const r=await sb.from('company_route_ticket_buys').select('*').in('request_id',ids);if(r.error){window._cfrtBuysMissing=/does not exist|schema cache|relation/i.test(r.error.message);return}ids.forEach(i=>BUYS.set(i,[]));(r.data||[]).forEach(x=>{const a=BUYS.get(x.request_id)||[];a.push(x);BUYS.set(x.request_id,a)})}
 async function loadPays(ids){ids=(ids||[]).filter(Boolean);if(!ids.length)return;await loadBuys(ids).catch(()=>{});const r=await sb.from('company_route_payments').select('*').in('request_id',ids).order('created_at');if(r.error)return;ids.forEach(i=>PAYS.set(i,[]));(r.data||[]).forEach(x=>{const a=PAYS.get(x.request_id)||[];a.push(x);PAYS.set(x.request_id,a)})}
 async function loadReqs(id){if(!id){REQS=[];return REQS}const r=await sb.from('company_route_requests').select('*').eq('company_id',company()).eq('route_id',id).order('revision',{ascending:false});reqReady=!r.error;REQS=r.error?[]:(r.data||[]);await loadPays(REQS.slice(0,3).map(x=>x.id));if(REQS[0]&&closeStates.includes(REQS[0].state))await loadExps([REQS[0].id]);return REQS}
@@ -13089,7 +13198,7 @@ function formHtml(sn,meta={}){const cs=window._companySettings||{};const co=cs.l
    +'<div class="grid"><table><tbody><tr><th style="width:38%">Görev yeri</th><td>'+P((sn.cities||[]).join(', ')||'—')+'</td></tr><tr><th>Tarih</th><td>'+P(fmtLong(sn.start))+(sn.end!==sn.start?' – '+P(fmtLong(sn.end)):'')+'</td></tr><tr><th>Süre</th><td>'+sn.ndays+' gün'+(sn.nights?' · '+sn.nights+' gece':'')+' · '+sn.people+' kişi</td></tr></tbody></table>'
    +'<table><tbody><tr><th style="width:38%">Çıkış / dönüş</th><td>'+P(sn.office||'—')+'</td></tr><tr><th>Ulaşım</th><td>'+P(TRANSPORT[sn.transport]||'')+(isCar(sn.transport)&&sn.utts?' · yakıt UTTS':'')+(sn.travel?'<br><span class="small">'+P(sn.travel)+'</span>':'')+((sn.local||[]).length?'<br><span class="small">Yerel ulaşım: '+P(sn.local.join(', '))+'</span>':'')+'</td></tr><tr><th>Toplam yol</th><td>'+(sn.km?'≈ '+Number(sn.km).toLocaleString('tr-TR')+' km':'—')+' · '+(sn.stops||0)+' ziyaret</td></tr></tbody></table></div>'
    +(meta.screen&&((sn.personal||[]).length||sn.ticket_diff)?'<div class="note"><b>Yönetici için bilgi:</b> '+(sn.personal||[]).map(p=>P(p.name)+' — kişisel uzatma '+p.days.length+' gün ('+p.days.map(d=>P(fmtDay(d))).join(', ')+')').join('; ')+((sn.personal||[]).length?'. Bu günler personel tercihidir, harcıraha dahil edilmedi.':'')+(sn.ticket_diff?' Kişisel tarihli bilet farkı: '+TL(sn.ticket_diff)+(sn.cover_diff?' (şirketin karşılaması isteniyor).':' (personel öder).'):'')+'</div>':'')+((sn.legs||[]).length?'<h2>Seyahat planı (bilet / yolculuk)</h2><table><thead><tr><th style="width:11%">Yön</th><th style="width:15%">Tarih</th><th style="width:13%">Saat</th><th>Güzergâh</th><th style="width:10%">Araç</th><th style="width:12%">Kim için</th><th style="width:9%">Bileti</th><th class="num" style="width:10%">Tahmini</th><th class="num" style="width:13%">Alınan</th></tr></thead><tbody>'+sn.legs.map(l=>{const b=(meta.buys||[]).find(x=>x.leg&&x.leg===l.id);return '<tr><td><b>'+P(l.dir)+'</b></td><td>'+P(fmtDay(l.date))+(l.personal?'<br><span class="small">personel tercihi</span>':'')+'</td><td>'+P(l.time||'—')+'</td><td>'+P(l.route||'—')+'</td><td>'+P(l.mode)+'</td><td>'+P(l.who)+'</td><td>'+P(l.buyer)+'</td><td class="num">'+(l.amt?TL(l.amt):'—')+'</td><td class="num">'+(b?'<b>'+TL(b.amount)+'</b>'+(b.pnr?'<br><span class="small">PNR '+P(b.pnr)+'</span>':'')+'<br><span class="small">'+P(fmtLong(b.date))+'</span>':(l.buyer==='Şirket'?'alınacak':'—'))+'</td></tr>'}).join('')+'</tbody></table>':'')+'<h2>Gün gün plan</h2><table><thead><tr><th style="width:5%">#</th><th style="width:17%">Tarih</th><th style="width:20%">İl</th><th>Ziyaret edilecek yerler</th></tr></thead><tbody>'+dayRows+'</tbody></table>'
-   +'<h2>Harcırah hesabı</h2><table><thead><tr><th>Gider</th><th>Hesap</th><th class="num" style="width:20%">Tutar</th></tr></thead><tbody>'+(sn.lines||[]).map(l=>'<tr><td>'+P(l.name)+'</td><td class="muted">'+P(l.calc)+'</td><td class="num">'+(l.note?'—':TL(l.amt))+'</td></tr>').join('')+'</tbody><tfoot><tr><th colspan="2">Toplam tahmini gider ('+sn.people+' kişi · kişi başı '+TL(sn.per)+')</th><th class="num">'+TL(sn.total)+'</th></tr><tr class="req"><th colspan="2">TALEP EDİLEN HARCIRAH TUTARI</th><th class="num">'+TL(meta.amount??sn.request)+'</th></tr>'+(meta.approved!=null&&Math.round(meta.approved)!==Math.round(meta.amount??sn.request)?'<tr class="req"><th colspan="2">ONAYLANAN TUTAR'+(meta.note&&isOk?' — '+P(meta.note):'')+'</th><th class="num">'+TL(meta.approved)+'</th></tr>':'')+((meta.buys||[]).length?'<tr><td colspan="2">Şirketin aldığı biletler (gerçek) · '+meta.buys.map(b=>P(b.label||'bilet')+' '+TL(b.amount)).join(', ')+'</td><td class="num">− '+TL(meta.tickets)+'</td></tr><tr class="req"><th colspan="2">PERSONELE ÖDENECEK AVANS (onaylanan − biletler)</th><th class="num">'+TL(Math.max(0,(meta.approved??meta.amount??sn.request)-meta.tickets))+'</th></tr>':(sn.company_tk&&!meta.approved?'<tr><td colspan="2">Şirketin alacağı biletler (tahmini) · personele ödenecek tahmini</td><td class="num">'+TL(Math.max(0,(meta.amount??sn.request)-sn.company_tk))+'</td></tr>':''))+(meta.payments||[]).map(x=>'<tr><td colspan="2">Ödenen avans · '+P(PAY_M[x.method]||'')+' · '+P(fmtLong(x.date))+(x.note?' · '+P(x.note):'')+'</td><td class="num">'+TL(x.amount)+'</td></tr>').join('')+(st==='partial'&&meta.approved!=null?'<tr><th colspan="2">Kalan (ödenecek)</th><th class="num">'+TL(meta.approved-(meta.tickets||0)-meta.paid)+'</th></tr>':'')+'</tfoot></table>'
+   +'<h2>Harcırah hesabı</h2><table><thead><tr><th>Gider</th><th>Hesap</th><th class="num" style="width:20%">Tutar</th></tr></thead><tbody>'+(sn.lines||[]).map(l=>'<tr><td>'+P(String(l.name).replace(' (şirket ödedi)',' (şirket alacak)'))+'</td><td class="muted">'+P(String(l.calc).replace(/· şirket aldı\b/,'· bileti şirket alacak').replace('· personel aldı','· bileti personel alacak'))+'</td><td class="num">'+(l.note?'—':TL(l.amt))+'</td></tr>').join('')+'</tbody><tfoot><tr><th colspan="2">Toplam tahmini gider ('+sn.people+' kişi · kişi başı '+TL(sn.per)+')</th><th class="num">'+TL(sn.total)+'</th></tr><tr class="req"><th colspan="2">TALEP EDİLEN HARCIRAH TUTARI</th><th class="num">'+TL(meta.amount??sn.request)+'</th></tr>'+(meta.approved!=null&&Math.round(meta.approved)!==Math.round(meta.amount??sn.request)?'<tr class="req"><th colspan="2">ONAYLANAN TUTAR'+(meta.note&&isOk?' — '+P(meta.note):'')+'</th><th class="num">'+TL(meta.approved)+'</th></tr>':'')+((meta.buys||[]).length?'<tr><td colspan="2">Şirketin aldığı biletler (gerçek) · '+meta.buys.map(b=>P(b.label||'bilet')+' '+TL(b.amount)).join(', ')+'</td><td class="num">− '+TL(meta.tickets)+'</td></tr><tr class="req"><th colspan="2">PERSONELE ÖDENECEK AVANS (onaylanan − biletler)</th><th class="num">'+TL(Math.max(0,(meta.approved??meta.amount??sn.request)-meta.tickets))+'</th></tr>':(sn.company_tk&&!meta.approved?'<tr><td colspan="2">Şirketin alacağı biletler (tahmini) · personele ödenecek tahmini</td><td class="num">'+TL(Math.max(0,(meta.amount??sn.request)-sn.company_tk))+'</td></tr>':''))+(meta.payments||[]).map(x=>'<tr><td colspan="2">Ödenen avans · '+P(PAY_M[x.method]||'')+' · '+P(fmtLong(x.date))+(x.note?' · '+P(x.note):'')+'</td><td class="num">'+TL(x.amount)+'</td></tr>').join('')+(st==='partial'&&meta.approved!=null?'<tr><th colspan="2">Kalan (ödenecek)</th><th class="num">'+TL(meta.approved-(meta.tickets||0)-meta.paid)+'</th></tr>':'')+'</tfoot></table>'
    +(meta.expenses&&meta.expenses.length?(()=>{const sp=meta.expenses.reduce((a,x)=>a+(+x.amount||0),0);const d=Math.round((sp-meta.paid)*100)/100;return '<h2>Gerçekleşen giderler (görev sonrası kapanış)</h2><table><thead><tr><th style="width:15%">Tarih</th><th style="width:20%">Gider</th><th>Açıklama</th><th style="width:8%">Belge</th><th class="num" style="width:16%">Tutar</th></tr></thead><tbody>'+meta.expenses.map(x=>'<tr><td>'+P(fmtLong(x.spent_at))+'</td><td>'+P(EXPCAT[x.category]||'')+'</td><td>'+P(x.description||'')+'</td><td>'+(x.receipt_path?'fiş':'—')+'</td><td class="num">'+TL(x.amount)+'</td></tr>').join('')+'</tbody><tfoot><tr><th colspan="4">Toplam harcanan</th><th class="num">'+TL(sp)+'</th></tr><tr><td colspan="4">Ödenen avans</td><td class="num">'+TL(meta.paid)+'</td></tr><tr class="req"><th colspan="4">'+(d>0.004?'FİRMANIN ÇALIŞANA ÖDEYECEĞİ':d<-0.004?'ÇALIŞANIN İADE EDECEĞİ':'FARK')+(st==='closed'&&meta.settleMethod?' — '+P(SETTLE_M[meta.settleMethod]||'')+(meta.settleDate?' · '+P(fmtLong(meta.settleDate)):''):'')+'</th><th class="num">'+TL(Math.abs(d))+'</th></tr>'+(st==='closed'?'<tr><td colspan="5">Hesabı kapatan: '+P(meta.closedBy)+' · '+P(fmtDT(meta.closedAt))+(meta.settleNote?' · '+P(meta.settleNote):'')+'</td></tr>':'')+'</tfoot></table>'})():'')
    +'<p class="small">Tutarlar tahminidir. Gerçekleşen giderler fatura / fiş ile belgelenir; kalan tutar iade edilir, eksik tutar belge karşılığı ödenir.</p>'
    +'<h2>Görevli personel</h2><table class="sig"><thead><tr><th style="width:5%">#</th><th style="width:38%">Adı Soyadı</th><th style="width:27%">Görevi / Ünvanı</th><th>İmza</th></tr></thead><tbody>'+((sn.travelers||[]).length?sn.travelers:['']).map((n,i)=>'<tr><td>'+(i+1)+'</td><td>'+P(n)+'</td><td>'+(sn.tduty&&sn.tduty[i]?'<span class="small">Görev: '+P(sn.tduty[i])+'</span>':'')+'</td><td></td></tr>').join('')+'</tbody></table>'
@@ -13351,7 +13460,7 @@ function paintWatch(){const root=$('cfrtRoot');const ppl=[R.owner_id,...(R.parti
    +(R.created_by===me()||['owner','admin'].includes(role())?'<button type="button" class="btn light" id="cfrtDel" style="color:#b91c1c">Sil</button>':'')+'</div><div class="cfrt-msg" style="margin-top:8px">Harita dakikada bir kendiliğinden yenilenir.</div></div></div></div>';
   $('cfrtGo')?.addEventListener('click',()=>openGo(R.id));$('cfrtDel')?.addEventListener('click',delRoute);
   const sb_=$('cfrtShareBtn'),sm=$('cfrtShareMenu');sb_.onclick=e=>{e.stopPropagation();sm.hidden=!sm.hidden};document.addEventListener('click',e=>{if(!e.target.closest('.cfrt-menu'))sm&&(sm.hidden=true)});sm.querySelectorAll('[data-sh]').forEach(b=>b.onclick=()=>{sm.hidden=true;share(b.dataset.sh)});
-  map=null;goMap=null;pinOffice=false;pinKey=null;const mel=$('cfrtMap');paintWatchBody();paintTrack();REQS=[];loadReqs(R.id).then(()=>{if($('cfrtAppr'))paintAppr()});watchTrack();
+  map=null;goMap=null;pinOffice=false;pinKey=null;const mel=$('cfrtMap');paintWatchBody();paintTrack();REQS=[];loadReqs(R.id).then(async()=>{const q=REQS.find(x=>!['withdrawn','rejected'].includes(x.state));if(q){try{await loadBuys([q.id])}catch(_){}}if($('cfrtAppr'))paintAppr();try{paintExpTot()}catch(_){}});watchTrack();
   if(!office())ensureOffice().then(o=>{if(o&&$('cfrtWatchDays')){ROADS.clear();paintMap(true);refreshRoads()}});
   makeMap(mel,{onMarker:m=>{if(m.key){focusKey=m.key;paintMap(false);const b=document.querySelector('.cfrt-wstop[data-wk="'+m.key+'"]');b?.scrollIntoView({block:'center',behavior:'smooth'});document.querySelectorAll('.cfrt-wstop').forEach(x=>x.classList.toggle('on',x===b))}},onTiles:ok=>{if(!ok)paintMap(false)}}).then(m=>{if(!mel.isConnected)return;map=m;paintMap(true);refreshRoads()})}
 
@@ -15734,7 +15843,7 @@ async function load(){
  const c=C(),sb=S();if(!c||!sb)return null;
  const since=new Date(dayKey()+'T00:00:00+03:00').toISOString();
  try{people=window.cfPeople?await window.cfPeople():people}catch(_){}
- const [offers,pfs,appr,svc,routes,moves,reqs,evs,orders]=await Promise.all([
+ const [offers,pfs,appr,svc,routes,moves,reqs,evs,orders,rNew,rDone,visits,hreq,hpay,hbuy,custs,offUp,evDone]=await Promise.all([
   can('archive')?q(sb.from('sales_offers').select('id,offer_number,created_at,created_by,payload->>customer_name').eq('company_id',c).gte('created_at',since).order('created_at',{ascending:false}).limit(25)):[],
   can('archive')||can('new')?q(sb.from('proformas').select('id,proforma_number,customer_name,created_at,prepared_by').eq('company_id',c).is('deleted_at',null).gte('created_at',since).order('created_at',{ascending:false}).limit(25)):[],
   can('archive')||can('new')?q(sb.from('proforma_approval_events').select('id,action,created_at,snapshot').eq('company_id',c).gte('created_at',since).order('created_at',{ascending:false}).limit(25)):[],
@@ -15743,7 +15852,16 @@ async function load(){
   can('stock')||can('catalog')?q(sb.from('stock_movements').select('id,product_id,movement_type,quantity,created_at').eq('company_id',c).gte('created_at',since).order('created_at',{ascending:false}).limit(25)):[],
   q(sb.from('employee_requests').select('id,title,requester_label,state,created_at,updated_at').eq('company_id',c).gte('updated_at',since).order('updated_at',{ascending:false}).limit(20)),
   q(sb.from('calendar_events').select('id,title,event_type,event_date,created_at,created_by').eq('company_id',c).gte('created_at',since).order('created_at',{ascending:false}).limit(20)),
-  q(sb.from('operation_orders').select('id,order_number,customer_name,shipment_status,updated_at').eq('company_id',c).in('shipment_status',['shipped','delivered']).gte('updated_at',since).order('updated_at',{ascending:false}).limit(15))
+  q(sb.from('operation_orders').select('id,order_number,customer_name,shipment_status,updated_at').eq('company_id',c).in('shipment_status',['shipped','delivered']).gte('updated_at',since).order('updated_at',{ascending:false}).limit(15)),
+  q(sb.from('company_routes').select('id,title,created_at,created_by,start_date,end_date').eq('company_id',c).gte('created_at',since).order('created_at',{ascending:false}).limit(15)),
+  q(sb.from('company_routes').select('id,title,owner_id,finished_at').eq('company_id',c).gte('finished_at',since).order('finished_at',{ascending:false}).limit(15)),
+  q(sb.from('company_route_stops').select('id,place_name,city,purpose,result,visited_at,visited_by,result_note').eq('company_id',c).gte('visited_at',since).order('visited_at',{ascending:false}).limit(30)),
+  q(sb.from('company_route_requests').select('id,route_id,state,amount,submitted_at,submitted_by,decided_at,decided_by,updated_at,snapshot->>title').eq('company_id',c).gte('updated_at',since).order('updated_at',{ascending:false}).limit(20)),
+  q(sb.from('company_route_payments').select('id,amount,method,created_at,created_by').eq('company_id',c).gte('created_at',since).order('created_at',{ascending:false}).limit(20)),
+  q(sb.from('company_route_ticket_buys').select('id,leg_label,amount,created_at,created_by').eq('company_id',c).gte('created_at',since).order('created_at',{ascending:false}).limit(20)),
+  q(sb.from('customers').select('id,name,city,created_at').eq('company_id',c).is('deleted_at',null).gte('created_at',since).order('created_at',{ascending:false}).limit(15)),
+  can('archive')?q(sb.from('sales_offers').select('id,offer_number,status,created_at,updated_at,payload->>customer_name').eq('company_id',c).gte('updated_at',since).order('updated_at',{ascending:false}).limit(25)):[],
+  q(sb.from('calendar_events').select('id,title,event_type,completed_at,completed_by').eq('company_id',c).gte('completed_at',since).order('completed_at',{ascending:false}).limit(20))
  ]);
  let prod={};const pids=[...new Set(moves.map(m=>m.product_id).filter(Boolean))];
  if(pids.length){(await q(sb.from('products').select('id,name').in('id',pids.slice(0,100)))).forEach(p=>prod[p.id]=p.name)}
@@ -15757,13 +15875,23 @@ async function load(){
  reqs.forEach(r=>{const fresh=Math.abs(Date.parse(r.updated_at)-Date.parse(r.created_at))<90000;const t=fresh?'Yeni talep formu':({approved:'Talep onaylandı',rejected:'Talep reddedildi',closed:'Talep kapatıldı',info_requested:'Talep için bilgi istendi'})[r.state]||'Talep güncellendi';add('rq'+r.id+'@'+r.updated_at,r.state==='rejected'?'red':'talep',r.updated_at,t,dot(r.title,r.requester_label))});
  evs.forEach(e=>add('ev'+e.id,'plan',e.created_at,'Yeni plan oluşturuldu',dot(window.cfPlanTitle?window.cfPlanTitle(e):(e.title||e.event_type||'Plan'),e.event_date?new Date(e.event_date+'T12:00:00').toLocaleDateString('tr-TR',{day:'numeric',month:'long'}):'',nm(e.created_by))));
  orders.forEach(o=>add('or'+o.id+'@'+o.updated_at,'siparis',o.updated_at,o.shipment_status==='delivered'?'Sipariş teslim edildi':'Sipariş yola çıktı',dot(o.order_number,o.customer_name)));
- return L.sort((a,b)=>Date.parse(b.at)-Date.parse(a.at)).slice(0,30)}
+ const P={sales:'satış',demo:'demo',install:'kurulum',service:'servis',training:'eğitim',collection:'tahsilat',other:''};const TLf=v=>Math.round(+v||0).toLocaleString('tr-TR')+' TL';const fresh=(a,b)=>Math.abs(Date.parse(a)-Date.parse(b))<90000;
+ rNew.forEach(r=>add('rn'+r.id,'seyahat',r.created_at,'Yeni seyahat rotası oluşturuldu',dot(r.title,r.start_date?new Date(r.start_date+'T12:00:00').toLocaleDateString('tr-TR',{day:'numeric',month:'short'})+(r.end_date&&r.end_date!==r.start_date?' – '+new Date(r.end_date+'T12:00:00').toLocaleDateString('tr-TR',{day:'numeric',month:'short'}):''):'',nm(r.created_by))));
+ rDone.forEach(r=>add('rf'+r.id,'seyahat',r.finished_at,'Seyahat tamamlandı',dot(r.title,nm(r.owner_id))));
+ visits.forEach(v=>{const t=v.result==='visited'?'Ziyaret yapıldı':v.result==='postponed'?'Ziyaret ertelendi':v.result==='cancelled'?'Ziyaret iptal edildi':'Ziyaret güncellendi';add('vs'+v.id+'@'+v.visited_at,v.result==='cancelled'?'red':'seyahat',v.visited_at,t,dot(v.place_name,v.city,P[v.purpose]||'',nm(v.visited_by)))});
+ hreq.forEach(r=>{const isNew=r.submitted_at&&fresh(r.updated_at,r.submitted_at);const m=isNew?['bekle','Harcırah talebi onaya gönderildi']:({approved:['onay','Harcırah talebi onaylandı'],rejected:['red','Harcırah talebi reddedildi'],revision:['bekle','Harcırah talebi için düzeltme istendi'],paid:['onay','Harcırah ödemesi tamamlandı'],closed:['onay','Harcırah kapatıldı'],withdrawn:['red','Harcırah talebi geri çekildi']})[r.state]||['talep','Harcırah talebi güncellendi'];add('hr'+r.id+'@'+r.updated_at,m[0],r.updated_at,m[1],dot(r.title,TLf(r.amount),nm(isNew?r.submitted_by:r.decided_by)))});
+ hpay.forEach(p=>add('hp'+p.id,'onay',p.created_at,'Harcırah ödemesi yapıldı',dot(TLf(p.amount),({cash:'elden',transfer:'havale',card:'kart',other:''})[p.method]||'',nm(p.created_by))));
+ hbuy.forEach(b=>add('hb'+b.id,'seyahat',b.created_at,'Muhasebe bileti aldı',dot(b.leg_label,TLf(b.amount),nm(b.created_by))));
+ custs.forEach(u=>add('cu'+u.id,'plan',u.created_at,'Yeni müşteri eklendi',dot(u.name,u.city)));
+ offUp.forEach(o=>{if(!o.updated_at||fresh(o.updated_at,o.created_at))return;const t=({accepted:'Teklif kabul edildi',rejected:'Teklif reddedildi',converted:'Teklif proformaya çevrildi',sent:'Teklif gönderildi'})[o.status]||'Teklif güncellendi';add('ou'+o.id+'@'+o.updated_at,o.status==='rejected'?'red':o.status==='accepted'?'onay':'teklif',o.updated_at,t,dot(o.offer_number,o.customer_name))});
+ evDone.forEach(e=>add('ed'+e.id,'onay',e.completed_at,'Plan tamamlandı',dot(window.cfPlanTitle?window.cfPlanTitle(e):(e.title||e.event_type||'Plan'),nm(e.completed_by))));
+ return L.sort((a,b)=>Date.parse(b.at)-Date.parse(a.at)).slice(0,80)}
 function li(x,cls,d){const k=K[x.k]||K.plan;return '<li class="cfl-it '+cls+'" data-id="'+E(x.id)+'" style="--c:'+k[0]+(d!=null?';--d:'+d+'s':'')+'"><span class="cfl-ic">'+k[1]+'</span><div class="cfl-tx"><div class="cfl-t">'+E(x.t)+'</div><div class="cfl-s">'+(x.s||'')+'</div></div><span class="cfl-ago" data-at="'+E(x.at)+'">'+ago(x.at)+'</span></li>'}
 function shell(){let el=$('cfLive');if(!el){el=document.createElement('section');el.id='cfLive';el.className='cff-card';el.innerHTML='<div class="cfl-h"><div><h3>Canlı akış</h3><small>Bugün firmada olanlar</small></div><span class="cfl-live"><i></i>CANLI</span></div><ul class="cfl-list"></ul><p class="cfl-empty" hidden>Bugün henüz kayıtlı hareket yok. Gün içinde girilen her kayıt burada akacak.</p><button type="button" class="cfl-more" hidden>Daha fazla göster</button>';
-  el.querySelector('.cfl-more').onclick=()=>{open=open>8?8:20;paint(false)}}
+  el.querySelector('.cfl-more').onclick=()=>{open=open>8?8:200;paint(false)}}
  const flow=$('cfFlow'),root=$('hdRoot');if(flow&&flow.parentElement){if(flow.nextElementSibling!==el)flow.after(el)}else if(root&&el.parentElement!==root)root.appendChild(el);return el}
 function paint(first,fresh){const el=shell(),ul=el.querySelector('.cfl-list');const show=items.slice(0,open);
- el.querySelector('.cfl-empty').hidden=!!items.length;const mb=el.querySelector('.cfl-more');mb.hidden=items.length<=8;mb.textContent=open>8?'Daha az göster':'Daha fazla göster ('+Math.min(items.length,20)+')';const half=Math.ceil(show.length/2);ul.style.setProperty('--rows',half);const mark=()=>{const w=innerWidth>=1000,n=ul.children.length;[...ul.children].forEach((c,i)=>{const col=w?Math.floor(i/half):0,pos=w?i%half:i,len=w?(col?n-half:half):n;c.classList.toggle('first',pos===0);c.classList.toggle('last',pos===len-1)})};setTimeout(mark,0);
+ el.querySelector('.cfl-empty').hidden=!!items.length;const mb=el.querySelector('.cfl-more');mb.hidden=items.length<=8;mb.textContent=open>8?'Daha az göster':'Günün tümünü göster ('+items.length+')';const half=Math.ceil(show.length/2);ul.style.setProperty('--rows',half);const mark=()=>{const w=innerWidth>=1000,n=ul.children.length;[...ul.children].forEach((c,i)=>{const col=w?Math.floor(i/half):0,pos=w?i%half:i,len=w?(col?n-half:half):n;c.classList.toggle('first',pos===0);c.classList.toggle('last',pos===len-1)})};setTimeout(mark,0);
  if(first){ul.innerHTML=show.map((x,i)=>li(x,'in',Math.min(i,8)*.06)).join('');return}
  const have=new Map([...ul.children].map(n=>[n.dataset.id,n]));const html=[];
  ul.innerHTML=show.map(x=>li(x,fresh&&fresh.has(x.id)&&!have.has(x.id)?'new':'')).join('')}
@@ -15776,7 +15904,7 @@ async function refresh(force){if(busy)return;const d=$('dashboardOverlay');if(!d
  finally{busy=false}}
 function soon(){clearTimeout(soonT);soonT=setTimeout(()=>refresh(true),1500)}
 function sub(){try{const sb=S();if(chan&&sb){sb.removeChannel(chan);chan=null}const c=C();if(!c||!sb?.channel)return;chan=sb.channel('cf-live-'+c+'-'+Math.random().toString(36).slice(2,7));
-  ['proformas','sales_offers','proforma_approval_events','technical_service_records','company_routes','stock_movements','employee_requests','calendar_events','operation_orders'].forEach(t=>chan.on('postgres_changes',{event:'*',schema:'public',table:t,filter:'company_id=eq.'+c},soon));chan.subscribe()}catch(_){}}
+  ['proformas','sales_offers','proforma_approval_events','technical_service_records','company_routes','company_route_stops','company_route_requests','company_route_payments','company_route_ticket_buys','customers','stock_movements','employee_requests','calendar_events','operation_orders'].forEach(t=>chan.on('postgres_changes',{event:'*',schema:'public',table:t,filter:'company_id=eq.'+c},soon));chan.subscribe()}catch(_){}}
 setInterval(()=>{if(document.hidden)return;refresh(false);document.querySelectorAll('#cfLive .cfl-ago[data-at]').forEach(s=>s.textContent=ago(s.dataset.at))},3000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh(false)});
 window.cfLiveFeed={refresh:()=>refresh(true),shell:()=>$('cfLive')};
@@ -16111,7 +16239,9 @@ html[data-cfp=dark] .cfrt-warn.ok{color:#c4f24c}
 .cfrt-ring svg{width:100%;height:100%}
 .cfrt-ring b{position:absolute;inset:0;display:grid;place-items:center;font-size:10.5px;font-weight:700}
 .cfrt-when{align-self:flex-start;font-size:11.5px;font-weight:700;color:var(--mt-ink-3,#71717a)}
-.cfrt-when.now{color:#d97706}.cfrt-when.soon{color:#2563eb}
+.cfrt-when.now{color:#d97706}.cfrt-when.soon{color:#2563eb}.cfrt-when.conf{color:#dc2626;max-width:calc(100% - 56px)}
+html[data-cfp=dark] .cfrt-when.conf{color:#f87171}
+.cfrt-card.cfrt-rich .cfrt-prog{display:none}
 html[data-cfp=dark] .cfrt-when.now{color:#fbbf24}html[data-cfp=dark] .cfrt-when.soon{color:#7dd3fc}
 .cfrt-sk{width:100%;height:46px;display:block}
 .cfrt-sk path{animation:cfrtDash 1.2s ease-out both}
@@ -16133,5 +16263,85 @@ html[data-cfp=dark] .cfrt-when.now{color:#fbbf24}html[data-cfp=dark] .cfrt-when.
 @keyframes cfrtConf{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(520px) rotate(540deg);opacity:0}}
 @media (prefers-reduced-motion:reduce){.cfrt-wz-in,.cfrt-card.cfrt-rich,.cfrt-sug-c,.cfrt-warn-i,.cfrt-sk path,.cfrt-ready-d,.cfrt-wzs-g>div{animation:none!important}}
 @media (max-width:640px){.cfrt-wz-steps span{font-size:11px}.cfrt-wznav{position:static;box-shadow:none}}
+</style>
+<style id="cf-route-extras-style">
+/* kart: Türkiye mini haritası */
+.cfrt-trmap{width:100%;height:96px;display:block;margin:-2px 0}
+.cfrt-trmap .tr,.cfrt-empty2 .tr{fill:rgba(120,130,120,.10);stroke:rgba(120,130,120,.30);stroke-width:.8;stroke-linejoin:round}
+.cfrt-trmap .rt{fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:100;stroke-dashoffset:100;animation:cfrtDrawR 1.4s .25s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes cfrtDrawR{to{stroke-dashoffset:0}}
+.cfrt-trmap .pulse{transform-box:fill-box;transform-origin:center;animation:cfrtPulse 1.8s ease-out infinite;opacity:.5}
+@keyframes cfrtPulse{0%{transform:scale(.6);opacity:.65}100%{transform:scale(2.6);opacity:0}}
+.cfrt-trmap .car{filter:drop-shadow(0 0 4px rgba(0,0,0,.35))}
+/* 3D eğilme ve parlama */
+.cfrt-card.cfrt-rich::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.10),transparent 60%);opacity:0;transition:opacity .25s}
+.cfrt-card.cfrt-rich.tilt{transform:perspective(900px) rotateX(var(--rx,0)) rotateY(var(--ry,0)) translateY(-3px);transition:transform .08s linear,box-shadow .2s,border-color .2s;box-shadow:0 18px 40px rgba(0,0,0,.18)}
+.cfrt-card.cfrt-rich.tilt::after{opacity:1}
+/* bugün rotadasınız şeridi */
+html body .cfrt-today:not(.cfp-keep){filter:none!important;position:relative;overflow:hidden;background:linear-gradient(120deg,rgba(132,204,22,.18),rgba(132,204,22,.03) 60%),#ffffff!important;border:1px solid rgba(132,204,22,.5)!important;color:#18181b!important}
+html[data-cfp=dark] body .cfrt-today:not(.cfp-keep){background:linear-gradient(120deg,rgba(196,242,76,.16),rgba(196,242,76,.02) 60%),#141712!important;border-color:rgba(196,242,76,.35)!important;color:#f4f4f5!important}
+html body .cfrt-today:not(.cfp-keep) b::before{content:'';display:inline-block;width:9px;height:9px;border-radius:50%;background:#84cc16;margin-right:9px;vertical-align:1px;animation:cfrtLive 1.6s ease-out infinite}
+@keyframes cfrtLive{0%{box-shadow:0 0 0 0 rgba(132,204,22,.65)}100%{box-shadow:0 0 0 10px rgba(132,204,22,0)}}
+html body .cfrt-today:not(.cfp-keep) span{opacity:.75}
+html body .cfrt-today:not(.cfp-keep) button{background:#84cc16!important;color:#0b0d08!important}
+html body .cfrt-today:not(.cfp-keep)::after{content:'';position:absolute;top:0;bottom:0;width:120px;left:-140px;background:linear-gradient(90deg,transparent,rgba(196,242,76,.16),transparent);animation:cfrtSweep 4.5s ease-in-out infinite}
+@keyframes cfrtSweep{0%,60%{left:-140px}100%{left:110%}}
+/* görünüm seçici */
+.cfrt-vt{display:inline-flex;border:1px solid var(--mt-border,#e4e4e7);border-radius:10px;overflow:hidden}
+.cfrt-vt button{border:0;background:none;padding:6px 11px;font:inherit;font-size:12.5px;font-weight:600;color:var(--mt-ink-3,#71717a);cursor:pointer}
+.cfrt-vt button.on{background:var(--mt-primary-soft,#eff6ff);color:var(--mt-primary,#2563eb)}
+/* zaman çizelgesi */
+.cfrt-tl{overflow-x:auto;border:1px solid var(--mt-border,#e4e4e7);border-radius:14px;background:var(--mt-panel,#fff);animation:cfrtWzIn .35s both}
+.tl-in{display:inline-block;min-width:100%}
+.tl-row{display:flex;border-bottom:1px solid var(--mt-border,#e4e4e7)}
+.tl-row:last-child{border-bottom:0}
+.tl-n{flex:0 0 150px;position:sticky;left:0;z-index:2;background:var(--mt-panel,#fff);display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:12.5px;font-weight:600;border-right:1px solid var(--mt-border,#e4e4e7)}
+.tl-n span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tl-head .tl-n{color:var(--mt-ink-3,#71717a);font-size:11.5px}
+.tl-g{position:relative;display:flex}
+.tl-head .tl-g span{flex:0 0 30px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:4px 0;font-size:11.5px;font-weight:600;position:relative}
+.tl-head .tl-g span small{font-size:9.5px;color:var(--mt-ink-3,#a1a1aa);font-weight:600}
+.tl-head .tl-g span em{position:absolute;top:2px;left:2px;font-style:normal;font-size:9.5px;color:var(--mt-primary,#2563eb);font-weight:700;white-space:nowrap}
+.tl-head .tl-g span.we{color:var(--mt-ink-3,#a1a1aa)}
+.tl-head .tl-g span.td{color:#4d7c0f}
+html[data-cfp=dark] .tl-head .tl-g span.td{color:#c4f24c}
+.tl-head .tl-g span em+small{margin-top:12px}
+.tl-head{padding-top:2px}
+.tl-we{position:absolute;top:0;bottom:0;background:rgba(120,130,120,.07)}
+.tl-bar{position:absolute;height:24px;border:0;border-radius:7px;padding:0 8px;font:inherit;font-size:11.5px;font-weight:700;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;background:color-mix(in srgb,var(--c) 22%,transparent);color:inherit;border-left:3px solid var(--c);transition:transform .15s,box-shadow .15s}
+.tl-bar:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.15)}
+.tl-bar.conf{outline:2px dashed #ef4444;outline-offset:1px}
+.tl-now{position:absolute;top:0;bottom:0;width:2px;background:#84cc16;box-shadow:0 0 8px rgba(132,204,22,.7)}
+/* boş liste */
+.cfrt-empty2{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:34px 16px;border:1px dashed var(--mt-border,#e4e4e7);border-radius:16px}
+.cfrt-empty2 svg{width:min(420px,90%);height:auto}
+.cfrt-empty2 .rt{fill:none;stroke:#84cc16;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:100;stroke-dashoffset:100;animation:cfrtDrawR 2.2s .3s ease-in-out forwards}
+.cfrt-empty2 .pin circle{fill:#84cc16;stroke:#fff;stroke-width:1.4;transform-box:fill-box;transform-origin:center;animation:cfrtPinIn .5s var(--d) cubic-bezier(.3,1.6,.5,1) both}
+@keyframes cfrtPinIn{from{transform:translateY(-10px) scale(.3);opacity:0}to{transform:none;opacity:1}}
+.cfrt-empty2 h3{margin:6px 0 0;font-size:18px}
+.cfrt-empty2 p{margin:0;max-width:420px;color:var(--mt-ink-3,#71717a);font-size:13.5px}
+/* kopyalama penceresi */
+.cfrt-copy{max-width:420px;padding:20px 22px;gap:8px}
+.cfrt-copy h3{margin:0}
+.cfrt-copy input{padding:8px 10px;border:1px solid var(--mt-border,#e4e4e7);border-radius:9px;font:inherit;background:var(--mt-panel,#fff);color:inherit}
+.cfrt-copy-a{display:flex;justify-content:flex-end;gap:8px;margin-top:6px}
+/* duraklar: kapalı kart, sürükle-bırak */
+.cfrt-stop{cursor:pointer}
+.cfrt-stop.focus{cursor:default}
+.cfrt-num[draggable=true]{cursor:grab}
+.cfrt-stop:not(.focus) strong::after{content:' ▾';font-size:11px;opacity:.4}
+.cfrt-stop.focus strong::after{content:' ▴';font-size:11px;opacity:.4}
+#cfrtDays.dragging .cfrt-day{outline:2px dashed rgba(132,204,22,.55);outline-offset:-2px;transition:outline-color .2s}
+#cfrtDays.dragging .cfrt-day>header::after{content:'Buraya bırakın';margin-left:auto;font-size:11.5px;font-weight:700;color:#4d7c0f}
+html[data-cfp=dark] #cfrtDays.dragging .cfrt-day>header::after{color:#c4f24c}
+.cfrt-daytools [data-mycust]{display:none}
+.cfrt-daytools:not(:has(button:not([data-mycust]))){display:none}
+/* harita: çizgi uzaması ve iğne düşmesi */
+.cfrt-draw{stroke-dasharray:1;stroke-dashoffset:1;animation:cfrtDrawL 1.3s ease-out forwards}
+@keyframes cfrtDrawL{to{stroke-dashoffset:0}}
+.cfmap-m.drop{animation:cfrtPinDrop .6s var(--pd,0s) cubic-bezier(.3,1.6,.5,1) both}
+@keyframes cfrtPinDrop{0%{translate:0 -28px;opacity:0}60%{translate:0 3px;opacity:1}100%{translate:0 0;opacity:1}}
+@media (prefers-reduced-motion:reduce){.cfrt-trmap .rt,.cfrt-empty2 .rt{animation:none;stroke-dashoffset:0}.cfrt-trmap .pulse,.cfrt-today::after,.cfrt-today b::before{animation:none!important}}
+@media (max-width:640px){.tl-n{flex-basis:96px}.cfrt-vt button{padding:6px 8px}}
 </style>
 </body></html>
