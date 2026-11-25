@@ -15755,8 +15755,8 @@ html[data-cfp=dark] .cfrt-link{color:#c4f24c}
 .cfofu small{opacity:.7}
 .cfofu .cfofu-b{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
 .cfofu .cfofu-b button{height:30px;padding:0 11px;border-radius:8px;border:1px solid rgba(128,128,128,.3);background:transparent;color:inherit;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
-.cfofu .cfofu-b button.p{background:#84cc16;border-color:#84cc16;color:#0b0d08}
-html[data-cfp=dark] .cfofu .cfofu-b button.p{background:#c4f24c;border-color:#c4f24c}
+.cfofu .cfofu-b button.p:not(.cfp-keep){background:#84cc16!important;border-color:#84cc16!important;color:#0b0d08!important}
+html[data-cfp=dark] .cfofu .cfofu-b button.p:not(.cfp-keep){background:#c4f24c!important;border-color:#c4f24c!important;color:#0b0d08!important}
 .cfofu-dlg.cfp-keep{position:fixed;inset:0;z-index:12000;background:rgba(5,6,5,.55);display:grid;place-items:center;padding:16px}
 .cfofu-dlg.cfp-keep>div{width:min(420px,100%);border-radius:16px;padding:18px;background:#fff;color:#11140f;box-shadow:0 30px 80px -20px rgba(0,0,0,.5);font-family:inherit}
 html[data-cfp=dark] .cfofu-dlg.cfp-keep>div{background:#151814;color:#eef2e8;border:1px solid rgba(255,255,255,.1)}
@@ -15903,5 +15903,10 @@ html[data-cfp=dark] .cfrt-lt-c.on{border-color:#c4f24c}
 .cfrt-buy-ok{font-weight:700;color:#15803d;font-size:13px}html[data-cfp=dark] .cfrt-buy-ok{color:#4ade80}
 .cfrt-buy-ok em{font-style:normal;font-weight:600;opacity:.8}
 @media(max-width:700px){.cfrt-buy,.cfrt-buy.done{grid-template-columns:1fr 1fr}.cfrt-buy>div{grid-column:1/-1}}
+</style>
+<style id="cf-readable-badges">
+/* turuncu / sarı zeminli sayı rozetleri ve yeşil düğmeler: koyu yazı (koyu tema çeviricisi dokunmasın) */
+html body:not(.cfp-keep) .cff-st.warn .cfp-badge:not(.cfp-keep),
+html body:not(.cfp-keep) .agenda-bell>b:not(.cfp-keep){color:#1a1205!important;font-weight:800!important}
 </style>
 </body></html>
