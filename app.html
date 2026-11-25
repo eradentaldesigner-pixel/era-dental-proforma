@@ -12598,7 +12598,7 @@ function peopleChips(field,dis){const list=peopleCache?.list||[];const sel=new S
    Hepsi aynı veriyi (R, ST, harcırah) kullanır; biri değişince diğerleri kendini yeniler. */
 const WZS=[['info','Ne zaman · kim'],['stops','Nereye · duraklar'],['exp','Harcırah'],['sum','Özet']];
 const WZ={on:(()=>{try{return localStorage.getItem('cfrt:wz')!=='off'}catch(_){return true}})(),step:0,key:null};
-function wzEls(){const L=$('cfrtRoot')?.querySelector('.cfrt-left');if(!L)return null;return {L,info:L.querySelector(':scope>.cfrt-card2'),stops:$('cfrtDays'),exp:[$('cfrtExp'),$('cfrtAppr'),$('cfrtClose')],sum:$('cfrtWzSum')}}
+function wzEls(){const L=$('cfrtRoot')?.querySelector('.cfrt-left');if(!L)return null;return {L,info:L.querySelector(':scope>.cfrt-card2'),stops:[$('cfrtConn'),$('cfrtDays')],exp:[$('cfrtExp'),$('cfrtAppr'),$('cfrtClose')],sum:$('cfrtWzSum')}}
 function wzMount(){const root=$('cfrtRoot');const L=root?.querySelector('.cfrt-left');if(!L||L.querySelector('.cfrt-wz'))return;const k=R?.id||'new';if(WZ.key!==k){WZ.key=k;WZ.step=R?.id?1:0}
   const bar=document.createElement('div');bar.className='cfrt-wz';const tr=$('cfrtTrack');tr?tr.after(bar):L.prepend(bar);
   const sum=document.createElement('div');sum.id='cfrtWzSum';sum.className='cfrt-card2 cfrt-wzsum';L.appendChild(sum);
@@ -12627,7 +12627,7 @@ function paintWzSum(){const el=$('cfrtWzSum');if(!el)return;const days=routeDays
    +(W.length?'<div class="cfrt-wzs-w">⚠ '+W.length+' konu kontrol edilmeli: '+W.slice(0,3).map(w=>esc(w.t)).join(' · ')+(W.length>3?' …':'')+'</div>':'<div class="cfrt-wzs-ok">✓ Her şey hazır görünüyor.</div>')}
 /* ---- 7) canlı özet ---- */
 function sumExtra(){let hrs=0,ok=0;routeDays().forEach(d=>{const r=ROADS.get(d);if(r&&r.sig===daySig(d)){hrs+=r.duration/3600;ok++}});let req=0;try{req=expCalc().request}catch(_){}
-  return (ok&&isCar(R.transport)?'<div title="Direksiyon başında geçen tahmini süre"><small>Yolda</small><b>'+hrs.toFixed(1).replace('.',',')+' sa</b></div>':'')+'<div class="hl" title="'+(req?'Harcırah kartındaki tahmini talep tutarı':'Tutarlar harcırah adımında girilince hesaplanır')+'"><small>Harcırah</small><b>'+(req?Math.round(req).toLocaleString('tr-TR')+' TL':'—')+'</b></div>'}
+  return (ok&&allCarTrip()?'<div title="Direksiyon başında geçen tahmini süre"><small>Yolda</small><b>'+hrs.toFixed(1).replace('.',',')+' sa</b></div>':'')+'<div class="hl" title="'+(req?'Harcırah kartındaki tahmini talep tutarı':'Tutarlar harcırah adımında girilince hesaplanır')+'"><small>Harcırah</small><b>'+(req?Math.round(req).toLocaleString('tr-TR')+' TL':'—')+'</b></div>'}
 const SUMPREV=new Map();
 function liveSum(el){const num=t=>{const m=String(t).match(/[\d.]+(,\d+)?/);return m?parseFloat(m[0].replace(/\./g,'').replace(',','.')):NaN};
   el.querySelectorAll(':scope>div').forEach(box=>{const k=box.querySelector('small')?.textContent||'';const b=box.querySelector('b');if(!b)return;const txt=b.textContent;const prev=SUMPREV.get(k);SUMPREV.set(k,txt);if(prev==null||prev===txt||/\//.test(txt))return;
@@ -12678,9 +12678,9 @@ function warnList(){const W=[];if(!R)return W;wdisSync();try{confLoad()}catch(_)
     if(t==='gorev'&&!L.length&&ST.length)add('empty'+d,'#f59e0b','📭',fmtDay(d)+' günü boş','Görev günü ama durak yok · durak ekleyin ya da günü yol / kişisel yapın','Güne git',()=>wzDay(d));
     const r=ROADS.get(d);const hrs=r&&r.sig===daySig(d)?r.duration/3600:0;
     if(t==='gorev'&&L.length>=6)add('busy'+d,'#f59e0b','⏱',fmtDay(d)+' çok yoğun',L.length+' durak'+(hrs?' · ~'+hrs.toFixed(1).replace('.',',')+' sa yol':'')+' · bazı durakları başka güne kaydırmayı düşünün','Güne git',()=>wzDay(d));
-    else if(t==='gorev'&&hrs>7.5&&isCar(R.transport))add('long'+d,'#0ea5e9','🛣',fmtDay(d)+' uzun yol günü','~'+hrs.toFixed(1).replace('.',',')+' sa direksiyon · mola ve konaklamayı planlayın','Güne git',()=>wzDay(d));
+    else if(t==='gorev'&&hrs>7.5&&allCarTrip())add('long'+d,'#0ea5e9','🛣',fmtDay(d)+' uzun yol günü','~'+hrs.toFixed(1).replace('.',',')+' sa direksiyon · mola ve konaklamayı planlayın','Güne git',()=>wzDay(d));
     if(t==='kisisel'&&L.length)add('pers'+d,'#0ea5e9','🧳',fmtDay(d)+' kişisel gün ama '+L.length+' ziyaret var','Harcırahta sayılmaz · bilerek böyle planladıysanız ✕ ile gizleyin','Görev günü yap',()=>{const m=DTS();m._all=m._all||{};m._all[d]='gorev';dirty=true;paintExp();paintDays();warnSoon()})});
-  if(['flight','bus','mixed'].includes(R.transport)&&days.length){const L=TK();const out=L.some(t=>t.dir==='gidis'&&t.date),back=L.some(t=>t.dir==='donus'&&t.date);
+  if(false&&days.length){const L=TK();const out=L.some(t=>t.dir==='gidis'&&t.date),back=L.some(t=>t.dir==='donus'&&t.date);
     if(!out||!back)add('legs','#ef4444','✈',(!out&&!back?'Gidiş ve dönüş':!out?'Gidiş':'Dönüş')+' yolculuğu eklenmedi','Muhasebe bilet alamaz','Rotadan öner',()=>{const sg=suggestLegs();if(!L.length)TK().push(...sg);else{if(!out&&sg[0])TK().unshift(sg[0]);if(!back&&sg.length)TK().push(sg[sg.length-1])}dirty=true;paintExp();wzGo(2)})}
   const noLoc=ST.filter(s=>!located(s)).length;if(noLoc)add('loc','#8e9589','📍',noLoc+' durağın konumu yok','Km ve süre hesabı eksik kalır · haritada işaretleyin','Duraklara git',()=>wzGo(1));
   const inR=new Set(ST.map(s=>String(s.customer_id||'')).filter(Boolean));
@@ -12735,9 +12735,9 @@ const MODEC={flight:'#5cc8ff',car:null,bus:'#f59e0b',train:'#a78bfa',ferry:'#22d
 const MODEN={flight:'Uçak',car:'Araç',bus:'Otobüs',train:'Tren',ferry:'Gemi'};
 function officeOf(x){const st=x?.needs?.start;if(officeValid(st))return st;try{const o=JSON.parse(localStorage.getItem(OKEY())||'null');if(officeValid(o))return o}catch(_){}return null}
 function segModes(x,cities,hasHome){const TKs=Array.isArray(x?.needs?.tickets)?x.needs.tickets.filter(t=>t&&t.date):[];const tr=x.transport;
-  const norm=m=>m==='car'||!m?'car':['flight','bus','train','ferry'].includes(m)?m:'car';
+  const norm=m=>!m?'car':m==='minibus'?'bus':['flight','bus','train','ferry'].includes(m)?m:'car';
   const def=tr==='flight'?'flight':tr==='bus'?'bus':'car';const mid=tr==='bus'?'bus':'car';
-  const hit=(t,a,b)=>{const f=lc(t.from||''),to=lc(t.to||'');return (!a||f.includes(lc(a)))&&(!b||to.includes(lc(b)))};
+  const hit=(t,a,b)=>{const f=lc(t.fc||t.from||''),to=lc(t.tc||t.to||'');return (!a||f.includes(lc(a)))&&(!b||to.includes(lc(b)))};
   const out=[];const n=cities.length;
   if(hasHome){const g=TKs.find(t=>t.dir==='gidis');out.push(g?norm(g.mode):def)}
   for(let i=0;i<n-1;i++){const t=TKs.find(t=>t.dir==='ara'&&hit(t,cities[i],cities[i+1]))||TKs.find(t=>hit(t,cities[i],cities[i+1])&&t.dir!=='gidis'&&t.dir!=='donus');out.push(t?norm(t.mode):mid)}
@@ -12839,6 +12839,90 @@ function mapAnim(){if(!map||!map.el||!map.svg||matchMedia('(prefers-reduced-moti
   const old=MAPSIG.split('|');const first=!MAPSIG||old[1]!==String(R?.id??'new');const prev=new Set((old[0]||'').split(',').filter(Boolean));MAPSIG=sig;
   const fresh=keys.filter(k=>first||!prev.has(k));if(!fresh.length&&!first)return;
   ANIM={until:Date.now()+1300,keys:new Set(fresh),lines:first||keys.length>prev.size,all:first};mapDecor()}
+/* ===================== Yolculuk planı: şehir değişikliklerinde bağlantı bağlantı ulaşım =====================
+   Ofis → 1. şehir → 2. şehir … → dönüş noktası → ofis. Her bağlantının kendi türü (uçak, otobüs, tren, gemi,
+   şirket aracı, kendi aracı, kiralık araç, minibüs, taksi), nereden/nereye (havalimanı, otogar …), tarih ve saati var.
+   Veri: R.needs.tickets (harcırahtaki "Yolculuk planı" ile aynı kayıtlar) · R.needs.ret_city (dönüş şehri). */
+const CMODE={flight:['✈','Uçak'],bus:['🚌','Otobüs'],train:['🚆','Tren'],ferry:['⛴','Gemi / feribot'],car:['🚗','Şirket aracı'],own:['🚙','Kendi aracı'],rental:['🔑','Kiralık araç'],minibus:['🚐','Minibüs / dolmuş'],taxi:['🚕','Taksi']};
+queueMicrotask(()=>{try{Object.assign(TMODE,{own:'Kendi aracı',rental:'Kiralık araç',minibus:'Minibüs / dolmuş bileti',taxi:'Taksi'})}catch(_){}});
+const CARM=['car','own','rental'],NOTKT=['car','own'];
+const AIR=[['Adana Çukurova Havalimanı',['Adana','Mersin']],['Adıyaman Havalimanı',['Adıyaman']],['Zafer Havalimanı',['Kütahya','Afyonkarahisar']],['Ağrı Ahmed-i Hani Havalimanı',['Ağrı']],['Amasya Merzifon Havalimanı',['Amasya']],['Ankara Esenboğa Havalimanı',['Ankara']],['Antalya Havalimanı',['Antalya']],['Gazipaşa-Alanya Havalimanı',['Antalya']],['Balıkesir Koca Seyit Havalimanı',['Balıkesir']],['Batman Havalimanı',['Batman']],['Bingöl Havalimanı',['Bingöl']],['Bursa Yenişehir Havalimanı',['Bursa']],['Çanakkale Havalimanı',['Çanakkale']],['Denizli Çardak Havalimanı',['Denizli']],['Diyarbakır Havalimanı',['Diyarbakır']],['Elazığ Havalimanı',['Elazığ']],['Erzincan Havalimanı',['Erzincan']],['Erzurum Havalimanı',['Erzurum']],['Eskişehir Hasan Polatkan Havalimanı',['Eskişehir']],['Gaziantep Havalimanı',['Gaziantep']],['Hakkari Yüksekova Havalimanı',['Hakkari']],['Hatay Havalimanı',['Hatay']],['Iğdır Havalimanı',['Iğdır']],['Isparta Süleyman Demirel Havalimanı',['Isparta']],['İstanbul Havalimanı',['İstanbul']],['Sabiha Gökçen Havalimanı',['İstanbul']],['İzmir Adnan Menderes Havalimanı',['İzmir','Manisa']],['Kahramanmaraş Havalimanı',['Kahramanmaraş']],['Kars Harakani Havalimanı',['Kars']],['Kastamonu Havalimanı',['Kastamonu']],['Kayseri Havalimanı',['Kayseri']],['Kocaeli Cengiz Topel Havalimanı',['Kocaeli']],['Konya Havalimanı',['Konya']],['Malatya Havalimanı',['Malatya']],['Mardin Havalimanı',['Mardin']],['Dalaman Havalimanı',['Muğla']],['Milas-Bodrum Havalimanı',['Muğla','Aydın']],['Muş Sultan Alparslan Havalimanı',['Muş']],['Kapadokya Havalimanı',['Nevşehir','Aksaray']],['Ordu-Giresun Havalimanı',['Ordu','Giresun']],['Rize-Artvin Havalimanı',['Rize','Artvin']],['Samsun Çarşamba Havalimanı',['Samsun']],['Siirt Havalimanı',['Siirt']],['Sinop Havalimanı',['Sinop']],['Sivas Nuri Demirağ Havalimanı',['Sivas']],['Şanlıurfa GAP Havalimanı',['Şanlıurfa']],['Şırnak Şerafettin Elçi Havalimanı',['Şırnak']],['Tekirdağ Çorlu Havalimanı',['Tekirdağ']],['Tokat Havalimanı',['Tokat']],['Trabzon Havalimanı',['Trabzon']],['Uşak Havalimanı',['Uşak']],['Van Ferit Melen Havalimanı',['Van']],['Zonguldak Çaycuma Havalimanı',['Zonguldak','Bartın']]];
+const hv=(a,b)=>{const R0=6371,t=Math.PI/180;const dLa=(b[1]-a[1])*t,dLo=(b[2]-a[2])*t;const x=Math.sin(dLa/2)**2+Math.cos(a[1]*t)*Math.cos(b[1]*t)*Math.sin(dLo/2)**2;return 2*R0*Math.asin(Math.sqrt(x))};
+const pc=c=>{const p=provOf(c||'');return p?p[0]:''};
+function airportsFor(city){const p=provOf(city||'');if(!p)return [];const ex=AIR.filter(a=>a[1].some(c=>lc(c)===lc(p[0]))).map(a=>a[0]);if(ex.length)return ex;
+  return AIR.map(a=>{const q=provOf(a[1][0]);return [a[0],q?hv(p,q):1e9]}).sort((x,y)=>x[1]-y[1]).slice(0,2).map(x=>x[0])}
+function stationsFor(city){if(!city)return [];return [...airportsFor(city),city+' Otogarı',city+' Garı',city+' İskelesi',city]}
+function stationFor(city,mode,isHome){if(!city)return '';if(mode==='flight')return isHome?'':(airportsFor(city)[0]||'');if(mode==='bus'||mode==='minibus')return city+' Otogarı';if(mode==='train')return city+' Garı';if(mode==='ferry')return city+' İskelesi';return city}
+function homeCity(){const o=officeOn()?office():null;if(!o)return '';const t=pc(o.city)||pc(o.label)||pc(o.address);if(t)return t;if(isFinite(+o.lat)&&isFinite(+o.lng)){let b=null,bd=1e9;for(const p of PROV){const d=hv(['',+o.lat,+o.lng],p);if(d<bd){bd=d;b=p}}return b?b[0]:''}return ''}
+function connChain(){const all=routeDays();const S=ordered().filter(s=>s.city&&s.result!=='cancelled');const G=[];
+  S.forEach(s=>{const c=pc(s.city)||s.city;const g=G[G.length-1];if(!g||g.c!==c)G.push({c,d:s.day_date,e:s.day_date});else g.e=s.day_date});
+  const home=homeCity();const N=R?.needs||{};const C=G.map(g=>g.c);const lastC=C[C.length-1]||'';const rc=N.ret_city&&N.ret_city!=='_last'?(pc(N.ret_city)||N.ret_city):lastC;
+  const links=[];if(!C.length||R.scope==='local')return {home,G,C,rc,links};
+  links.push({dir:'gidis',fc:home,tc:C[0],date:all[0]||G[0].d});
+  for(let i=0;i<C.length-1;i++)links.push({dir:'ara',fc:C[i],tc:C[i+1],date:G[i+1].d});
+  if(rc&&lc(rc)!==lc(lastC))links.push({dir:'ara',fc:lastC,tc:rc,date:G[G.length-1].e,ret:1});
+  links.push({dir:'donus',fc:rc||lastC,tc:home,date:all[all.length-1]||G[G.length-1].e});
+  return {home,G,C,rc,links}}
+function defMode(k){const tr=R.transport;if(k.dir==='ara')return tr==='bus'?'bus':tr==='own_car'?'own':'car';if(tr==='flight'||tr==='mixed')return 'flight';if(tr==='bus')return 'bus';if(tr==='own_car')return 'own';if(R.id&&tr==='company_car')return 'car';
+  const a=provOf(k.fc),b=provOf(k.tc);return a&&b&&hv(a,b)>450?'flight':'car'}
+function deriveTransport(L){const M=[...new Set(L.map(t=>t.mode).filter(Boolean))];if(!M.length)return null;if(M.every(m=>m==='own'))return 'own_car';if(M.every(m=>CARM.includes(m)))return 'company_car';if(M.every(m=>m==='flight'))return 'flight';if(M.every(m=>m==='bus'))return 'bus';return 'mixed'}
+function trText(L){L=L||TK();const M=[...new Set(L.map(t=>t.mode).filter(Boolean))];if(!M.length)return TRANSPORT[R.transport]||'';const lab=m=>CARM.includes(m)||m==='taxi'?'Araç':CMODE[m]?.[1].split(' /')[0]||m;return [...new Set(M.map(lab))].join(' + ')}
+function allCarTrip(){const L=TK().filter(t=>t.mode);return L.length?L.every(t=>CARM.includes(t.mode)):isCar(R.transport)}
+function driveKm(){const L=TK().filter(t=>t.mode);if(!L.length||L.every(t=>CARM.includes(t.mode)))return {km:EKM.km||0,all:true};let s=0;L.filter(t=>CARM.includes(t.mode)).forEach(t=>{const a=provOf(t.fc||t.from),b=provOf(t.tc||t.to);if(a&&b)s+=hv(a,b)*1.3});return {km:s,all:false}}
+function connSync(){if(!R||!canEdit)return false;const ch=connChain();if(!ch.links.length)return false;const L=TK();let changed=false;
+  L.forEach(t=>{if(t.fc!=null&&t.tc!=null)return;if(t.dir==='gidis'){t.fc=ch.home;t.tc=pc(t.to)||ch.C[0]}else if(t.dir==='donus'){t.fc=pc(t.from)||ch.rc;t.tc=ch.home}else{t.fc=pc(t.from);t.tc=pc(t.to)}});
+  const used=new Set(),out=[];
+  ch.links.forEach(k=>{let t=L.find(x=>!used.has(x)&&x.dir===k.dir&&lc(x.fc||'')===lc(k.fc)&&lc(x.tc||'')===lc(k.tc));
+    if(!t&&k.dir!=='ara')t=L.find(x=>!used.has(x)&&x.dir===k.dir);
+    if(t){used.add(t);if(t.auto&&(lc(t.fc||'')!==lc(k.fc)||lc(t.tc||'')!==lc(k.tc))){t.fc=k.fc;t.tc=k.tc;t.from=stationFor(k.fc,t.mode,k.dir==='gidis');t.to=stationFor(k.tc,t.mode,k.dir==='donus');if(t.auto&&k.date)t.date=k.date;changed=true}}
+    else{const m=defMode(k);t={who:'_all',dir:k.dir,mode:m,date:k.date||'',time:'',fc:k.fc,tc:k.tc,from:stationFor(k.fc,m,k.dir==='gidis'),to:stationFor(k.tc,m,k.dir==='donus'),buyer:'sirket',amount:'',ref:'',auto:1};used.add(t);changed=true}
+    out.push(t)});
+  L.forEach(t=>{if(used.has(t))return;if(t.auto&&!numv(t.amount)){changed=true;return}out.push(t)});
+  if(changed||out.length!==L.length||out.some((t,i)=>t!==L[i])){R.needs.tickets=out;TK();changed=true}
+  const tr=deriveTransport(out);if(tr&&tr!==R.transport){R.transport=tr;changed=true}
+  return changed}
+function connPaint(){const days=$('cfrtDays');if(!days)return;let box=$('cfrtConn');if(!box){box=document.createElement('div');box.id='cfrtConn';box.className='cfrt-card2 cfrt-conn';days.before(box)}
+  const ch=connChain();const L=TK();const dis=canEdit?'':' disabled';const head='<div class="cfrt-cn-h"><h4>🧭 Yolculuk planı</h4><span class="cfrt-msg">Ulaşım: <b>'+esc(trText(L)||'—')+'</b></span></div>';
+  if(R.scope==='local'){box.innerHTML=head+'<p class="cfrt-msg">Şehir içi rotada şehirler arası yolculuk yok.</p>';return}
+  if(!ch.C.length){box.innerHTML=head+'<p class="cfrt-msg">Durak ekleyince her şehir değişikliğinde nasıl gideceğinizi (uçak, otobüs, araç …) burada seçersiniz.</p>';return}
+  const legOf=k=>L.find(t=>t.dir===k.dir&&lc(t.fc||'')===lc(k.fc)&&lc(t.tc||'')===lc(k.tc))||(k.dir!=='ara'?L.find(t=>t.dir===k.dir):null);
+  const fmtR=g=>esc(fmtShort(g.d))+(g.e&&g.e!==g.d?'–'+esc(fmtShort(g.e)):'');
+  const cityOpts=[...new Set(ch.C)];const N=R.needs||{};const rv=N.ret_city&&N.ret_city!=='_last'?N.ret_city:'_last';const other=rv!=='_last'&&!cityOpts.some(c=>lc(c)===lc(rv));
+  const node=(t,s,cls)=>'<li class="cfrt-cn-node '+(cls||'')+'"><i></i><div><b>'+esc(t)+'</b>'+(s?'<small>'+s+'</small>':'')+'</div></li>';
+  const legRow=(k,t,idx)=>{if(!t)return '';const i=L.indexOf(t);const pub=!CARM.includes(t.mode)&&t.mode!=='taxi';const a=provOf(t.fc||''),b=provOf(t.tc||'');const km=a&&b?Math.round(hv(a,b)*(t.mode==='flight'?1:1.3)):0;
+    return '<li class="cfrt-cn-leg" data-ti="'+i+'"><div class="cfrt-cn-top"><span class="cfrt-cn-dir d-'+k.dir+'">'+(k.dir==='gidis'?'Gidiş':k.dir==='donus'?'Dönüş':k.ret?'Dönüş noktasına':'Şehir değişikliği')+'</span><div class="cfrt-cn-modes" role="group" aria-label="Ulaşım türü">'
+      +Object.entries(CMODE).map(([m,v])=>'<button type="button" data-cm="'+m+'" class="'+(t.mode===m?'on':'')+'" title="'+v[1]+'"'+dis+'><span>'+v[0]+'</span>'+v[1]+'</button>').join('')+'</div></div>'
+      +'<div class="cfrt-cn-f"><input data-cf="from" list="cfrtSt'+idx+'a" value="'+esc(t.from||'')+'" placeholder="'+(t.mode==='flight'?'Kalkış havalimanı':'Nereden')+'" maxlength="80"'+dis+'><i>→</i><input data-cf="to" list="cfrtSt'+idx+'b" value="'+esc(t.to||'')+'" placeholder="'+(t.mode==='flight'?'Varış havalimanı':'Nereye')+'" maxlength="80"'+dis+'>'
+      +'<datalist id="cfrtSt'+idx+'a">'+stationsFor(t.fc).map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist><datalist id="cfrtSt'+idx+'b">'+stationsFor(t.tc).map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist></div>'
+      +'<div class="cfrt-cn-d"><input type="date" data-cf="date" value="'+esc(t.date||'')+'"'+dis+' aria-label="Tarih"><select data-cf="time"'+dis+' aria-label="Saat">'+Object.entries(TTIME).map(([kk,v])=>'<option value="'+kk+'"'+((t.time||'')===kk?' selected':'')+'>'+v+'</option>').join('')+'</select>'
+      +(km?'<span class="cfrt-msg">≈ '+km.toLocaleString('tr-TR')+' km'+(t.mode==='flight'?' (kuş uçuşu)':'')+'</span>':'')+(pub?'<span class="cfrt-msg">· bilet: '+(t.buyer==='personel'?'personel':'şirket')+' alır</span>':'')+'</div></li>'};
+  let html=head+'<div class="cfrt-cn-ret"><label for="cfrtRetSel">Dönüş nereden?</label><select id="cfrtRetSel"'+dis+'><option value="_last"'+(rv==='_last'?' selected':'')+'>Son durak ('+esc(ch.C[ch.C.length-1])+')</option>'+cityOpts.map(c=>'<option value="'+esc(c)+'"'+(rv!=='_last'&&lc(rv)===lc(c)?' selected':'')+'>'+esc(c)+'</option>').join('')+'<option value="_other"'+(other?' selected':'')+'>Başka şehir…</option></select>'+(other||rv==='_other'?'<input id="cfrtRetOther" list="cfrtProv" value="'+esc(other?rv:'')+'" placeholder="Şehir yazın"'+dis+'>':'')+'</div><ol class="cfrt-cn-l">';
+  html+=node(ch.home?'Ofis · '+ch.home:'Ofis','Başlangıç','home');let li=0,gi=0;
+  ch.links.forEach(k=>{html+=legRow(k,legOf(k),li++);if(k.dir==='donus')return;if(k.ret){html+=node(k.tc,'dönüş noktası','ret');return}const g=ch.G[gi++];html+=node(k.tc,g?fmtR(g)+' · ziyaret':'')});
+  html+=node(ch.home?'Ofis · '+ch.home:'Ofis','Dönüş','home')+'</ol>';
+  const extra=L.filter(t=>!ch.links.some(k=>legOf(k)===t));if(extra.length)html+='<p class="cfrt-msg">Ayrıca '+extra.length+' ek yolculuk var (harcırah adımındaki listede).</p>';
+  box.innerHTML=html;
+  const after=()=>{connSync();connPaint();try{paintExp()}catch(_){}try{paintSum()}catch(_){}trSum();warnSoon()};
+  box.querySelectorAll('.cfrt-cn-leg').forEach(row=>{const t=L[+row.dataset.ti];if(!t)return;
+    row.querySelectorAll('[data-cm]').forEach(b=>b.onclick=()=>{const m=b.dataset.cm;if(m===t.mode)return;const isH=t.dir==='gidis',isR=t.dir==='donus';const dF=stationFor(t.fc,t.mode,isH),dT=stationFor(t.tc,t.mode,isR);
+      if(!t.from||t.from===dF||t.from===t.fc)t.from=stationFor(t.fc,m,isH);if(!t.to||t.to===dT||t.to===t.tc)t.to=stationFor(t.tc,m,isR);t.mode=m;dirty=true;after()});
+    row.querySelectorAll('[data-cf]').forEach(el=>el.addEventListener('change',()=>{t[el.dataset.cf]=el.value;delete t.auto;dirty=true;if(el.dataset.cf==='date'||el.dataset.cf==='time'){try{paintExp()}catch(_){}warnSoon()}else{try{paintExp()}catch(_){}}}))});
+  const moveRet=v=>{const lastC=ch.C[ch.C.length-1];const rc=v==='_last'?lastC:(pc(v)||v);const d=TK().find(t=>t.dir==='donus');if(d&&rc&&lc(d.fc||'')!==lc(rc)){d.fc=rc;d.from=stationFor(rc,d.mode,false)}};
+  const rs=$('cfrtRetSel');if(rs)rs.onchange=()=>{R.needs=R.needs||{};if(rs.value==='_other'){R.needs.ret_city='_other';connPaint();setTimeout(()=>$('cfrtRetOther')?.focus(),50);return}R.needs.ret_city=rs.value;moveRet(rs.value);dirty=true;after()};
+  const ro=$('cfrtRetOther');if(ro)ro.onchange=()=>{const v=pc(ro.value)||String(ro.value||'').trim();if(!v)return;R.needs.ret_city=v;moveRet(v);dirty=true;after()}}
+function trSum(){const sel=$('cfrtF_transport');if(!sel)return;let info=$('cfrtTrSum');if(!info){sel.style.display='none';info=document.createElement('div');info.id='cfrtTrSum';info.className='cfrt-trsum';sel.after(info)}
+  const t=trText();const h=(TK().length?'<b>'+esc(t)+'</b>':'<b>Durak ekleyince belirlenir</b>')+'<button type="button" class="cfrt-link" data-trgo>Bağlantı bağlantı seç →</button>';if(info.innerHTML!==h){info.innerHTML=h;info.querySelector('[data-trgo]').onclick=()=>{wzGo(1);setTimeout(()=>$('cfrtConn')?.scrollIntoView({block:'start',behavior:'smooth'}),260)}}}
+/* ek uyarılar: havalimanı seçilmedi, tek yön kiralık araç, yolculuk tarihi ziyaretle çakışıyor */
+function connWarns(add){const ch=connChain();if(!ch.links.length)return;const L=TK();const legOf=k=>L.find(t=>t.dir===k.dir&&lc(t.fc||'')===lc(k.fc)&&lc(t.tc||'')===lc(k.tc))||(k.dir!=='ara'?L.find(t=>t.dir===k.dir):null);
+  const seq=ch.links.map(legOf).filter(Boolean);const goConn=()=>{wzGo(1);setTimeout(()=>$('cfrtConn')?.scrollIntoView({block:'start',behavior:'smooth'}),260)};
+  seq.forEach((t,i)=>{if(t.mode==='flight'&&(!t.from||!t.to))add('air'+i,'#0ea5e9','✈',(t.dir==='gidis'?'Gidiş':t.dir==='donus'?'Dönüş':'Uçuş')+' için havalimanı seçilmedi',(t.fc||'?')+' → '+(t.tc||'?')+' · muhasebe bileti buna göre alır','Seç',goConn)});
+  for(let i=0;i<seq.length;i++){if(seq[i].mode!=='rental')continue;let j=i;while(j+1<seq.length&&seq[j+1].mode==='rental')j++;const a=seq[i].fc,b=seq[j].tc;if(a&&b&&lc(a)!==lc(b))add('rent'+i,'#f59e0b','🔑','Kiralık araç '+a+'’de alınıp '+b+'’de bırakılıyor','Tek yön teslim çoğu firmada ek ücretli · fiyatı buna göre sorun','Bağlantılar',goConn);i=j}
+  const first=ch.G[0],last=ch.G[ch.G.length-1];const g=seq.find(t=>t.dir==='gidis'),d=seq.find(t=>t.dir==='donus');
+  if(g&&first&&g.tc&&lc(g.tc)!==lc(first.c))add('gcity','#f59e0b','🧭','Gidiş '+g.tc+'’a, ilk durak '+first.c,first.c+'’a nasıl geçileceği belli değil · gidişi düzeltin ya da bağlantı ekleyin','Bağlantılar',goConn);
+  if(d&&ch.rc&&d.fc&&lc(d.fc)!==lc(ch.rc))add('dcity','#f59e0b','🧭','Dönüş '+d.fc+'’dan, dönüş noktası '+ch.rc,'“Dönüş nereden?” seçimini veya dönüş yolculuğunu kontrol edin','Bağlantılar',goConn);
+  if(g&&g.date&&first){if(g.date>first.d)add('gdate','#ef4444','📅','Gidiş '+fmtShort(g.date)+', ilk ziyaret '+fmtShort(first.d),'Gidiş tarihi ilk ziyaretten sonra · tarihi kontrol edin','Bağlantılar',goConn);else if(g.date===first.d&&['ogle','aksam','gece'].includes(g.time||''))add('gtime','#f59e0b','⏰','Gidiş '+(TTIME[g.time]||'').split(' ')[0].toLocaleLowerCase('tr-TR')+', aynı gün ziyaret var','İlk ziyarete yetişemeyebilirsiniz · bir gün önce gitmeyi düşünün','Bağlantılar',goConn)}
+  if(d&&d.date&&last&&d.date<last.e)add('ddate','#ef4444','📅','Dönüş '+fmtShort(d.date)+', son ziyaret '+fmtShort(last.e),'Dönüş son ziyaretten önce · tarihi kontrol edin','Bağlantılar',goConn)}
+
 /* ---- bağlantılar: mevcut fonksiyonları sarmala ---- */
 {const _pe=paintEditor;paintEditor=function(){const r=_pe.apply(this,arguments);try{wzMount()}catch(e){console.warn('rota sihirbazı',e)}return r}}
 {const _pd=paintDays;paintDays=function(){const r=_pd.apply(this,arguments);try{sugMount();warnSoon()}catch(e){console.warn(e)}return r}}
@@ -12848,6 +12932,21 @@ function mapAnim(){if(!map||!map.el||!map.svg||matchMedia('(prefers-reduced-moti
 {const _pl=paintList;paintList=function(){const r=_pl.apply(this,arguments);try{listExtras()}catch(e){console.warn(e)}return r}}
 {const _pm=paintMap;paintMap=function(){const r=_pm.apply(this,arguments);try{mapAnim()}catch(_){}return r}}
 {const _pe2=paintEditor;paintEditor=function(){const r=_pe2.apply(this,arguments);try{editorExtras()}catch(e){console.warn(e)}return r}}
+{const _pd2=paintDays;paintDays=function(){const r=_pd2.apply(this,arguments);try{const ch=connSync();connPaint();trSum();if(ch&&$('cfrtExp'))paintExp()}catch(e){console.warn('yolculuk planı',e)}return r}}
+/* ---- rota haritası: uçak / gemi bölümleri karayolu yerine kavis / dalga ---- */
+const AIRM=['flight','ferry'];
+function legMode(dir,fc,tc){const L=TK();let t=null;if(dir==='ara'){const a=lc(pc(fc)||fc||''),b=lc(pc(tc)||tc||'');t=L.find(x=>x.dir==='ara'&&lc(x.fc||pc(x.from)||'')===a&&lc(x.tc||pc(x.to)||'')===b)}else t=L.find(x=>x.dir===dir);return t?.mode||''}
+function airLines(){const out=[];if(!R)return out;const o=officeOn()?office():null;const S=ordered().filter(located);if(!S.length)return out;const col='#5cc8ff';
+  const g=TK().find(t=>t.dir==='gidis');if(o&&g&&AIRM.includes(g.mode))out.push({pts:arcLL(o,S[0],g.mode),color:col,dash:true});
+  for(let i=1;i<S.length;i++){const a=S[i-1],b=S[i];if(a.day_date===b.day_date)continue;const m=legMode('ara',a.city,b.city);if(AIRM.includes(m))out.push({pts:arcLL(a,b,m),color:col,dash:true})}
+  const dn=TK().find(t=>t.dir==='donus');if(o&&dn&&AIRM.includes(dn.mode)){const last=S[S.length-1];const rv=R.needs?.ret_city;const rp=rv&&rv!=='_last'&&rv!=='_other'?provOf(rv):null;const from=rp&&lc(rp[0])!==lc(pc(last.city)||'')?{lat:rp[1],lng:rp[2]}:last;if(from!==last)out.push({pts:[{lat:last.lat,lng:last.lng},from],color:'#a1a1aa',dash:true});out.push({pts:arcLL(from,o,dn.mode),color:col,dash:true})}
+  return out}
+{const _dp=dayPts;dayPts=function(d){const L=_dp.apply(this,arguments);if(!R||L.length<2)return L;try{
+  if(L[0].office&&AIRM.includes(legMode('gidis')))L.shift();
+  else if(L[0].prev&&L[1]&&L[1].s){const ps=ordered().find(s=>s.lat===L[0].lat&&s.lng===L[0].lng);if(ps&&AIRM.includes(legMode('ara',ps.city,L[1].s.city)))L.shift()}
+  const z=L[L.length-1];if(z&&z.office&&L.length>=2&&AIRM.includes(legMode('donus')))L.pop()}catch(_){}return L}}
+{const _pm3=paintMap;paintMap=function(){if(map&&!map.__air){const os=map.set.bind(map);map.set=function(mk,ln){let ex=[];try{ex=airLines()}catch(_){}return os(mk,[...(ln||[]),...ex])};map.__air=1}return _pm3.apply(this,arguments)}}
+{const _wl=warnList;warnList=function(){const W=_wl.apply(this,arguments);try{connWarns((id,c,ic,t,s2,label,fn)=>{if(!WDIS.has(id))W.push({id,c,ic,t,s:s2,label,fn})})}catch(e){console.warn(e)}return W}}
 /* ---- 6) zengin rota kartları: mini rota çizimi, ilerleme halkası, geri sayım ---- */
 function cardSketch(cities,col){const C=cities.slice(0,7);if(C.length<2)return '';const W=260,H=46,n=C.length;const pts=C.map((c,i)=>[14+i*(W-28)/(n-1),i%2?14:32]);
   const d=pts.map((p,i)=>i?('Q'+((pts[i-1][0]+p[0])/2)+' '+(i%2?2:44)+' '+p[0]+' '+p[1]):('M'+p[0]+' '+p[1])).join(' ');
@@ -13061,7 +13160,7 @@ const TTIME={'':'Saat farketmez',sabah:'Sabah (06–12)',ogle:'Öğle (12–17)'
 const tripLeg=t=>[t.from,t.to].filter(Boolean).join(' → ');
 function TK(){R.needs=R.needs&&typeof R.needs==='object'?R.needs:{};if(!Array.isArray(R.needs.tickets))R.needs.tickets=[];R.needs.tickets.forEach(t=>{if(t&&!t.id)t.id='L'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)});return R.needs.tickets}
 function ticketsCalc(){const e=EXP();const rows=[];let owed=0,diffAll=0;const T=travelers();
-  for(const t of TK()){const amt=numv(t.amount);if(!amt||t.mode==='car')continue;const who=t.who&&t.who!=='_all'?[t.who]:(T.length?T:[null]);
+  for(const t of TK()){const amt=numv(t.amount);if(!amt||NOTKT.includes(t.mode))continue;const who=t.who&&t.who!=='_all'?[t.who]:(T.length?T:[null]);
     for(const u of who){const ty=t.date?personType(u,t.date):'gorev';const personal=ty==='kisisel';const ref=numv(t.ref);let share=amt,diff=0;
       if(personal&&ref>0&&ref<amt){diff=amt-ref;if(!e.cover_diff)share=ref}
       const company=t.buyer==='sirket';const bo=company?boughtLeg(t.id):null;if(company&&diff>0&&!e.cover_diff)owed+=diff;if(!e.cover_diff)diffAll+=diff;
@@ -13116,7 +13215,7 @@ function suggestLegs(){const all=routeDays();if(!all.length)return [];const O=of
   legs.push({who:'_all',dir:'donus',mode,date:all[all.length-1],time:'',from:lastCity,to:home,buyer:'sirket',amount:'',ref:''});return legs}
 function ticketBlock(){const T=travelers();const all=routeDays();const e=EXP();const dis=canEdit?'':' disabled';const tc=ticketsCalc();const L=TK();
   const hasOut=L.some(t=>t.dir==='gidis'&&t.date),hasBack=L.some(t=>t.dir==='donus'&&t.date);const needT=['flight','bus','mixed'].includes(R.transport);
-  const rows=L.map((t,i)=>{const who=t.who&&t.who!=='_all'?[t.who]:(T.length?T:[null]);const personal=t.date&&who.some(u=>personType(u,t.date)==='kisisel');const isCar=t.mode==='car';
+  const rows=L.map((t,i)=>{const who=t.who&&t.who!=='_all'?[t.who]:(T.length?T:[null]);const personal=t.date&&who.some(u=>personType(u,t.date)==='kisisel');const isCar=NOTKT.includes(t.mode);
     return '<div class="cfrt-tk dir-'+esc(t.dir||'gidis')+'" data-ti="'+i+'"><div class="cfrt-tk-h"><select data-tf="dir"'+dis+'>'+Object.entries(TDIR).map(([k,v])=>'<option value="'+k+'"'+(t.dir===k?' selected':'')+'>'+v+'</option>').join('')+'</select>'
      +'<input type="date" data-tf="date" value="'+esc(t.date||'')+'"'+(all.length?' min="'+all[0]+'" max="'+all[all.length-1]+'"':'')+dis+' aria-label="Yolculuk tarihi">'
      +'<select data-tf="time"'+dis+' aria-label="Saat tercihi">'+Object.entries(TTIME).map(([k,v])=>'<option value="'+k+'"'+((t.time||'')===k?' selected':'')+'>'+v+'</option>').join('')+'</select>'
@@ -13151,7 +13250,7 @@ function expCalc(){const e=EXP();const a=autoVals();const d=a.days;const T=trave
    if(tot)add('Yerel ulaşım ('+names+')',(where?where+' · ':'')+'tahmini',tot);else add('Yerel ulaşım ('+names+')',(where?where+' · ':'')+'tutar belirtilmedi',0,true)}}
   if(numv(e.parking_pd)){const gd=routeDays().filter(x=>teamType(x)==='gorev').length;add('Otopark',gd+' görev günü × '+TL(e.parking_pd),gd*numv(e.parking_pd))}
   if(numv(e.toll))add('Köprü / otoyol (HGS)','tahmini',numv(e.toll));
-  if(isCar(R.transport)){if(e.utts!==false)add('Yakıt',(km?'≈ '+Math.round(km).toLocaleString('tr-TR')+' km · ':'')+'UTTS ile şirket öder',0,true);else add('Yakıt',(km?Math.round(km).toLocaleString('tr-TR')+' km':'km ?')+' × '+String(e.fuel_l100||0).replace('.',',')+' L/100 km × '+TL(e.fuel_price)+'/L',km*numv(e.fuel_l100)/100*numv(e.fuel_price))}
+  if(isCar(R.transport)){const dk=driveKm();const km2=dk.km;const tag=dk.all?'':' (araçla gidilen bölümler, tahmini)';if(e.utts!==false)add('Yakıt',(km2?'≈ '+Math.round(km2).toLocaleString('tr-TR')+' km'+tag+' · ':'')+'UTTS ile şirket öder',0,true);else add('Yakıt',(km2?Math.round(km2).toLocaleString('tr-TR')+' km'+tag:'km ?')+' × '+String(e.fuel_l100||0).replace('.',',')+' L/100 km × '+TL(e.fuel_price)+'/L',km2*numv(e.fuel_l100)/100*numv(e.fuel_price))}
   const tk=ticketsCalc();
   if(tk.rows.length)tk.rows.forEach(t=>add(t.name+(t.company?(t.bought?' (muhasebe aldı)':' (şirket alacak)'):''),t.calc,t.share,false,{company:t.company}));
   else if(isTicket(R.transport)&&numv(e.ticket_pp))add(R.transport==='flight'?'Uçak bileti':R.transport==='bus'?'Otobüs bileti':'Bilet',people+' kişi × '+TL(e.ticket_pp)+' (gidiş-dönüş)',people*numv(e.ticket_pp));
@@ -13221,7 +13320,7 @@ async function loadReqs(id){if(!id){REQS=[];return REQS}const r=await sb.from('c
 const fmtDT=v=>v?new Date(v).toLocaleString('tr-TR',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:TZ}):'';
 function buildSnapshot(){const e=EXP();const c=expCalc();const o=officeOn()?office():null;const dd=dutyDays(null);const L=dutyStops();const T=travelers();
   const custom=T.some(u=>Object.keys(DTS()[u]||{}).length);
-  return {v:2,title:R.title,start:dd[0]||R.start_date,end:dd[dd.length-1]||R.end_date,trip_start:R.start_date,trip_end:R.end_date,travel:travelText(),scope:R.scope,transport:R.transport,utts:e.utts!==false,office:o?(o.label||'Ofis'):'',cities:[...new Set(L.map(s=>s.city).filter(Boolean))],stops:L.length,
+  return {v:2,title:R.title,start:dd[0]||R.start_date,end:dd[dd.length-1]||R.end_date,trip_start:R.start_date,trip_end:R.end_date,travel:travelText(),scope:R.scope,transport:R.transport,tr_text:trText(),utts:e.utts!==false,office:o?(o.label||'Ofis'):'',cities:[...new Set(L.map(s=>s.city).filter(Boolean))],stops:L.length,
     days:dd.map(d=>{const S=L.filter(s=>s.day_date===d);return {d,t:teamType(d),cities:[...new Set(S.map(s=>s.city).filter(Boolean))],names:S.map(s=>s.place_name).slice(0,12)}}),
     lines:c.lines.map(l=>({name:l.name,calc:l.calc,amt:Math.round(l.amt*100)/100,note:!!l.note,company:!!l.company})),total:Math.round(c.total*100)/100,request:c.request,per:Math.round(c.per*100)/100,people:c.people,ndays:c.days,nights:c.nights,km:Math.round(c.km||0),
     legs:TK().filter(t=>t.date).slice().sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(['gidis','ara','donus'].indexOf(a.dir)-['gidis','ara','donus'].indexOf(b.dir))).map(t=>{const who=t.who&&t.who!=='_all'?[t.who]:(travelers().length?travelers():[null]);return {id:t.id||'',dir:TDIR[t.dir]||'',date:t.date,time:(TTIME[t.time]||'').replace('Saat farketmez',''),route:tripLeg(t),mode:(TMODE[t.mode]||'').replace(' bileti',''),who:t.who&&t.who!=='_all'?nameOf(t.who):'Herkes',buyer:t.mode==='car'?'—':(t.buyer==='personel'?'Personel':'Şirket'),amt:numv(t.amount)||0,personal:who.some(u=>personType(u,t.date)==='kisisel')}}),local:LT().map(x=>LTV[x.k][1]+((x.where||'').trim()?' ('+x.where.trim()+')':'')),company_tk:Math.round((c.companyTk||0)*100)/100,personal:c.personal.map(p=>({name:p.name,days:p.days})),ticket_diff:Math.round((c.tickets?.diff||0)*100)/100,cover_diff:!!e.cover_diff,
@@ -13240,7 +13339,7 @@ function formHtml(sn,meta={}){const cs=window._companySettings||{};const co=cs.l
    +'<div class="hd">'+(logo&&/^data:image|^https?:/.test(logo)?'<img src="'+P(logo)+'" alt="">':'')+'<div class="c"><b>'+P(co)+'</b><small>'+P([cs.address,cs.phone,cs.email].filter(Boolean).join(' · '))+'</small><small>'+P([cs.tax_office?cs.tax_office+' V.D.':'',cs.tax_number?'VKN '+cs.tax_number:''].filter(Boolean).join(' · '))+'</small></div><div class="m">Sayı: '+P(sn.doc_no||'…………')+'<br>Tarih: '+P(fmtLong(meta.date||today()))+(meta.revision?'<br>Sürüm: '+meta.revision:'')+'</div></div>'+stamp
    +'<h1>HARCIRAH TALEP VE GÖREVLENDİRME FORMU</h1><p><b>Konu:</b> '+P(sn.title)+(sn.team?' <span class="muted">· '+P(sn.team)+'</span>':'')+'</p>'+(meta.returnNote&&st==='returned'?'<div class="note"><b>Muhasebe notu:</b> '+P(meta.returnNote)+'</div>':'')+(meta.note&&(st==='revision'||st==='rejected')?'<div class="note"><b>'+(st==='revision'?'Revizyon notu':'Ret sebebi')+':</b> '+P(meta.note)+'</div>':'')+'<p>'+P(sn.text).replace(/\n/g,'<br>')+'</p>'
    +'<div class="grid"><table><tbody><tr><th style="width:38%">Görev yeri</th><td>'+P((sn.cities||[]).join(', ')||'—')+'</td></tr><tr><th>Tarih</th><td>'+P(fmtLong(sn.start))+(sn.end!==sn.start?' – '+P(fmtLong(sn.end)):'')+'</td></tr><tr><th>Süre</th><td>'+sn.ndays+' gün'+(sn.nights?' · '+sn.nights+' gece':'')+' · '+sn.people+' kişi</td></tr></tbody></table>'
-   +'<table><tbody><tr><th style="width:38%">Çıkış / dönüş</th><td>'+P(sn.office||'—')+'</td></tr><tr><th>Ulaşım</th><td>'+P(TRANSPORT[sn.transport]||'')+(isCar(sn.transport)&&sn.utts?' · yakıt UTTS':'')+(sn.travel&&!(sn.legs||[]).length?'<br><span class="small">'+P(sn.travel)+'</span>':'')+((sn.local||[]).length&&!(sn.lines||[]).some(l=>/^Yerel ulaşım/.test(l.name||''))?'<br><span class="small">Yerel ulaşım: '+P(sn.local.join(', '))+'</span>':'')+'</td></tr><tr><th>'+(isCar(sn.transport)?'Toplam yol':'Ziyaret')+'</th><td>'+(isCar(sn.transport)?(sn.km?'≈ '+Number(sn.km).toLocaleString('tr-TR')+' km':'—')+' · ':'')+(sn.stops||0)+' ziyaret</td></tr></tbody></table></div>'
+   +'<table><tbody><tr><th style="width:38%">Çıkış / dönüş</th><td>'+P(sn.office||'—')+'</td></tr><tr><th>Ulaşım</th><td>'+P(sn.tr_text||TRANSPORT[sn.transport]||'')+(isCar(sn.transport)&&sn.utts?' · yakıt UTTS':'')+(sn.travel&&!(sn.legs||[]).length?'<br><span class="small">'+P(sn.travel)+'</span>':'')+((sn.local||[]).length&&!(sn.lines||[]).some(l=>/^Yerel ulaşım/.test(l.name||''))?'<br><span class="small">Yerel ulaşım: '+P(sn.local.join(', '))+'</span>':'')+'</td></tr><tr><th>'+(isCar(sn.transport)?'Toplam yol':'Ziyaret')+'</th><td>'+(isCar(sn.transport)?(sn.km?'≈ '+Number(sn.km).toLocaleString('tr-TR')+' km':'—')+' · ':'')+(sn.stops||0)+' ziyaret</td></tr></tbody></table></div>'
    +(meta.screen&&((sn.personal||[]).length||sn.ticket_diff)?'<div class="note"><b>Yönetici için bilgi:</b> '+(sn.personal||[]).map(p=>P(p.name)+' — kişisel uzatma '+p.days.length+' gün ('+p.days.map(d=>P(fmtDay(d))).join(', ')+')').join('; ')+((sn.personal||[]).length?'. Bu günler personel tercihidir, harcıraha dahil edilmedi.':'')+(sn.ticket_diff?' Kişisel tarihli bilet farkı: '+TL(sn.ticket_diff)+(sn.cover_diff?' (şirketin karşılaması isteniyor).':' (personel öder).'):'')+'</div>':'')+((sn.legs||[]).length?(()=>{const LG=sn.legs;const one=new Set(LG.map(l=>l.who||'')).size<=1&&(sn.people||1)<=1;const sameMode=new Set(LG.map(l=>l.mode||'')).size<=1;
      return '<h2>Seyahat planı'+(sameMode&&LG[0].mode?' · '+P(LG[0].mode):'')+'</h2><table class="legs"><thead><tr><th style="width:8%">Yön</th><th style="width:14%">Tarih</th><th style="width:12%">Saat</th><th>Güzergâh</th>'+(sameMode?'':'<th style="width:9%">Araç</th>')+(one?'':'<th style="width:14%">Kim için</th>')+'<th class="num" style="width:10%">Tahmini</th><th class="num" style="width:13%">Bilet</th></tr></thead><tbody>'
      +LG.map(l=>{const b=(meta.buys||[]).find(x=>x.leg&&x.leg===l.id);return '<tr><td><b>'+P(l.dir)+'</b></td><td class="nw">'+P(fmtDay(l.date))+(l.personal?' <span class="small">(kişisel)</span>':'')+'</td><td class="nw">'+P(String(l.time||'—').replace(/\s*\(.*\)/,''))+'</td><td class="rt">'+P(String(l.route||'—').replace(/\s+Havalimanı/g,' Hvl.'))+'</td>'+(sameMode?'':'<td>'+P(l.mode)+'</td>')+(one?'':'<td>'+P(l.who)+'</td>')+'<td class="num">'+(l.amt?TL(l.amt):'—')+'</td><td class="num">'+(b?'<b>'+TL(b.amount)+'</b>'+(b.pnr?' <span class="small">PNR '+P(b.pnr)+'</span>':''):(l.buyer==='Şirket'?'şirket alacak':'personel alır'))+'</td></tr>'}).join('')+'</tbody></table>'})():'')+'<h2>Gün gün plan</h2><table><thead><tr><th style="width:5%">#</th><th style="width:17%">Tarih</th><th style="width:20%">İl</th><th>Ziyaret edilecek yerler</th></tr></thead><tbody>'+dayRows+'</tbody></table>'
@@ -16490,5 +16589,35 @@ html body :is(#cfrtHomeMap,#cfrtMap,.cfmap) .cfmap-m[style*="--c:#e5e7eb"]:not(.
 html body :is(#cfrtHomeMap,#cfrtMap,.cfmap) .cfmap-m[style*="--c:#ffffff"]:not(.cfp-keep) span b,
 html body :is(#cfrtHomeMap,#cfrtMap,.cfmap) .cfmap-m[style*="--c:#fff"]:not(.cfp-keep) span b,
 html body :is(#cfrtHomeMap,#cfrtMap,.cfmap) .cfmap-m.cfp-trav:not(.cfp-keep) span b{color:#11140a!important;text-shadow:none!important}
+</style>
+<style id="cf-conn-style">
+.cfrt-conn h4{margin:0}
+.cfrt-cn-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.cfrt-cn-ret{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;font-size:13px}
+.cfrt-cn-ret label{font-weight:600}
+.cfrt-cn-ret select,.cfrt-cn-ret input,.cfrt-cn-f input,.cfrt-cn-d input,.cfrt-cn-d select{padding:7px 9px;border:1px solid var(--mt-border,#e4e4e7);border-radius:9px;font:inherit;font-size:13px;background:var(--mt-panel,#fff);color:inherit;min-width:0}
+.cfrt-cn-l{list-style:none;margin:0;padding:0 0 0 14px;position:relative}
+.cfrt-cn-l::before{content:'';position:absolute;left:5px;top:10px;bottom:10px;width:2px;background:var(--mt-border,#e4e4e7)}
+.cfrt-cn-node{position:relative;display:flex;align-items:center;gap:10px;padding:6px 0 6px 14px}
+.cfrt-cn-node i{position:absolute;left:-14px;top:50%;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:var(--mt-panel,#fff);border:2.5px solid #84cc16}
+.cfrt-cn-node.home i{border-radius:3px;border-color:var(--mt-ink-3,#71717a)}
+.cfrt-cn-node.ret i{border-color:#f59e0b}
+.cfrt-cn-node b{font-size:14px}.cfrt-cn-node small{display:block;font-size:11.5px;color:var(--mt-ink-3,#71717a)}
+.cfrt-cn-leg{margin:4px 0 4px 14px;padding:10px 12px;border:1px solid var(--mt-border,#e4e4e7);border-radius:12px;background:var(--mt-panel,#fff);display:flex;flex-direction:column;gap:8px}
+.cfrt-cn-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cfrt-cn-dir{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--mt-ink-3,#71717a)}
+.cfrt-cn-dir.d-gidis{color:#4d7c0f}.cfrt-cn-dir.d-donus{color:#b45309}
+html[data-cfp=dark] .cfrt-cn-dir.d-gidis{color:#c4f24c}html[data-cfp=dark] .cfrt-cn-dir.d-donus{color:#fbbf24}
+.cfrt-cn-modes{display:flex;gap:4px;flex-wrap:wrap}
+.cfrt-cn-modes button{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--mt-border,#e4e4e7);background:none;border-radius:999px;padding:3px 9px;font:inherit;font-size:12px;font-weight:600;color:var(--mt-ink-2,#52525b);cursor:pointer;transition:.15s}
+.cfrt-cn-modes button:hover{border-color:#84cc16;color:inherit}
+.cfrt-cn-modes button.on:not(.cfp-keep){background:#84cc16!important;border-color:#84cc16!important;color:#0b0d08!important}
+.cfrt-cn-f{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center}
+.cfrt-cn-f i{font-style:normal;color:var(--mt-ink-3,#a1a1aa)}
+.cfrt-cn-d{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.cfrt-cn-d input,.cfrt-cn-d select{width:auto!important;flex:0 0 auto}
+.cfrt-cn-ret select,.cfrt-cn-ret input{width:auto!important;min-width:180px}
+.cfrt-trsum{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 10px;border:1px dashed var(--mt-border,#e4e4e7);border-radius:9px;font-size:13px}
+@media (max-width:640px){.cfrt-cn-f{grid-template-columns:1fr}.cfrt-cn-f i{display:none}.cfrt-cn-modes button{padding:3px 7px}}
 </style>
 </body></html>
