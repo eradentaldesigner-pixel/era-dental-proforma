@@ -12754,46 +12754,121 @@ function EXP(){R.needs=R.needs&&typeof R.needs==='object'?R.needs:{};const base=
   if(!R.needs.exp){const r=rates();delete r.taxi_pd;R.needs.exp={...base,...r}}else R.needs.exp={...base,...R.needs.exp};
   const e=R.needs.exp;if(numv(e.taxi_pd)>0&&String(e.taxi_total).trim()===''){e.taxi_total=String(Math.round(numv(e.taxi_pd)*(payDays().length||1)));e.taxi_pd=''}
   return e}
-/* harcırah günleri: ziyaret (durak) olan günler; aynı gün birden çok yer olsa da gün bir kez sayılır. Kullanıcı gün ekleyip çıkarabilir. */
+/* ================= Gün türleri (kişi bazında): görev / yol / zorunlu bekleme / kişisel =================
+   * Görev: ziyaret ya da iş olan gün (hafta sonu da olabilir).
+   * Yol: göreve gidiş / dönüş için yolda geçen mesai günü.
+   * Zorunlu bekleme: iki görev günü arasında kalan gün (otel ve yemek şirkete aittir).
+   * Kişisel: mesai dışı, personelin kendi tercihi; harcıraha ve resmî forma girmez.
+   Otomatik öneri kullanıcı tarafından gün gün (ekip için ya da kişiye özel) değiştirilebilir.
+   Veriler rotanın needs alanında saklanır: needs.dt = {_all:{tarih:tür}, kullanıcıId:{tarih:tür}}, needs.tickets = [...] */
+const DT={gorev:['Görev','#16a34a'],yol:['Yol','#0284c7'],bekleme:['Zorunlu bekleme','#d97706'],kisisel:['Kişisel','#71717a']};
+const DUTY=t=>!!t&&t!=='kisisel';
+const isWeekday=d=>{const w=new Date(d+'T12:00:00Z').getUTCDay();return w>=1&&w<=5};
 function stopDays(){return [...new Set(ST.map(s=>s.day_date).filter(Boolean))].sort()}
-function autoPayDays(){const all=routeDays();const sd=new Set(stopDays());const w=all.filter(d=>sd.has(d));return w.length?w:all}
-function payDays(){const all=routeDays();const p=R?.needs?.exp?.pdays;if(Array.isArray(p)){const ok=p.filter(d=>all.includes(d)).sort();return ok.length?ok:autoPayDays()}return autoPayDays()}
-function payNights(days){if(R.scope!=='outstation'||!days.length)return 0;const all=routeDays();let n=Math.max(0,days.length-1);if(all.length&&days[0]>all[0])n+=1;return n}
-function autoVals(){const pd=payDays();const d=pd.length||1;const p=Math.max(1,travelers().length);return {days:d,people:p,nights:payNights(pd),rooms:p,pdays:pd,all:routeDays().length}}
+function DTS(){R.needs=R.needs&&typeof R.needs==='object'?R.needs:{};if(!R.needs.dt||typeof R.needs.dt!=='object')R.needs.dt={};return R.needs.dt}
+function autoTypes(){const all=routeDays();const sd=new Set(stopDays());const g=all.filter(d=>sd.has(d));const m={};if(!g.length){all.forEach(d=>m[d]='gorev');return m}
+  const f=g[0],l=g[g.length-1];all.forEach(d=>{m[d]=sd.has(d)?'gorev':(d>f&&d<l?'bekleme':'kisisel')});
+  const i0=all.indexOf(f),i1=all.indexOf(l);
+  if(i0>0&&isWeekday(all[i0-1]))m[all[i0-1]]='yol';
+  if(i1>=0&&i1<all.length-1&&(R.scope==='outstation'||isWeekday(all[i1+1])))m[all[i1+1]]='yol';
+  return m}
+function teamType(d){const o=DTS()._all||{};return o[d]||autoTypes()[d]||'gorev'}
+function personType(u,d){if(!u)return teamType(d);const p=DTS()[u];return (p&&p[d])||teamType(d)}
+function dutyDays(u){return routeDays().filter(d=>DUTY(personType(u,d)))}
+function personalDaysOf(u){return routeDays().filter(d=>personType(u,d)==='kisisel')}
+function payDays(){const d=dutyDays(null);return d.length?d:routeDays()}
+function nightsFor(u){if(R.scope!=='outstation')return 0;const all=routeDays();let n=0;for(let i=0;i<all.length-1;i++){const a=personType(u,all[i]),b=personType(u,all[i+1]);if(DUTY(b)&&(DUTY(a)||b==='gorev'))n++}return n}
+function payNights(){const T=travelers();return T.length?Math.max(0,...T.map(nightsFor)):nightsFor(null)}
+const dutyStops=()=>{const dd=new Set(dutyDays(null));return ordered().filter(s=>dd.has(s.day_date))};
+function personalSummary(){const T=travelers();const out=[];(T.length?T:[null]).forEach(u=>{const p=personalDaysOf(u);if(p.length)out.push({u,name:u?nameOf(u):'Ekip',days:p})});return out}
+/* ---- biletler ---- */
+const TDIR={gidis:'Gidiş',donus:'Dönüş',ara:'Şehirler arası'};const TMODE={flight:'Uçak bileti',bus:'Otobüs bileti',train:'Tren bileti',ferry:'Feribot bileti',other:'Bilet'};
+function TK(){R.needs=R.needs&&typeof R.needs==='object'?R.needs:{};if(!Array.isArray(R.needs.tickets))R.needs.tickets=[];return R.needs.tickets}
+function ticketsCalc(){const e=EXP();const rows=[];let owed=0,diffAll=0;const T=travelers();
+  for(const t of TK()){const amt=numv(t.amount);if(!amt)continue;const who=t.who&&t.who!=='_all'?[t.who]:(T.length?T:[null]);
+    for(const u of who){const ty=t.date?personType(u,t.date):'gorev';const personal=ty==='kisisel';const ref=numv(t.ref);let share=amt,diff=0;
+      if(personal&&ref>0&&ref<amt){diff=amt-ref;if(!e.cover_diff)share=ref}
+      const company=t.buyer==='sirket';if(company&&diff>0&&!e.cover_diff)owed+=diff;if(!e.cover_diff)diffAll+=diff;
+      rows.push({name:(TMODE[t.mode]||'Bilet')+' · '+(TDIR[t.dir]||'')+(u&&(T.length>1||t.who!=='_all')?' · '+nameOf(u):''),calc:(t.date?fmtLong(t.date):'tarih ?')+(personal?' · personel tercihi (kişisel gün)':'')+' · '+(company?'şirket aldı':'personel aldı')+(diff?(e.cover_diff?' · fark şirkete':' · görev tarihi fiyatı '+TL(ref)+', fark '+TL(diff)+' personele'):''),share,company,personal,diff,date:t.date,dir:t.dir,u})}}
+  return {rows,owed,diff:diffAll}}
+function travelText(){const tk=ticketsCalc().rows;const pick=dir=>tk.filter(r=>r.dir===dir&&r.date).sort((a,b)=>a.date<b.date?-1:1);const g=pick('gidis')[0],d=pick('donus').slice(-1)[0];
+  const all=routeDays();const dd=dutyDays(null);const parts=[];
+  const out=g?g.date:all[0],back=d?d.date:all[all.length-1];
+  if(out)parts.push('Gidiş: '+fmtLong(out)+((g?g.personal:(dd.length&&out<dd[0]&&teamType(out)==='kisisel'))?' (personel tercihiyle erken gidiş)':''));
+  if(back&&back!==out)parts.push('Dönüş: '+fmtLong(back)+((d?d.personal:(dd.length&&back>dd[dd.length-1]&&teamType(back)==='kisisel'))?' (personel tercihiyle geç dönüş)':''));
+  return parts.join(' · ')}
+/* ---- izin talebi: hafta içi kişisel günler ---- */
+function leaveRequest(days){if(!days.length)return;if(typeof openRequests!=='function'){toast('Talepler modülü bulunamadı.');return}
+  try{openRequests(false)}catch(_){}
+  setTimeout(()=>{try{if(typeof erEditor==='function')erEditor(null);const t=document.getElementById('erType');if(t){t.value='leave';t.dispatchEvent(new Event('change'))}
+    const set=(id,v)=>{const el=document.getElementById(id);if(el){el.value=v;el.dispatchEvent(new Event('input'))}};
+    set('erTitle',('İzin — '+(R?.title||'rota')).slice(0,150));set('erDescription','"'+(R?.title||'')+'" rotası sırasında kişisel olarak işaretlenen hafta içi günler: '+days.map(fmtLong).join(', ')+'. Bu günler görev dışıdır.');
+    setTimeout(()=>{set('erStart',days[0]);set('erEnd',days[days.length-1])},80)}catch(_){}},450)}
+/* ---- gün planı kartı ---- */
+function dayPlan(){const all=routeDays();if(!all.length)return '';const auto=autoTypes();const team=DTS()._all||{};const T=travelers();const dis=canEdit?'':' disabled';
+  const cities=d=>{const c=[...new Set(ST.filter(s=>s.day_date===d).map(s=>s.city||s.place_name).filter(Boolean))];return c.length?c.slice(0,3).join(', ')+(c.length>3?' +'+(c.length-3):''):'ziyaret yok'};
+  const opt=(cur,autoT,withSame)=>(withSame?'<option value="">Ekip ile aynı</option>':'<option value="">Otomatik · '+DT[autoT][0]+'</option>')+Object.entries(DT).map(([k,v])=>'<option value="'+k+'"'+(cur===k?' selected':'')+'>'+v[0]+'</option>').join('');
+  const warn=[];all.forEach(d=>{if(teamType(d)==='kisisel'&&ST.some(s=>s.day_date===d))warn.push(fmtDay(d)+' günü kişisel ama '+ST.filter(s=>s.day_date===d).length+' ziyaret var; bu ziyaretler harcırahta ve formda görünmez.')});
+  const myWk=personalDaysOf(me()&&T.includes(me())?me():null).filter(isWeekday);
+  const custom=T.filter(u=>Object.keys(DTS()[u]||{}).length).length;
+  return '<div class="full cfrt-dplan"><div class="cfrt-pdays-h"><b>Gün planı</b><span class="cfrt-msg">'+dutyDays(null).length+' görev / yol günü · '+all.filter(d=>teamType(d)==='kisisel').length+' kişisel gün'+(Object.keys(team).length&&canEdit?' · <button type="button" class="cfrt-link" data-dt-reset>otomatiğe dön</button>':'')+'</span></div>'
+   +'<div class="cfrt-dplan-l">'+all.map(d=>{const ty=teamType(d);return '<div class="cfrt-dday" style="--dt:'+DT[ty][1]+'"><b>'+esc(fmtDay(d))+'</b><small>'+esc(cities(d))+'</small><select data-dt="'+d+'"'+dis+' aria-label="'+esc(fmtDay(d))+' gün türü">'+opt(team[d]||'',auto[d]||'gorev',false)+'</select></div>'}).join('')+'</div>'
+   +(warn.length?'<div class="cfrt-dwarn">⚠ '+warn.map(esc).join('<br>⚠ ')+'</div>':'')
+   +(myWk.length?'<div class="cfrt-dwarn info">🗓 Hafta içi kişisel gününüz var ('+myWk.map(fmtDay).join(', ')+'). Bu günler için izin kaydı gerekir. <button type="button" class="cfrt-link" data-dt-leave>İzin talebi oluştur</button></div>':'')
+   +(T.length>1||(T.length===1&&custom)?'<details class="cfrt-dper"'+(custom?' open':'')+'><summary>Kişiye göre farklı program'+(custom?' ('+custom+' kişi)':'')+'</summary><p class="cfrt-msg">Ekipten biri erken gidiyor ya da geç dönüyorsa yalnızca onun günlerini değiştirin.</p>'
+     +T.map(u=>'<div class="cfrt-dprow"><b>'+esc(nameOf(u))+'</b><div>'+all.map(d=>{const p=(DTS()[u]||{})[d]||'';const ty=personType(u,d);return '<label style="--dt:'+DT[ty][1]+'"><small>'+esc(fmtDay(d))+'</small><select data-dtp="'+u+'|'+d+'"'+dis+'>'+opt(p,ty,true)+'</select></label>'}).join('')+'</div></div>').join('')+'</details>':'')
+   +'<p class="cfrt-msg">Yemek, günlük harcırah ve otopark yalnızca görev, yol ve zorunlu bekleme günleri için hesaplanır. Kişisel günler, o günlerin ziyaretleri ve gezintileri resmî forma ve km hesabına girmez.</p></div>'}
+function ticketBlock(){const T=travelers();const all=routeDays();const e=EXP();const dis=canEdit?'':' disabled';const tc=ticketsCalc();
+  const rows=TK().map((t,i)=>{const who=t.who&&t.who!=='_all'?[t.who]:(T.length?T:[null]);const personal=t.date&&who.some(u=>personType(u,t.date)==='kisisel');
+    return '<div class="cfrt-tk" data-ti="'+i+'"><select data-tf="who"'+dis+'><option value="_all"'+(!t.who||t.who==='_all'?' selected':'')+'>Herkes (kişi başı)</option>'+T.map(u=>'<option value="'+u+'"'+(t.who===u?' selected':'')+'>'+esc(nameOf(u))+'</option>').join('')+'</select>'
+     +'<select data-tf="dir"'+dis+'>'+Object.entries(TDIR).map(([k,v])=>'<option value="'+k+'"'+(t.dir===k?' selected':'')+'>'+v+'</option>').join('')+'</select>'
+     +'<select data-tf="mode"'+dis+'>'+Object.entries(TMODE).map(([k,v])=>'<option value="'+k+'"'+(t.mode===k?' selected':'')+'>'+v.replace(' bileti','')+'</option>').join('')+'</select>'
+     +'<input type="date" data-tf="date" value="'+esc(t.date||'')+'"'+(all.length?' min="'+all[0]+'" max="'+all[all.length-1]+'"':'')+dis+'>'
+     +'<select data-tf="buyer"'+dis+'><option value="sirket"'+(t.buyer!=='personel'?' selected':'')+'>Şirket aldı</option><option value="personel"'+(t.buyer==='personel'?' selected':'')+'>Personel aldı</option></select>'
+     +'<input data-tf="amount" inputmode="decimal" placeholder="Tutar (TL)" value="'+esc(t.amount||'')+'"'+dis+'>'
+     +(personal?'<input data-tf="ref" inputmode="decimal" placeholder="Görev tarihindeki fiyat" title="Bu bilet kişisel bir güne denk geliyor. Görev tarihinde alınsaydı ne kadar olurdu?" value="'+esc(t.ref||'')+'"'+dis+'>':'<span></span>')
+     +(canEdit?'<button type="button" class="cfrt-tk-x" data-tdel="'+i+'" aria-label="Bileti sil">✕</button>':'')
+     +(personal?'<small class="cfrt-tk-n">Kişisel güne denk gelen bilet: görev tarihindeki fiyattan pahalıysa farkı personel öder (yönetici aksini onaylayabilir).</small>':'')+'</div>'}).join('');
+  return '<div class="full cfrt-tks"><div class="cfrt-pdays-h"><b>🎫 Biletler</b><span class="cfrt-msg">'+(TK().length?TK().length+' bilet'+(tc.diff?' · personel payı '+TL(tc.diff):''):'Uçak, otobüs, tren biletlerini gidiş / dönüş olarak girin')+'</span></div>'+rows
+   +(canEdit?'<div class="cfrt-acts"><button type="button" class="btn light" data-tadd>＋ Bilet ekle</button>'+(tc.diff||e.cover_diff?'<label class="cfrt-chk"><input type="checkbox" data-cover'+(e.cover_diff?' checked':'')+'> Kişisel tarih farkını şirket karşılasın (yönetici onayına bağlı)</label>':'')+'</div>':'')+'</div>'}
+function autoVals(){const pd=payDays();const d=pd.length||1;const p=Math.max(1,travelers().length);return {days:d,people:p,nights:payNights(),rooms:p,pdays:pd,all:routeDays().length}}
 let EKM={sig:'',km:null,busy:false,err:false};
-function tripPts(){const pts=ordered().filter(located).map(s=>({lat:s.lat,lng:s.lng}));const o=officeOn()?office():null;if(o&&pts.length){pts.unshift({lat:o.lat,lng:o.lng});pts.push({lat:o.lat,lng:o.lng})}return pts}
+function tripPts(){const pts=dutyStops().filter(located).map(s=>({lat:s.lat,lng:s.lng}));const o=officeOn()?office():null;if(o&&pts.length){pts.unshift({lat:o.lat,lng:o.lng});pts.push({lat:o.lat,lng:o.lng})}return pts}
 async function expKm(force){const pts=tripPts();const sig=pts.map(p=>p.lat.toFixed(4)+','+p.lng.toFixed(4)).join('|');if(pts.length<2){EKM={sig,km:null,busy:false,err:false};return}if(!force&&EKM.sig===sig&&(EKM.km!=null||EKM.busy))return;
   EKM={sig,km:null,busy:true,err:false};paintExpTot();let km=null;try{let hit=null;try{hit=JSON.parse(sessionStorage.getItem('cfrtx:'+sig)||'null')}catch(_){}if(!hit){const r=await freeRoute(pts.slice(0,90));hit={d:r.distance,t:r.duration};try{sessionStorage.setItem('cfrtx:'+sig,JSON.stringify(hit))}catch(_){}}km=hit.d/1000}catch(_){EKM.err=true}
   if(EKM.sig===sig){EKM.km=km;EKM.busy=false;paintExpTot()}}
-function expCalc(){const e=EXP();const a=autoVals();const d=a.days;const people=Math.max(1,Math.round(numv(e.people))||a.people);const nights=String(e.nights).trim()!==''?numv(e.nights):a.nights;const rooms=String(e.rooms).trim()!==''?numv(e.rooms):people;const km=EKM.km||0;
-  const lines=[];const add=(name,calc,amt,note)=>lines.push({name,calc,amt,note});
-  if(nights>0)add('Konaklama (otel)',nights+' gece × '+rooms+' oda × '+TL(e.room_price),nights*rooms*numv(e.room_price));
-  add('Yemek (iaşe)',d+' gün × '+people+' kişi × '+TL(e.meal_pp),d*people*numv(e.meal_pp));
-  if(numv(e.daily_pp))add('Günlük harcırah',d+' gün × '+people+' kişi × '+TL(e.daily_pp),d*people*numv(e.daily_pp));
+function expCalc(){const e=EXP();const a=autoVals();const d=a.days;const T=travelers();const ppl=T.length?T:[null];const km=EKM.km||0;
+  const manualPeople=String(e.people).trim()!==''&&Math.round(numv(e.people))!==ppl.length;const people=Math.max(1,Math.round(numv(e.people))||a.people);
+  const per=ppl.map(u=>dutyDays(u).length);const uniform=new Set(per).size<=1;const personDays=manualPeople?d*people:per.reduce((x,y)=>x+y,0);
+  const pdTxt=(uniform||manualPeople)?d+' gün × '+people+' kişi':personDays+' kişi-gün ('+ppl.map((u,i)=>nameOf(u).split(' ')[0]+' '+per[i]).join(', ')+')';
+  const lines=[];const add=(name,calc,amt,note,extra)=>lines.push({name,calc,amt,note,...(extra||{})});
+  const nOver=String(e.nights).trim()!=='',rOver=String(e.rooms).trim()!=='';let nights,rooms;
+  if(nOver||rOver){nights=nOver?numv(e.nights):a.nights;rooms=rOver?numv(e.rooms):people;if(nights>0)add('Konaklama (otel)',nights+' gece × '+rooms+' oda × '+TL(e.room_price),nights*rooms*numv(e.room_price))}
+  else{const pn=ppl.map(u=>nightsFor(u));const rn=pn.reduce((x,y)=>x+y,0);nights=Math.max(0,...pn);rooms=ppl.length;if(rn>0)add('Konaklama (otel)',(new Set(pn).size<=1?pn[0]+' gece × '+ppl.length+' oda':rn+' oda-gece (kişiye göre)')+' × '+TL(e.room_price),rn*numv(e.room_price))}
+  add('Yemek (iaşe)',pdTxt+' × '+TL(e.meal_pp),personDays*numv(e.meal_pp));
+  if(numv(e.daily_pp))add('Günlük harcırah',pdTxt+' × '+TL(e.daily_pp),personDays*numv(e.daily_pp));
   if(numv(e.taxi_total))add('Şehir içi ulaşım (minibüs, otobüs, taksi)','toplam',numv(e.taxi_total));
-  if(numv(e.parking_pd))add('Otopark',d+' gün × '+TL(e.parking_pd),d*numv(e.parking_pd));
+  if(numv(e.parking_pd)){const gd=routeDays().filter(x=>teamType(x)==='gorev').length;add('Otopark',gd+' görev günü × '+TL(e.parking_pd),gd*numv(e.parking_pd))}
   if(numv(e.toll))add('Köprü / otoyol (HGS)','tahmini',numv(e.toll));
   if(isCar(R.transport)){if(e.utts!==false)add('Yakıt',(km?'≈ '+Math.round(km).toLocaleString('tr-TR')+' km · ':'')+'UTTS ile şirket öder',0,true);else add('Yakıt',(km?Math.round(km).toLocaleString('tr-TR')+' km':'km ?')+' × '+String(e.fuel_l100||0).replace('.',',')+' L/100 km × '+TL(e.fuel_price)+'/L',km*numv(e.fuel_l100)/100*numv(e.fuel_price))}
-  if(isTicket(R.transport))add(R.transport==='flight'?'Uçak bileti':R.transport==='bus'?'Otobüs bileti':'Bilet',people+' kişi × '+TL(e.ticket_pp)+' (gidiş-dönüş)',people*numv(e.ticket_pp));
+  const tk=ticketsCalc();
+  if(tk.rows.length)tk.rows.forEach(t=>add(t.name+(t.company?' (şirket ödedi)':''),t.calc,t.share,false,{company:t.company}));
+  else if(isTicket(R.transport)&&numv(e.ticket_pp))add(R.transport==='flight'?'Uçak bileti':R.transport==='bus'?'Otobüs bileti':'Bilet',people+' kişi × '+TL(e.ticket_pp)+' (gidiş-dönüş)',people*numv(e.ticket_pp));
+  if(tk.owed>0)add('Bilet farkı (personel payı, avanstan düşülür)','kişisel tarihli bilet',0,true);
   if(numv(e.other))add('Diğer'+(e.other_note?' ('+e.other_note+')':''),'',numv(e.other));
-  const total=lines.reduce((s,l)=>s+l.amt,0);const request=String(e.request).trim()!==''?numv(e.request):Math.ceil(total/100)*100;
-  return {lines,total,request,per:total/people,people,days:d,nights,rooms,km}}
-function dayPicker(a){const all=routeDays();if(all.length<2&&stopDays().length<2)return '';const sel=new Set(a.pdays);const custom=Array.isArray(R?.needs?.exp?.pdays);
-  const wd=d=>new Date(d+'T12:00:00Z').toLocaleDateString('tr-TR',{weekday:'short',day:'numeric',month:'short',timeZone:'UTC'});
-  const cities=d=>{const c=[...new Set(ST.filter(s=>s.day_date===d).map(s=>s.city||s.place_name).filter(Boolean))];return c.length?c.slice(0,3).join(', ')+(c.length>3?' +'+(c.length-3):''):'ziyaret yok'};
-  return '<div class="full cfrt-pdays"><div class="cfrt-pdays-h"><b>Harcırah günleri</b><span class="cfrt-msg">'+sel.size+' / '+all.length+' gün'+(custom?' · <button type="button" class="cfrt-link" data-pauto>otomatiğe dön</button>':' · ziyaret olan günler otomatik seçildi')+'</span></div>'
-   +'<div class="cfrt-pdays-l">'+all.map(d=>'<button type="button" class="cfrt-pday'+(sel.has(d)?' on':'')+'" data-pday="'+d+'" aria-pressed="'+sel.has(d)+'"><b>'+esc(wd(d))+'</b><small>'+esc(cities(d))+'</small></button>').join('')+'</div>'
-   +'<p class="cfrt-msg">Yemek, günlük harcırah ve otopark yalnızca seçili günler için hesaplanır. Aynı gün birden fazla yere gidilse de gün bir kez sayılır. İşten önce gidip beklediğiniz günleri (ör. hafta sonu) çıkarabilirsiniz.</p></div>'}
+  const total=lines.reduce((x,l)=>x+l.amt,0);const advance=Math.max(0,lines.filter(l=>!l.company).reduce((x,l)=>x+l.amt,0)-tk.owed);
+  const request=String(e.request).trim()!==''?numv(e.request):Math.ceil(advance/100)*100;
+  return {lines,total,request,per:total/people,people,days:d,nights,rooms,km,tickets:tk,advance,personal:personalSummary()}}
 function paintExp(){const box=$('cfrtExp');if(!box)return;const e=EXP();const a=autoVals();const dis=canEdit?'':' disabled';
   const f=(k,label,ph,auto)=>'<div><label class="cfrt-lbl" for="cfx_'+k+'">'+label+(auto!=null?' <span class="cfrt-auto">otomatik: '+auto+'</span>':'')+'</label><input id="cfx_'+k+'" data-ex="'+k+'" inputmode="decimal" value="'+esc(e[k]??'')+'" placeholder="'+esc(ph||'')+'"'+dis+'></div>';
   const open=box.querySelector('details')?.open??!!(R.needs?.exp_open);
   box.innerHTML='<details class="cfrt-card2 cfrt-exp"'+(open?' open':'')+'><summary><span><b>💰 Harcırah talebi</b><small id="cfrtExpSum"></small></span><span class="cfrt-exp-chev">▾</span></summary>'
    +'<div class="cfrt-exp-body"><p class="cfrt-msg" style="margin:10px 0 0">Kişi, gün ve gece sayısı rotadan <b>otomatik</b> gelir. Ücretleri bir kez girin; sonraki rotalarda kendiliğinden gelir. Boş bırakılan sayılar otomatik değeri kullanır.</p><div class="cfrt-form">'
-   +'<div class="full cfrt-exp-h">👥 Süre ve kişi</div>'+dayPicker(a)+f('people','Kişi sayısı',a.people,a.people)+f('nights','Gece sayısı',a.nights,a.nights)
+   +'<div class="full cfrt-exp-h">👥 Süre ve kişi</div>'+dayPlan()+f('people','Kişi sayısı',a.people,a.people)+f('nights','Gece sayısı',a.nights,a.nights)
    +'<div class="full cfrt-exp-h">🏨 Konaklama ve yemek</div>'+f('room_price','Gecelik oda fiyatı (TL)','örn. 2.500')+f('rooms','Oda sayısı','kişi sayısı kadar',null)+f('meal_pp','Yemek, kişi başı günlük (TL)','örn. 900')+f('daily_pp','Günlük harcırah, kişi başı (TL)','isteğe bağlı')
    +'<div class="full cfrt-exp-h">🚗 Ulaşım</div>'
    +(isCar(R.transport)?'<label class="cfrt-chk full"><input type="checkbox" data-utts'+(e.utts!==false?' checked':'')+dis+'> Araçta <b>UTTS</b> var — yakıt şirket tarafından ödenir, harcıraha girmez</label>'+(e.utts===false?f('fuel_l100','Tüketim (L / 100 km)','örn. 7')+f('fuel_price','Yakıt (TL / L)','örn. 47'):''):'')
-   +(isTicket(R.transport)?f('ticket_pp','Bilet, kişi başı gidiş-dönüş (TL)','örn. 4.000'):'')
+   +(isTicket(R.transport)&&!TK().length&&numv(e.ticket_pp)?f('ticket_pp','Bilet, kişi başı gidiş-dönüş (TL) · eski','örn. 4.000'):'')+ticketBlock()
    +f('taxi_total','Şehir içi ulaşım, toplam (TL)','minibüs, otobüs, taksi')+f('toll','Köprü / otoyol, toplam (TL)','HGS tahmini')
    +'<div class="full cfrt-exp-h">🧾 Diğer</div>'+f('parking_pd','Otopark, günlük (TL)','')+f('other','Diğer gider (TL)','')+'<div class="full"><label class="cfrt-lbl" for="cfx_other_note">Diğer açıklaması</label><input id="cfx_other_note" data-ex="other_note" value="'+esc(e.other_note||'')+'" placeholder="örn. numune kargosu, ikram"'+dis+'></div>'
    +'</div><div id="cfrtExpTot" class="cfrt-exp-tot"></div>'
@@ -12805,13 +12880,22 @@ function paintExp(){const box=$('cfrtExp');if(!box)return;const e=EXP();const a=
   box.querySelector('[data-utts]')?.addEventListener('change',ev=>{EXP().utts=ev.target.checked;dirty=true;paintExp()});
   box.querySelectorAll('[data-pday]').forEach(b=>b.onclick=()=>{if(!canEdit)return;const e2=EXP();const cur=new Set(payDays());const d=b.dataset.pday;cur.has(d)?cur.delete(d):cur.add(d);if(!cur.size){toast('En az bir gün seçili olmalı.');return}e2.pdays=[...cur].sort();dirty=true;paintExp()});
   box.querySelector('[data-pauto]')?.addEventListener('click',()=>{EXP().pdays=null;dirty=true;paintExp()});
+  box.querySelectorAll('[data-dt]').forEach(el=>el.onchange=()=>{const m=DTS();m._all=m._all||{};el.value?m._all[el.dataset.dt]=el.value:delete m._all[el.dataset.dt];dirty=true;paintExp();expKm(true)});
+  box.querySelectorAll('[data-dtp]').forEach(el=>el.onchange=()=>{const [u,d]=el.dataset.dtp.split('|');const m=DTS();m[u]=m[u]||{};el.value?m[u][d]=el.value:delete m[u][d];if(!Object.keys(m[u]).length)delete m[u];dirty=true;paintExp()});
+  box.querySelector('[data-dt-reset]')?.addEventListener('click',()=>{const m=DTS();delete m._all;dirty=true;paintExp();expKm(true)});
+  box.querySelector('[data-dt-leave]')?.addEventListener('click',()=>leaveRequest(personalDaysOf(me()).filter(isWeekday)));
+  box.querySelector('[data-tadd]')?.addEventListener('click',()=>{const all=routeDays();const n=TK().length;TK().push({who:'_all',dir:n%2?'donus':'gidis',mode:R.transport==='bus'?'bus':'flight',date:n%2?all[all.length-1]:all[0],buyer:'sirket',amount:'',ref:''});dirty=true;paintExp()});
+  box.querySelectorAll('[data-tdel]').forEach(b=>b.onclick=()=>{TK().splice(Number(b.dataset.tdel),1);dirty=true;paintExp()});
+  box.querySelectorAll('.cfrt-tk [data-tf]').forEach(el=>{const i=Number(el.closest('[data-ti]').dataset.ti);const k=el.dataset.tf;const live=['amount','ref'].includes(k);
+    el.addEventListener(live?'input':'change',()=>{TK()[i][k]=el.value;dirty=true;if(live)paintExpTot();else paintExp()})});
+  box.querySelector('[data-cover]')?.addEventListener('change',ev=>{EXP().cover_diff=ev.target.checked;dirty=true;paintExp()});
   box.querySelector('[data-expdoc]').onclick=()=>expenseDoc();paintExpTot();expKm()}
 function paintExpTot(){const box=$('cfrtExpTot');if(!box)return;const c=expCalc();
   box.innerHTML='<table><tbody>'+c.lines.map(l=>'<tr'+(l.note?' class="note"':'')+'><td>'+esc(l.name)+'<small>'+esc(l.calc)+'</small></td><td>'+(l.note?'—':TL(l.amt))+'</td></tr>').join('')+'</tbody><tfoot><tr><th>Toplam tahmini gider</th><th>'+TL(c.total)+'</th></tr><tr><td>Kişi başı ('+c.people+' kişi · '+c.days+' gün'+(c.nights?' · '+c.nights+' gece':'')+')</td><td>'+TL(c.per)+'</td></tr><tr class="req"><th>Talep edilen tutar</th><th>'+TL(c.request)+'</th></tr></tfoot></table>';
   if($('cfrtAppr')&&R?.id)paintAppr();
   const s=$('cfrtExpSum');if(s)s.textContent=c.total?' · Talep '+TL(c.request)+' · '+c.people+' kişi, '+c.days+' gün':' · ücretleri girin, tutar otomatik hesaplanır'}
-function defaultLetter(){const cities=[...new Set(ordered().map(s=>s.city).filter(Boolean))];const n=ST.length;const o=officeOn()?office():null;
-  return 'Firmamız adına '+fmtLong(R.start_date)+(R.end_date!==R.start_date?' – '+fmtLong(R.end_date):'')+' tarihleri arasında '+(o?(o.label||'ofisimizden')+' çıkışlı olarak ':'')+(cities.length?cities.join(', ')+' '+(cities.length>1?'illerinde':'ilinde'):'belirtilen bölgede')+' bulunan '+(n?n+' ':'')+'müşterimizi ziyaret etmek üzere aşağıda adı geçen personel görevlendirilmiştir. Görev süresince oluşacak giderler için aşağıda belirtilen harcırah tutarını talep ederiz. Harcamalar görev dönüşünde fatura / fiş ile belgelenecektir.'}
+function defaultLetter(){const dd=dutyDays(null);const L=dutyStops();const cities=[...new Set(L.map(s=>s.city).filter(Boolean))];const n=L.length;const o=officeOn()?office():null;const a=dd[0]||R.start_date,z=dd[dd.length-1]||R.end_date;
+  return 'Firmamız adına '+fmtLong(a)+(z!==a?' – '+fmtLong(z):'')+' '+(z!==a?'tarihleri arasında ':'tarihinde ')+(o?(o.label||'ofisimizden')+' çıkışlı olarak ':'')+(cities.length?cities.join(', ')+' '+(cities.length>1?'illerinde':'ilinde'):'belirtilen bölgede')+' bulunan '+(n?n+' ':'')+'müşterimizi ziyaret etmek üzere aşağıda adı geçen personel görevlendirilmiştir. Görev süresince oluşacak giderler için aşağıda belirtilen harcırah tutarını talep ederiz. Harcamalar görev dönüşünde fatura / fiş ile belgelenecektir.'}
 const fmtLong=d=>d?new Date(d+'T12:00:00Z').toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}):'';
 function expenseDoc(){const q=REQS&&REQS[0];const c=expCalc();
   if(q&&['approved','partial','paid'].includes(q.state)&&Math.round(+q.amount)===Math.round(c.request)&&!dirty){people().then(()=>printHtml(formHtml(q.snapshot||{},{...reqMeta(q),print:true})));return}
@@ -12827,14 +12911,17 @@ let REQS=[],reqReady=null,PAYS=new Map();
 async function loadPays(ids){ids=(ids||[]).filter(Boolean);if(!ids.length)return;const r=await sb.from('company_route_payments').select('*').in('request_id',ids).order('created_at');if(r.error)return;ids.forEach(i=>PAYS.set(i,[]));(r.data||[]).forEach(x=>{const a=PAYS.get(x.request_id)||[];a.push(x);PAYS.set(x.request_id,a)})}
 async function loadReqs(id){if(!id){REQS=[];return REQS}const r=await sb.from('company_route_requests').select('*').eq('company_id',company()).eq('route_id',id).order('revision',{ascending:false});reqReady=!r.error;REQS=r.error?[]:(r.data||[]);await loadPays(REQS.slice(0,3).map(x=>x.id));if(REQS[0]&&closeStates.includes(REQS[0].state))await loadExps([REQS[0].id]);return REQS}
 const fmtDT=v=>v?new Date(v).toLocaleString('tr-TR',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:TZ}):'';
-function buildSnapshot(){const e=EXP();const c=expCalc();const o=officeOn()?office():null;const days=routeDays();
-  return {v:1,title:R.title,start:R.start_date,end:R.end_date,scope:R.scope,transport:R.transport,utts:e.utts!==false,office:o?(o.label||'Ofis'):'',cities:[...new Set(ordered().map(s=>s.city).filter(Boolean))],stops:ST.length,
-    days:days.map(d=>{const L=ordered().filter(s=>s.day_date===d);return {d,cities:[...new Set(L.map(s=>s.city).filter(Boolean))],names:L.map(s=>s.place_name).slice(0,12)}}),
-    lines:c.lines.map(l=>({name:l.name,calc:l.calc,amt:Math.round(l.amt*100)/100,note:!!l.note})),total:Math.round(c.total*100)/100,request:c.request,per:Math.round(c.per*100)/100,people:c.people,ndays:c.days,nights:c.nights,km:Math.round(c.km||0),
-    travelers:travelers().map(nameOf),text:(e.text||'').trim()||defaultLetter(),doc_no:e.doc_no||'',team:TEAM[role()]||'Ekip'}}
+function buildSnapshot(){const e=EXP();const c=expCalc();const o=officeOn()?office():null;const dd=dutyDays(null);const L=dutyStops();const T=travelers();
+  const custom=T.some(u=>Object.keys(DTS()[u]||{}).length);
+  return {v:2,title:R.title,start:dd[0]||R.start_date,end:dd[dd.length-1]||R.end_date,trip_start:R.start_date,trip_end:R.end_date,travel:travelText(),scope:R.scope,transport:R.transport,utts:e.utts!==false,office:o?(o.label||'Ofis'):'',cities:[...new Set(L.map(s=>s.city).filter(Boolean))],stops:L.length,
+    days:dd.map(d=>{const S=L.filter(s=>s.day_date===d);return {d,t:teamType(d),cities:[...new Set(S.map(s=>s.city).filter(Boolean))],names:S.map(s=>s.place_name).slice(0,12)}}),
+    lines:c.lines.map(l=>({name:l.name,calc:l.calc,amt:Math.round(l.amt*100)/100,note:!!l.note,company:!!l.company})),total:Math.round(c.total*100)/100,request:c.request,per:Math.round(c.per*100)/100,people:c.people,ndays:c.days,nights:c.nights,km:Math.round(c.km||0),
+    personal:c.personal.map(p=>({name:p.name,days:p.days})),ticket_diff:Math.round((c.tickets?.diff||0)*100)/100,cover_diff:!!e.cover_diff,
+    travelers:T.map(nameOf),tduty:custom?T.map(u=>{const x=dutyDays(u);return x.length?fmtLong(x[0])+(x.length>1?' – '+fmtLong(x[x.length-1]):''):''}):null,
+    text:(e.text||'').trim()||defaultLetter(),doc_no:e.doc_no||'',team:TEAM[role()]||'Ekip'}}
 /* formun HTML'i: yazdırma ve onay ekranı aynı görünümü kullanır */
 function formHtml(sn,meta={}){const cs=window._companySettings||{};const co=cs.legal_name||cs.company_display_name||document.getElementById('profileCompany')?.textContent||'';const logo=window._companyLogo||cs.logo_data||'';const P=x=>esc(x??'');
-  const dayRows=(sn.days||[]).map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+P(fmtDay(x.d))+'</td><td>'+P((x.cities||[]).join(', ')||'—')+'</td><td>'+P((x.names||[]).slice(0,5).join(', ')+((x.names||[]).length>5?' +'+((x.names||[]).length-5):''))+'</td></tr>').join('');
+  const dayRows=(sn.days||[]).map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+P(fmtDay(x.d))+(x.t&&x.t!=='gorev'?' <span class="small">('+P((DT[x.t]||[''])[0])+')</span>':'')+'</td><td>'+P((x.cities||[]).join(', ')||'—')+'</td><td>'+P((x.names||[]).slice(0,5).join(', ')+((x.names||[]).length>5?' +'+((x.names||[]).length-5):''))+'</td></tr>').join('');
   const st=meta.state;const isOk=['approved','partial','paid','closing','closing_revision','closed'].includes(st);const lp=(meta.payments||[]).slice(-1)[0];const stamp=st==='closed'?'<div class="stamp ok">HESAP KAPANDI</div>':isOk?'<div class="stamp ok">ONAYLANDI</div>':st==='returned'?'<div class="stamp wait">MUHASEBE İADESİ</div>':st==='submitted'?'<div class="stamp wait">ONAY BEKLİYOR</div>':st==='revision'?'<div class="stamp wait">REVİZYON İSTENDİ</div>':st==='rejected'?'<div class="stamp no">REDDEDİLDİ</div>':meta.draft?'<div class="stamp draft">TASLAK</div>':'';
   const sig=(title,who,when,extra)=>'<div><div class="sg">'+(who?'<b>'+P(who)+'</b><br><span class="small">'+P(when||'')+(extra?' · '+P(extra):'')+'</span>':'&nbsp;')+'</div>'+title+'<br><span class="small">Ad Soyad · İmza'+(title.startsWith('Onaylayan')?' · Kaşe':'')+'</span></div>';
   return '<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Harcırah talep formu — '+P(sn.title)+'</title><style>@page{size:A4;margin:12mm}*{box-sizing:border-box}html,body{margin:0;background:#fff}body{font:10.5px/1.4 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:#111}.pg{width:186mm;margin:0 auto;position:relative'+(meta.screen?';padding:14px 0':'')+'}'
@@ -12845,12 +12932,12 @@ function formHtml(sn,meta={}){const cs=window._companySettings||{};const co=cs.l
    +'<div class="hd">'+(logo&&/^data:image|^https?:/.test(logo)?'<img src="'+P(logo)+'" alt="">':'')+'<div class="c"><b>'+P(co)+'</b><small>'+P([cs.address,cs.phone,cs.email].filter(Boolean).join(' · '))+'</small><small>'+P([cs.tax_office?cs.tax_office+' V.D.':'',cs.tax_number?'VKN '+cs.tax_number:''].filter(Boolean).join(' · '))+'</small></div><div class="m">Sayı: '+P(sn.doc_no||'…………')+'<br>Tarih: '+P(fmtLong(meta.date||today()))+(meta.revision?'<br>Sürüm: '+meta.revision:'')+'</div></div>'+stamp
    +'<h1>HARCIRAH TALEP VE GÖREVLENDİRME FORMU</h1><p><b>Konu:</b> '+P(sn.title)+(sn.team?' <span class="muted">· '+P(sn.team)+'</span>':'')+'</p>'+(meta.returnNote&&st==='returned'?'<div class="note"><b>Muhasebe notu:</b> '+P(meta.returnNote)+'</div>':'')+(meta.note&&(st==='revision'||st==='rejected')?'<div class="note"><b>'+(st==='revision'?'Revizyon notu':'Ret sebebi')+':</b> '+P(meta.note)+'</div>':'')+'<p>'+P(sn.text).replace(/\n/g,'<br>')+'</p>'
    +'<div class="grid"><table><tbody><tr><th style="width:38%">Görev yeri</th><td>'+P((sn.cities||[]).join(', ')||'—')+'</td></tr><tr><th>Tarih</th><td>'+P(fmtLong(sn.start))+(sn.end!==sn.start?' – '+P(fmtLong(sn.end)):'')+'</td></tr><tr><th>Süre</th><td>'+sn.ndays+' gün'+(sn.nights?' · '+sn.nights+' gece':'')+' · '+sn.people+' kişi</td></tr></tbody></table>'
-   +'<table><tbody><tr><th style="width:38%">Çıkış / dönüş</th><td>'+P(sn.office||'—')+'</td></tr><tr><th>Ulaşım</th><td>'+P(TRANSPORT[sn.transport]||'')+(isCar(sn.transport)&&sn.utts?' · yakıt UTTS':'')+'</td></tr><tr><th>Toplam yol</th><td>'+(sn.km?'≈ '+Number(sn.km).toLocaleString('tr-TR')+' km':'—')+' · '+(sn.stops||0)+' ziyaret</td></tr></tbody></table></div>'
-   +'<h2>Gün gün plan</h2><table><thead><tr><th style="width:5%">#</th><th style="width:17%">Tarih</th><th style="width:20%">İl</th><th>Ziyaret edilecek yerler</th></tr></thead><tbody>'+dayRows+'</tbody></table>'
+   +'<table><tbody><tr><th style="width:38%">Çıkış / dönüş</th><td>'+P(sn.office||'—')+'</td></tr><tr><th>Ulaşım</th><td>'+P(TRANSPORT[sn.transport]||'')+(isCar(sn.transport)&&sn.utts?' · yakıt UTTS':'')+(sn.travel?'<br><span class="small">'+P(sn.travel)+'</span>':'')+'</td></tr><tr><th>Toplam yol</th><td>'+(sn.km?'≈ '+Number(sn.km).toLocaleString('tr-TR')+' km':'—')+' · '+(sn.stops||0)+' ziyaret</td></tr></tbody></table></div>'
+   +(meta.screen&&((sn.personal||[]).length||sn.ticket_diff)?'<div class="note"><b>Yönetici için bilgi:</b> '+(sn.personal||[]).map(p=>P(p.name)+' — kişisel uzatma '+p.days.length+' gün ('+p.days.map(d=>P(fmtDay(d))).join(', ')+')').join('; ')+((sn.personal||[]).length?'. Bu günler personel tercihidir, harcıraha dahil edilmedi.':'')+(sn.ticket_diff?' Kişisel tarihli bilet farkı: '+TL(sn.ticket_diff)+(sn.cover_diff?' (şirketin karşılaması isteniyor).':' (personel öder).'):'')+'</div>':'')+'<h2>Gün gün plan</h2><table><thead><tr><th style="width:5%">#</th><th style="width:17%">Tarih</th><th style="width:20%">İl</th><th>Ziyaret edilecek yerler</th></tr></thead><tbody>'+dayRows+'</tbody></table>'
    +'<h2>Harcırah hesabı</h2><table><thead><tr><th>Gider</th><th>Hesap</th><th class="num" style="width:20%">Tutar</th></tr></thead><tbody>'+(sn.lines||[]).map(l=>'<tr><td>'+P(l.name)+'</td><td class="muted">'+P(l.calc)+'</td><td class="num">'+(l.note?'—':TL(l.amt))+'</td></tr>').join('')+'</tbody><tfoot><tr><th colspan="2">Toplam tahmini gider ('+sn.people+' kişi · kişi başı '+TL(sn.per)+')</th><th class="num">'+TL(sn.total)+'</th></tr><tr class="req"><th colspan="2">TALEP EDİLEN HARCIRAH TUTARI</th><th class="num">'+TL(meta.amount??sn.request)+'</th></tr>'+(meta.approved!=null&&Math.round(meta.approved)!==Math.round(meta.amount??sn.request)?'<tr class="req"><th colspan="2">ONAYLANAN TUTAR'+(meta.note&&isOk?' — '+P(meta.note):'')+'</th><th class="num">'+TL(meta.approved)+'</th></tr>':'')+(meta.payments||[]).map(x=>'<tr><td colspan="2">Ödenen avans · '+P(PAY_M[x.method]||'')+' · '+P(fmtLong(x.date))+(x.note?' · '+P(x.note):'')+'</td><td class="num">'+TL(x.amount)+'</td></tr>').join('')+(st==='partial'&&meta.approved!=null?'<tr><th colspan="2">Kalan (ödenecek)</th><th class="num">'+TL(meta.approved-meta.paid)+'</th></tr>':'')+'</tfoot></table>'
    +(meta.expenses&&meta.expenses.length?(()=>{const sp=meta.expenses.reduce((a,x)=>a+(+x.amount||0),0);const d=Math.round((sp-meta.paid)*100)/100;return '<h2>Gerçekleşen giderler (görev sonrası kapanış)</h2><table><thead><tr><th style="width:15%">Tarih</th><th style="width:20%">Gider</th><th>Açıklama</th><th style="width:8%">Belge</th><th class="num" style="width:16%">Tutar</th></tr></thead><tbody>'+meta.expenses.map(x=>'<tr><td>'+P(fmtLong(x.spent_at))+'</td><td>'+P(EXPCAT[x.category]||'')+'</td><td>'+P(x.description||'')+'</td><td>'+(x.receipt_path?'fiş':'—')+'</td><td class="num">'+TL(x.amount)+'</td></tr>').join('')+'</tbody><tfoot><tr><th colspan="4">Toplam harcanan</th><th class="num">'+TL(sp)+'</th></tr><tr><td colspan="4">Ödenen avans</td><td class="num">'+TL(meta.paid)+'</td></tr><tr class="req"><th colspan="4">'+(d>0.004?'FİRMANIN ÇALIŞANA ÖDEYECEĞİ':d<-0.004?'ÇALIŞANIN İADE EDECEĞİ':'FARK')+(st==='closed'&&meta.settleMethod?' — '+P(SETTLE_M[meta.settleMethod]||'')+(meta.settleDate?' · '+P(fmtLong(meta.settleDate)):''):'')+'</th><th class="num">'+TL(Math.abs(d))+'</th></tr>'+(st==='closed'?'<tr><td colspan="5">Hesabı kapatan: '+P(meta.closedBy)+' · '+P(fmtDT(meta.closedAt))+(meta.settleNote?' · '+P(meta.settleNote):'')+'</td></tr>':'')+'</tfoot></table>'})():'')
    +'<p class="small">Tutarlar tahminidir. Gerçekleşen giderler fatura / fiş ile belgelenir; kalan tutar iade edilir, eksik tutar belge karşılığı ödenir.</p>'
-   +'<h2>Görevli personel</h2><table class="sig"><thead><tr><th style="width:5%">#</th><th style="width:38%">Adı Soyadı</th><th style="width:27%">Görevi / Ünvanı</th><th>İmza</th></tr></thead><tbody>'+((sn.travelers||[]).length?sn.travelers:['']).map((n,i)=>'<tr><td>'+(i+1)+'</td><td>'+P(n)+'</td><td></td><td></td></tr>').join('')+'</tbody></table>'
+   +'<h2>Görevli personel</h2><table class="sig"><thead><tr><th style="width:5%">#</th><th style="width:38%">Adı Soyadı</th><th style="width:27%">Görevi / Ünvanı</th><th>İmza</th></tr></thead><tbody>'+((sn.travelers||[]).length?sn.travelers:['']).map((n,i)=>'<tr><td>'+(i+1)+'</td><td>'+P(n)+'</td><td>'+(sn.tduty&&sn.tduty[i]?'<span class="small">Görev: '+P(sn.tduty[i])+'</span>':'')+'</td><td></td></tr>').join('')+'</tbody></table>'
    +'<div class="foot">'+sig('Talep eden',meta.submittedBy,meta.submittedAt?fmtDT(meta.submittedAt):'')+sig('Muhasebe',lp?lp.by:'',lp?fmtDT(lp.at):'',lp?(st==='partial'?'kısmi ödeme':'avans ödendi'):'')+sig('Onaylayan (Yetkili)',isOk?meta.decidedBy:'',isOk?fmtDT(meta.decidedAt):'',isOk?'sistem onayı':'')+'</div>'
    +'</div>'+(meta.print?'<script>window.onload=function(){var p=document.getElementById("pg");var max=1030;var h=p.scrollHeight;if(h>max){p.style.zoom=(max/h).toFixed(3)}setTimeout(function(){window.print()},300)}<\/script>':'')+'</body></html>'}
 function reqMeta(q){const pays=PAYS.get(q.id)||[];let paid=pays.reduce((a,x)=>a+(+x.amount||0),0);const legacy=!pays.length&&q.state==='paid'&&+q.paid_amount>0;if(legacy)paid=+q.paid_amount;
@@ -12922,6 +13009,7 @@ function paintAppr(){const box=$('cfrtAppr');if(!box)return;if(!R?.id||reqReady=
   if(q&&(q.state==='revision'||q.state==='rejected'))h+='<div class="cfrt-appr-note"><b>'+(q.state==='revision'?'↺ Yöneticinin revizyon notu':'✕ Ret sebebi')+'</b> · '+esc(nameOf(q.decided_by))+', '+fmtDT(q.decided_at)+'<br>'+esc(q.decision_note||'')+'</div>';
   if(q&&['approved','partial','paid','closing','closing_revision','closed'].includes(q.state)){h+='<p class="cfrt-msg">✓ '+esc(nameOf(q.decided_by))+' · '+fmtDT(q.decided_at)+' onayladı'+(M.approved!=null&&Math.round(M.approved)!==Math.round(q.amount)?': <b>'+TL(M.approved)+'</b>'+(q.decision_note?' — “'+esc(q.decision_note)+'”':''):'')+'.'+(q.state==='approved'?' Muhasebede ödeme bekleniyor.':'')+'</p>';
     if(M.payments.length)h+='<div class="cfrt-paylist">'+M.payments.map(p=>'<div>💵 '+TL(p.amount)+' · '+esc(PAY_M[p.method]||'')+' · '+esc(fmtLong(p.date))+' · '+esc(p.by)+(p.note?' · '+esc(p.note):'')+'</div>').join('')+(q.state==='partial'?'<div><b>Kalan: '+TL((M.approved??q.amount)-M.paid)+'</b></div>':'')+'</div>'}
+  if(c.personal&&c.personal.length)h+='<p class="cfrt-msg">🧳 Kişisel uzatma: '+c.personal.map(p=>esc(p.name)+' '+p.days.length+' gün').join(', ')+' · harcırah ve forma dahil değil'+(c.tickets?.diff?' · bilet farkı '+TL(c.tickets.diff)+(EXP().cover_diff?' (şirkete)':' (personele)'):'')+'</p>';
   if(changed)h+='<div class="cfrt-appr-note">⚠ Talep tutarı onaya gönderilenden farklı ('+TL(q.amount)+' → '+TL(c.request)+'). Değişiklik için yeniden onaya gönderin.</div>';
   h+='<div class="cfrt-acts">';
   if(q&&q.state!=='withdrawn')h+='<button type="button" class="btn light" data-ar="view">📄 Formu görüntüle</button>';
@@ -13026,7 +13114,7 @@ const liveKey=id=>'cfrt:live:'+company()+':'+id;
 const liveOn=id=>{try{return localStorage.getItem(liveKey(id))==='1'}catch(_){return false}};
 function liveSet(id,on){try{on?localStorage.setItem(liveKey(id),'1'):localStorage.removeItem(liveKey(id))}catch(_){}}
 function liveLabel(){const el=$('cfrtRoot')?.querySelector('[data-live-t]');if(el)el.textContent=liveRoute&&liveLast?'son gönderim '+fmtClock(new Date(liveLast).toISOString()):liveRoute?'konum alınıyor…':''}
-async function livePing(){if(!liveRoute||liveBusy||document.visibilityState!=='visible')return;const id=liveRoute;if(R?.id===id&&(R.finished_at||!R.started_at)){liveStop();return}
+async function livePing(){if(!liveRoute||liveBusy||document.visibilityState!=='visible')return;const id=liveRoute;if(R?.id===id&&personType(me(),today())==='kisisel'){const el=$('cfrtRoot')?.querySelector('[data-live-t]');if(el)el.textContent='bugün kişisel gününüz · konum paylaşılmıyor';return}if(R?.id===id&&(R.finished_at||!R.started_at)){liveStop();return}
   liveBusy=true;try{const pos=await geo();if(!pos||liveRoute!==id){if(!pos&&liveRoute===id){const el=$('cfrtRoot')?.querySelector('[data-live-t]');if(el)el.textContent='konum alınamadı (izin verin)'}return}
     const {error}=await sb.rpc('cf_route_trip',{p_route:id,p_action:'ping',p_lat:pos.lat,p_lng:pos.lng});if(error){if(/yetki|bulunamad/i.test(error.message)){liveStop();liveSet(id,false)}return}
     liveLast=Date.now();if(R?.id===id)Object.assign(R,{last_lat:pos.lat,last_lng:pos.lng,last_at:new Date(liveLast).toISOString(),last_by:me()});liveLabel()}finally{liveBusy=false}}
@@ -15727,4 +15815,24 @@ let homeSig='';async function boot(){await load(true);const sig=JSON.stringify((
 setTimeout(boot,2500);setInterval(()=>{if(!document.hidden&&U()&&C()&&Date.now()-last>60000)boot()},30000);
 window.cfOfferFollow={reload:()=>load(true),info:id=>{const o=OFF.find(x=>Number(x.id)===Number(id));return o?info(o):null}};
 })();</script>
+<style id="cf-route-daytypes-style">
+.cfrt-dplan{display:grid;gap:8px}
+.cfrt-dplan-l{display:flex;flex-wrap:wrap;gap:6px}
+.cfrt-dday{display:flex;flex-direction:column;gap:3px;min-width:120px;padding:8px 9px;border-radius:11px;border:1px solid color-mix(in srgb,var(--dt) 45%,transparent);background:color-mix(in srgb,var(--dt) 9%,transparent)}
+.cfrt-dday b{font-size:12.5px}.cfrt-dday small{font-size:11px;opacity:.75;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cfrt-dday select,.cfrt-dprow select{font:inherit;font-size:12px;padding:4px 6px;border-radius:7px;border:1px solid rgba(128,128,128,.35);background:transparent;color:inherit}
+html[data-cfp=dark] .cfrt-dday select,html[data-cfp=dark] .cfrt-dprow select{color-scheme:dark}
+.cfrt-dwarn{font-size:12.5px;padding:8px 10px;border-radius:10px;border:1px solid rgba(245,158,11,.5);background:rgba(245,158,11,.1)}
+.cfrt-dwarn.info{border-color:rgba(14,165,233,.5);background:rgba(14,165,233,.08)}
+.cfrt-dper summary{cursor:pointer;font-weight:700;font-size:13px}
+.cfrt-dprow{display:grid;gap:5px;margin:8px 0}.cfrt-dprow>div{display:flex;flex-wrap:wrap;gap:6px}
+.cfrt-dprow label{display:flex;flex-direction:column;gap:2px;padding:5px 7px;border-radius:9px;border-left:3px solid var(--dt)}
+.cfrt-tks{display:grid;gap:8px}
+.cfrt-tk{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:6px;align-items:center;padding:8px;border-radius:11px;border:1px solid rgba(128,128,128,.22)}.cfrt-tk>span:empty{display:none}
+.cfrt-tk :is(select,input){min-width:0;font:inherit;font-size:12.5px;padding:7px 8px;border-radius:8px;border:1px solid rgba(128,128,128,.35);background:transparent;color:inherit}
+html[data-cfp=dark] .cfrt-tk :is(select,input){color-scheme:dark}
+.cfrt-tk-x{width:30px;height:30px;border-radius:8px;border:1px solid rgba(128,128,128,.35);background:transparent;color:inherit;cursor:pointer}
+.cfrt-tk-n{grid-column:1/-1;font-size:11.5px;opacity:.75}
+.cfrt-tk-x{justify-self:end}
+</style>
 </body></html>
