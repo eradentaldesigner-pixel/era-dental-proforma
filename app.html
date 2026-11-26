@@ -6339,7 +6339,7 @@ const act=b=>{try{return (typeof pnAction==='function'&&pnAction(b))||''}catch(e
 function keyOf(b){
   const d=b.dataset;
   if('cfHealthNav' in d)return 'health';if('cfMessagesNav' in d)return 'messages';if('cfInboxNav' in d)return 'inbox';if('cfUsersNav' in d)return 'users';if('cfFilesNav' in d)return 'files';if('cfAnalyticsNav' in d)return 'analytics';if('cfReportNav' in d)return 'reports';
-  /* CepFirma düzeltme: Bekleyenler / Görevler / Otomatik kurallar */if('cfQueueNav' in d)return 'queue';if('cfRoutesNav' in d)return 'routes';if('cfTasksNav' in d)return 'tasks';if('cfAutoNav' in d)return 'rules';
+  /* CepFirma düzeltme: Bekleyenler / Görevler / Otomatik kurallar */if('cfQueueNav' in d)return 'queue';if('cfStock2Nav' in d)return 'stock2';if('cfRoutesNav' in d)return 'routes';if('cfTasksNav' in d)return 'tasks';if('cfAutoNav' in d)return 'rules';
   if('cfWorkNav' in d)return 'work';if('presenceOpen' in d)return 'presence';if('erOpen' in d)return 'requests';if('securityOpen' in d)return 'security';if('personalSettings' in d)return 'personal';
   if(d.newOfferNav)return 'newOffer';if(d.offerNav)return 'offers';
   const a=act(b);if(a)return a;
@@ -6350,6 +6350,7 @@ function keyOf(b){
 function visibleKeys(){
   const v=new Set(['requests','messages','inbox','files','guide','logout','queue','tasks']);if(isMgr())v.add('rules');if(has('organization')||has('crm')||has('service'))v.add('routes');
   for(const k of ['home','calendar','customers','crm','catalog','service','orders','organization'])if(has(k))v.add(k);
+  if(has('stock')||has('catalog'))v.add('stock2');
   if(has('archive'))v.add('archive');else if(offersOk())v.add('offers');
   if(isMgr())v.add('users');else if(typeof erAllowed!=='function'||erAllowed())v.add('presence');
   if(isMgr()){v.add('reports');v.add('health')}
@@ -6363,7 +6364,7 @@ const LABEL={archive:'Belgeler',offers:'Belgeler',catalog:'Ürünler',service:'S
 const GROUPS=[
   ['ÇALIŞMA ALANI',['home','queue','tasks','inbox','calendar','requests','messages']],
   ['SATIŞ',['customers','crm','archive','offers']],
-  ['ÜRÜN VE SERVİS',['catalog','service']],
+  ['ÜRÜN VE SERVİS',['catalog','stock2','service']],
   ['OPERASYON',['orders','organization','routes']],
   ['YÖNETİM',['users','presence','reports','rules','files','health','settings','personal','security']]
 ];
@@ -17431,6 +17432,16 @@ function detail(id){const p=K.prods.find(x=>x.id===id);if(!p)return;const s=stat
 async function open(){const ov=$('stockOverlay');if(!ov)return;try{if(typeof closeAllCepFirmaViews==='function')closeAllCepFirmaViews()}catch(_){}ov.style.display='block';const el=shell();el.innerHTML='<p class="cfsk-empty">Stok yükleniyor…</p>';await load();paint()}
 window.openStockControl=open;try{openStockControl=open}catch(_){}
 const _lsc=window.loadStockControl;window.loadStockControl=async function(){if($('stockOverlay')?.querySelector('.cfsk')){await reload();return}try{return await _lsc?.apply(this,arguments)}catch(_){}};try{loadStockControl=window.loadStockControl}catch(_){}
-window.cfStock={open,reload,move:moveModal};
+window.cfStock={open,reload,move:moveModal,ready};
+/* ---- giriş noktaları: kenar menüde "Stok", Ürünler sayfasında "Stok yönetimi", "± Stok" yeni pencereyi açar ---- */
+let readyP=null,RD=null;function ready(){if(K.ready!=null)return Promise.resolve(K.ready);return readyP||(readyP=sb.from('stock_serials').select('id').limit(1).then(r=>!r.error,()=>false))}
+const ICO='<svg class="cfui-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35a2 2 0 0 1 1.26-1.86l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z"/><path d="M6 18h12M6 14h12"/><rect x="6" y="10" width="12" height="12"/></svg>';
+function navMark(on){document.querySelectorAll('.cfsk-nav').forEach(b=>{b.classList.toggle('active',on);if(on)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});if(on)document.querySelectorAll('.ds-nav .ds-btn.active:not(.cfsk-nav)').forEach(b=>{b.classList.remove('active');b.removeAttribute('aria-current')})}
+function ensureEntry(){document.querySelectorAll('[data-pn-action="catalog"]').forEach(c=>{const ex=c.parentElement.querySelectorAll(':scope>.cfsk-nav');if(ex.length){[...ex].slice(1).forEach(x=>x.remove());return}const b=document.createElement('button');b.type='button';b.className=c.className.replace(/\bactive\b/,'').trim()+' cfsk-nav';b.dataset.t='Stok';b.dataset.cfStock2Nav='';b.innerHTML='<span class="ds-icon">'+ICO+'</span><span class="pn-label">Stok</span>';b.onclick=e=>{e.preventDefault();open()};c.after(b)});
+  const t=document.getElementById('cfqrScanBtn')?.parentElement;if(t&&!t.querySelector('[data-cfsk-open]')){const b=document.createElement('button');b.type='button';b.className='btn primary';b.dataset.cfskOpen='';b.textContent='📦 Stok yönetimi';b.onclick=()=>open();t.prepend(b)}
+  if(RD===null&&C()&&!readyP)ready().then(v=>RD=v);const ov=$('stockOverlay');navMark(!!ov&&ov.style.display==='block'&&!!ov.querySelector('.cfsk'))}
+new MutationObserver(()=>{clearTimeout(ensureEntry._t);ensureEntry._t=setTimeout(ensureEntry,120)}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['style']});setTimeout(ensureEntry,300);
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-cfsm-open]');if(!b||!canWrite()||(RD!==true&&K.ready!==true))return;e.stopImmediatePropagation();e.preventDefault();try{document.querySelectorAll('.cfsm-ov,.cfsm-modal').forEach(x=>x.remove())}catch(_){}if(!K.prods.length)await load();moveModal('in',{lines:[{pid:+b.dataset.cfsmOpen}]})},true);
+
 })();</script>
 </body></html>
