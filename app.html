@@ -12610,7 +12610,7 @@ function wzMount(){const root=$('cfrtRoot');const L=root?.querySelector('.cfrt-l
   if(!R?.id){const sel=$('cfrtF_status');if(sel)[...sel.options].forEach(o=>{if(!['draft','planned'].includes(o.value))o.remove()})}
   wzPaint(false);warnSoon();sugMount()}
 function wzPaint(anim){const E=wzEls();if(!E)return;const bar=E.L.querySelector('.cfrt-wz'),nav=E.L.querySelector('.cfrt-wznav');if(!bar||!nav)return;const s=WZ.step;
-  bar.innerHTML=(WZ.on?'<div class="cfrt-wz-steps">'+WZS.map((x,i)=>'<button type="button" data-ws="'+i+'" class="'+(i<s?'done':i===s?'on':'')+'"><i><b></b></i><span>'+(i<s?'✓ ':(i+1)+'. ')+x[1]+'</span></button>').join('')+'</div>':'')+'<div class="cfrt-wz-mode"><button type="button" class="cfrt-link" data-wmode>'+(WZ.on?'Tüm formu tek sayfada göster':'Adım adım göster')+'</button></div>';
+  bar.innerHTML=(WZ.on?stepperHtml(s):'')+'<div class="cfrt-wz-mode"><button type="button" class="cfrt-link" data-wmode>'+(WZ.on?'Tüm formu tek sayfada göster':'Adım adım göster')+'</button></div>';
   const show=(el,on)=>{(Array.isArray(el)?el:[el]).forEach(e=>{if(!e)return;e.classList.toggle('cfrt-wz-hide',!on);if(on&&anim){e.classList.remove('cfrt-wz-in');void e.offsetWidth;e.classList.add('cfrt-wz-in')}})};
   if(!WZ.on){show(E.info,true);show(E.stops,true);show(E.exp,true);show(E.sum,false);nav.innerHTML=''}
   else{show(E.info,s===0);show(E.stops,s===1);show(E.exp,s===2);show(E.sum,s===3);if(s===2){const d=$('cfrtExp')?.querySelector('details');if(d&&!d.open)d.open=true}if(s===3)paintWzSum();
@@ -12693,7 +12693,7 @@ function paintWarn(){const box=$('cfrtWarn');if(!box)return;if(!canEdit){box.inn
   box.innerHTML='<div class="cfrt-warn"><div class="cfrt-warn-h"><b>💡 Öneriler ve uyarılar</b><span>'+W.length+'</span></div>'+W.map((w,i)=>'<div class="cfrt-warn-i" style="--c:'+w.c+';--d:'+(i*.05)+'s"><span class="ic">'+w.ic+'</span><div><b>'+esc(w.t)+'</b><small>'+esc(w.s)+'</small></div>'+(w.fn?'<button type="button" class="btn light" data-wi="'+i+'">'+esc(w.label)+'</button>':'')+'<button type="button" class="cfrt-warn-x" data-wx="'+i+'" aria-label="Bu uyarıyı gizle">✕</button></div>').join('')+'</div>';
   box.querySelectorAll('[data-wi]').forEach(b=>b.onclick=()=>{try{W[+b.dataset.wi].fn()}catch(e){console.warn(e)}});
   box.querySelectorAll('[data-wx]').forEach(b=>b.onclick=()=>{WDIS.add(W[+b.dataset.wx].id);try{localStorage.setItem(wdisKey(),JSON.stringify([...WDIS]))}catch(_){}paintWarn()})}
-let warnT=0;function warnSoon(){clearTimeout(warnT);warnT=setTimeout(()=>{if(!$('cfrtRoot')?.querySelector('.cfrt-ed'))return;paintWarn();if(WZ.on&&WZ.step===3)paintWzSum()},220)}
+let warnT=0;function warnSoon(){clearTimeout(warnT);warnT=setTimeout(()=>{if(!$('cfrtRoot')?.querySelector('.cfrt-ed'))return;paintWarn();try{stepRefresh();dayMarks()}catch(_){}if(WZ.on&&WZ.step===3)paintWzSum()},220)}
 /* ---- 10) rota hazır ekranı ---- */
 function readyScreen(){if(!R?.id)return;const days=routeDays();const cities=cityChain();let c=null;try{c=expCalc()}catch(_){}const others=travelers().filter(u=>u!==me());
   const m=document.createElement('div');m.className='cfrt-modal cfrt-ready';m.innerHTML='<div class="cfrt-dlg cfrt-ready-d" role="dialog" aria-modal="true" aria-label="Rota oluşturuldu"><div class="cfrt-ready-ok"><svg viewBox="0 0 40 40"><path d="M10 21 L17 28 L31 13" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h3>Rota oluşturuldu</h3><p class="cfrt-msg">'+(others.length?esc(others.map(nameOf).join(', '))+' rotayı görebilir':'Rota listenize eklendi')+'</p>'
@@ -12854,6 +12854,7 @@ const hv=(a,b)=>{const R0=6371,t=Math.PI/180;const dLa=(b[1]-a[1])*t,dLo=(b[2]-a
 const pc=c=>{const p=provOf(c||'');return p?p[0]:''};
 function airportsFor(city){const p=provOf(city||'');if(!p)return [];const ex=AIR.filter(a=>a[1].some(c=>lc(c)===lc(p[0]))).map(a=>a[0]);if(ex.length)return ex;
   return AIR.map(a=>{const q=provOf(a[1][0]);return [a[0],q?hv(p,q):1e9]}).sort((x,y)=>x[1]-y[1]).slice(0,2).map(x=>x[0])}
+function stationCities(v){const n=x=>lc(String(x||'')).replace(/[^a-zçğıöşü0-9]/g,'');const k=n(v);if(!k)return [];const a=AIR.find(x=>n(x[0])===k||k.includes(n(x[0]))||n(x[0]).includes(k));if(a)return a[1].slice();const p=pc(v);return p?[p]:[]}
 function stationsFor(city){if(!city)return [];return [...airportsFor(city),city+' Otogarı',city+' Garı',city+' İskelesi',city]}
 function stationFor(city,mode,isHome){if(!city)return '';if(mode==='flight')return isHome?'':(airportsFor(city)[0]||'');if(mode==='bus'||mode==='minibus')return city+' Otogarı';if(mode==='train')return city+' Garı';if(mode==='ferry')return city+' İskelesi';return city}
 function homeCity(){const o=officeOn()?office():null;if(!o)return '';const t=pc(o.city)||pc(o.label)||pc(o.address);if(t)return t;if(isFinite(+o.lat)&&isFinite(+o.lng)){let b=null,bd=1e9;for(const p of PROV){const d=hv(['',+o.lat,+o.lng],p);if(d<bd){bd=d;b=p}}return b?b[0]:''}return ''}
@@ -12877,6 +12878,7 @@ function connSync(){if(!R||!canEdit)return false;const ch=connChain();if(!ch.lin
   const used=new Set(),out=[];
   ch.links.forEach(k=>{let t=L.find(x=>!used.has(x)&&x.dir===k.dir&&lc(x.fc||'')===lc(k.fc)&&lc(x.tc||'')===lc(k.tc));
     if(!t&&k.dir!=='ara')t=L.find(x=>!used.has(x)&&x.dir===k.dir);
+    if(t&&!t.auto){if(lc(t.tc||'')!==lc(k.tc)&&stationCities(t.to).some(c=>lc(c)===lc(k.tc))){t.tc=k.tc;changed=true}if(lc(t.fc||'')!==lc(k.fc)&&stationCities(t.from).some(c=>lc(c)===lc(k.fc))){t.fc=k.fc;changed=true}}
     if(t){used.add(t);if(t.auto&&(lc(t.fc||'')!==lc(k.fc)||lc(t.tc||'')!==lc(k.tc))){t.fc=k.fc;t.tc=k.tc;t.from=stationFor(k.fc,t.mode,k.dir==='gidis');t.to=stationFor(k.tc,t.mode,k.dir==='donus');if(t.auto&&k.date)t.date=k.date;changed=true}}
     else{const m=defMode(k);t={who:'_all',dir:k.dir,mode:m,date:k.date||'',time:'',fc:k.fc,tc:k.tc,from:stationFor(k.fc,m,k.dir==='gidis'),to:stationFor(k.tc,m,k.dir==='donus'),buyer:'sirket',amount:'',ref:'',auto:1};used.add(t);changed=true}
     out.push(t)});
@@ -12893,6 +12895,8 @@ function connPaint(){const days=$('cfrtDays');if(!days)return;let box=$('cfrtCon
   const cityOpts=[...new Set(ch.C)];const N=R.needs||{};const rv=N.ret_city&&N.ret_city!=='_last'?N.ret_city:'_last';const other=rv!=='_last'&&!cityOpts.some(c=>lc(c)===lc(rv));
   box.innerHTML='<div class="cfcn-top"><span>🧭 Yolculuk: <b>'+esc(trText(L)||'—')+'</b> · şehir değiştikçe nasıl gidileceğini günlerin arasından seçin</span>'
     +'<label>Dönüş nereden? <select id="cfrtRetSel"'+dis+'><option value="_last"'+(rv==='_last'?' selected':'')+'>Son durak ('+esc(ch.C[ch.C.length-1])+')</option>'+cityOpts.map(c=>'<option value="'+esc(c)+'"'+(rv!=='_last'&&lc(rv)===lc(c)?' selected':'')+'>'+esc(c)+'</option>').join('')+'<option value="_other"'+(other?' selected':'')+'>Başka şehir…</option></select>'+(other||rv==='_other'?'<input id="cfrtRetOther" list="cfrtProv" value="'+esc(other?rv:'')+'" placeholder="Şehir"'+dis+'>':'')+'</label></div>';
+  {const dn=L.find(t=>t.dir==='donus');const rc=ch.rc||ch.C[ch.C.length-1];const rp=provOf(rc||'');if(dn&&dn.mode==='flight'&&rp&&!AIR.some(a=>a[1].some(c=>lc(c)===lc(rp[0])))){const seen=new Set();const hasAir=c=>AIR.some(a=>a[1].some(x=>lc(x)===lc(c)));const onRoute=[...new Set(ch.C)].filter(c=>lc(c)!==lc(rc)&&hasAir(c)).map(c=>{const q=provOf(c);return [c,q?hv(rp,q):1e9,1]}).sort((x,y)=>x[1]-y[1]);const near=[...onRoute,...AIR.map(a=>{const q=provOf(a[1][0]);return [a[1][0],q?hv(rp,q):1e9,0]}).sort((x,y)=>x[1]-y[1])].filter(x=>!seen.has(x[0])&&seen.add(x[0])).slice(0,4);
+    box.insertAdjacentHTML('beforeend','<div class="cfcn-hint">✈ <b>'+esc(rc)+': havalimanı yok.</b> Uçakla dönüş hangi şehirden olacak? '+near.map(n=>'<button type="button" class="cfq-chip sm" data-retc="'+esc(n[0])+'">'+esc(n[0])+' · ≈ '+Math.round(n[1]*1.3)+' km'+(n[2]?' · rotada':'')+'</button>').join('')+'<small>Seçince '+esc(rc)+' → seçilen şehir bağlantısı kendiliğinden eklenir.</small></div>')}}
   const GROUPS=[['Toplu taşıma',['flight','bus','train','ferry']],['Araçla',['car','own','rental']],['Diğer',['minibus','taxi']]];
   const row=(k,t,idx)=>{const i=L.indexOf(t);const a=provOf(t.fc||''),b=provOf(t.tc||'');const km=a&&b?Math.round(hv(a,b)*(t.mode==='flight'?1:1.3)):0;
     const lab=k.dir==='gidis'?'Gidiş':k.dir==='donus'?'Dönüş':k.ret?'Dönüş noktasına':'Şehir değişikliği';
@@ -12910,20 +12914,21 @@ function connPaint(){const days=$('cfrtDays');if(!days)return;let box=$('cfrtCon
   days.querySelectorAll('.cfcn').forEach(row=>{const t=L[+row.dataset.ti];if(!t)return;
     row.querySelector('[data-cm]')?.addEventListener('change',e=>{const m=e.target.value;const isH=t.dir==='gidis',isR=t.dir==='donus';const dF=stationFor(t.fc,t.mode,isH),dT=stationFor(t.tc,t.mode,isR);
       if(!t.from||t.from===dF||t.from===t.fc)t.from=stationFor(t.fc,m,isH);if(!t.to||t.to===dT||t.to===t.tc)t.to=stationFor(t.tc,m,isR);t.mode=m;delete t.auto;dirty=true;after()});
-    row.querySelectorAll('[data-cf]').forEach(el=>el.addEventListener('change',()=>{t[el.dataset.cf]=el.value;delete t.auto;dirty=true;try{paintExp()}catch(_){}warnSoon()}))});
+    row.querySelectorAll('[data-cf]').forEach(el=>el.addEventListener('change',()=>{const f=el.dataset.cf;t[f]=el.value;delete t.auto;dirty=true;if(f==='from'||f==='to'){const cs=stationCities(el.value);const cur=f==='to'?t.tc:t.fc;if(cs.length&&!cs.some(c=>lc(c)===lc(cur||''))){if(f==='to')t.tc=cs[0];else t.fc=cs[0]}after();return}try{paintExp()}catch(_){}warnSoon()}))});
   const ch2=ch;const moveRet=v=>{const lastC=ch2.C[ch2.C.length-1];const rc=v==='_last'?lastC:(pc(v)||v);const d=TK().find(t=>t.dir==='donus');if(d&&rc&&lc(d.fc||'')!==lc(rc)){d.fc=rc;d.from=stationFor(rc,d.mode,false)}};
   const rs=$('cfrtRetSel');if(rs)rs.onchange=()=>{R.needs=R.needs||{};if(rs.value==='_other'){R.needs.ret_city='_other';connPaint();setTimeout(()=>$('cfrtRetOther')?.focus(),50);return}R.needs.ret_city=rs.value;moveRet(rs.value);dirty=true;after()};
-  const ro=$('cfrtRetOther');if(ro)ro.onchange=()=>{const v=pc(ro.value)||String(ro.value||'').trim();if(!v)return;R.needs.ret_city=v;moveRet(v);dirty=true;after()}}
+  const ro=$('cfrtRetOther');if(ro)ro.onchange=()=>{const v=pc(ro.value)||String(ro.value||'').trim();if(!v)return;R.needs.ret_city=v;moveRet(v);dirty=true;after()}
+  box.querySelectorAll('[data-retc]').forEach(b=>b.onclick=()=>{R.needs=R.needs||{};R.needs.ret_city=b.dataset.retc;moveRet(b.dataset.retc);dirty=true;after()})}
 function trSum(){const sel=$('cfrtF_transport');if(!sel)return;let info=$('cfrtTrSum');if(!info){sel.style.display='none';info=document.createElement('div');info.id='cfrtTrSum';info.className='cfrt-trsum';sel.after(info)}
   const t=trText();const h=(TK().length?'<b>'+esc(t)+'</b>':'<b>Durak ekleyince belirlenir</b>')+'<button type="button" class="cfrt-link" data-trgo>Bağlantı bağlantı seç →</button>';if(info.innerHTML!==h){info.innerHTML=h;info.querySelector('[data-trgo]').onclick=()=>{wzGo(1);setTimeout(()=>$('cfrtConn')?.scrollIntoView({block:'start',behavior:'smooth'}),260)}}}
 /* ek uyarılar: havalimanı seçilmedi, tek yön kiralık araç, yolculuk tarihi ziyaretle çakışıyor */
 function connWarns(add){const ch=connChain();if(!ch.links.length)return;const L=TK();const legOf=k=>L.find(t=>t.dir===k.dir&&lc(t.fc||'')===lc(k.fc)&&lc(t.tc||'')===lc(k.tc))||(k.dir!=='ara'?L.find(t=>t.dir===k.dir):null);
   const seq=ch.links.map(legOf).filter(Boolean);const goConn=()=>{wzGo(1);setTimeout(()=>(document.querySelector('#cfrtDays .cfcn')||$('cfrtConn'))?.scrollIntoView({block:'center',behavior:'smooth'}),260)};
   seq.forEach((t,i)=>{if(t.mode==='flight'&&(!t.from||!t.to))add('air'+i,'#0ea5e9','✈',(t.dir==='gidis'?'Gidiş':t.dir==='donus'?'Dönüş':'Uçuş')+' için havalimanı seçilmedi',(t.fc||'?')+' → '+(t.tc||'?')+' · muhasebe bileti buna göre alır','Seç',goConn)});
-  for(let i=0;i<seq.length;i++){if(seq[i].mode!=='rental')continue;let j=i;while(j+1<seq.length&&seq[j+1].mode==='rental')j++;const a=seq[i].fc,b=seq[j].tc;if(a&&b&&lc(a)!==lc(b))add('rent'+i,'#f59e0b','🔑','Kiralık araç '+a+'’de alınıp '+b+'’de bırakılıyor','Tek yön teslim çoğu firmada ek ücretli · fiyatı buna göre sorun','Bağlantılar',goConn);i=j}
+  for(let i=0;i<seq.length;i++){if(seq[i].mode!=='rental')continue;let j=i;while(j+1<seq.length&&seq[j+1].mode==='rental')j++;const a=seq[i].fc,b=seq[j].tc;if(a&&b&&lc(a)!==lc(b))add('rent'+i,'#f59e0b','🔑','Kiralık araç · alış: '+a+', teslim: '+b,'Tek yön teslim çoğu firmada ek ücretli · fiyatı buna göre sorun','Bağlantılar',goConn);i=j}
   const first=ch.G[0],last=ch.G[ch.G.length-1];const g=seq.find(t=>t.dir==='gidis'),d=seq.find(t=>t.dir==='donus');
-  if(g&&first&&g.tc&&lc(g.tc)!==lc(first.c))add('gcity','#f59e0b','🧭','Gidiş '+g.tc+'’a, ilk durak '+first.c,first.c+'’a nasıl geçileceği belli değil · gidişi düzeltin ya da bağlantı ekleyin','Bağlantılar',goConn);
-  if(d&&ch.rc&&d.fc&&lc(d.fc)!==lc(ch.rc))add('dcity','#f59e0b','🧭','Dönüş '+d.fc+'’dan, dönüş noktası '+ch.rc,'“Dönüş nereden?” seçimini veya dönüş yolculuğunu kontrol edin','Bağlantılar',goConn);
+  if(g&&first&&g.tc&&lc(g.tc)!==lc(first.c))add('gcity','#f59e0b','🧭','Gidiş varışı: '+g.tc+' · ilk durak: '+first.c,'İlk durağa nasıl geçileceği belli değil · gidişin varış yerini düzeltin','Bağlantılar',goConn);
+  if(d&&ch.rc&&d.fc&&lc(d.fc)!==lc(ch.rc))add('dcity','#f59e0b','🧭','Dönüş kalkışı: '+d.fc+' · dönüş noktası: '+ch.rc,'“Dönüş nereden?” seçimini veya dönüş yolculuğunu kontrol edin','Bağlantılar',goConn);
   if(g&&g.date&&first){if(g.date>first.d)add('gdate','#ef4444','📅','Gidiş '+fmtShort(g.date)+', ilk ziyaret '+fmtShort(first.d),'Gidiş tarihi ilk ziyaretten sonra · tarihi kontrol edin','Bağlantılar',goConn);else if(g.date===first.d&&['ogle','aksam','gece'].includes(g.time||''))add('gtime','#f59e0b','⏰','Gidiş '+(TTIME[g.time]||'').split(' ')[0].toLocaleLowerCase('tr-TR')+', aynı gün ziyaret var','İlk ziyarete yetişemeyebilirsiniz · bir gün önce gitmeyi düşünün','Bağlantılar',goConn)}
   if(d&&d.date&&last&&d.date<last.e)add('ddate','#ef4444','📅','Dönüş '+fmtShort(d.date)+', son ziyaret '+fmtShort(last.e),'Dönüş son ziyaretten önce · tarihi kontrol edin','Bağlantılar',goConn)}
 
@@ -12950,6 +12955,40 @@ function airLines(){const out=[];if(!R)return out;const o=officeOn()?office():nu
   else if(L[0].prev&&L[1]&&L[1].s){const ps=ordered().find(s=>s.lat===L[0].lat&&s.lng===L[0].lng);if(ps&&AIRM.includes(legMode('ara',ps.city,L[1].s.city)))L.shift()}
   const z=L[L.length-1];if(z&&z.office&&L.length>=2&&AIRM.includes(legMode('donus')))L.pop()}catch(_){}return L}}
 {const _pm3=paintMap;paintMap=function(){if(map&&!map.__air){const os=map.set.bind(map);map.set=function(mk,ln){let ex=[];try{ex=airLines()}catch(_){}return os(mk,[...(ln||[]),...ex])};map.__air=1}return _pm3.apply(this,arguments)}}
+
+/* ---- planın hazır olma durumu: adımlar tamamlandıkça yeşile döner ---- */
+function planStatus(){const days=routeDays();const stops=ST.filter(s=>s.result!=='cancelled');
+  const A=[[!!String(R.title||'').trim(),'Rota adı'],[!!(R.start_date&&R.end_date),'Tarihler'],[travelers().length+GU().length>0,'Kimler gidiyor']];
+  const B=[[stops.length>0,'En az bir durak']];
+  if(stops.length)days.forEach(d=>{if(teamType(d)==='gorev'&&!ST.some(s=>s.day_date===d))B.push([false,fmtDay(d)+' boş'])});
+  if(R.scope!=='local'&&stops.length){const ch=connChain();const L=TK();ch.links.forEach(k=>{const t=L.find(x=>x.dir===k.dir&&lc(x.fc||'')===lc(k.fc)&&lc(x.tc||'')===lc(k.tc))||(k.dir!=='ara'?L.find(x=>x.dir===k.dir):null);const nm=(k.fc||'Ofis')+' → '+(k.tc||'Ofis');
+    if(!t){B.push([false,nm]);return}B.push([!!(t.mode&&t.date),nm+(t.date?'':' tarihi')]);if(t.mode==='flight')B.push([!!(t.from&&t.to),nm+' havalimanı'])})}
+  const e=EXP();const C=[];let nights=0;try{nights=autoVals().nights}catch(_){}if(nights>0&&R.scope!=='local')C.push([numv(e.room_price)>0,'Gecelik oda fiyatı']);C.push([numv(e.meal_pp)>0,'Yemek ücreti']);
+  const pub=TK().filter(t=>t.date&&!NOTKT.includes(t.mode)&&!['taxi','minibus'].includes(t.mode));if(pub.length)C.push([pub.every(t=>t.buyer),'Biletleri kimin alacağı']);
+  const sent=(REQS||[]).some(q=>!['withdrawn','rejected'].includes(q.state));const D=[[!!R.id&&!dirty,'Kaydet'],[sent,'Onaya gönder']];
+  return [A,B,C,D].map(L=>({ok:L.filter(x=>x[0]).length,n:L.length,miss:L.filter(x=>!x[0]).map(x=>x[1])}))}
+function stepperHtml(s){let P;try{P=planStatus()}catch(_){P=WZS.map(()=>({ok:0,n:1,miss:[]}))}const tot=P.reduce((x,p)=>x+p.n,0),ok=P.reduce((x,p)=>x+p.ok,0);const pct=tot?Math.round(ok/tot*100):0;
+  return '<div class="cfst"><div class="cfst-top"><b>Plan %'+pct+' hazır</b><span>'+(pct===100?'Her şey tamam ✓':(tot-ok)+' eksik kaldı')+'</span><em style="--p:'+pct+'%"></em></div><ol class="cfst-l">'
+   +WZS.map((x,i)=>{const p=P[i];const st=p.ok===p.n?'ok':p.ok>0?'part':'none';return '<li class="st-'+st+(i===s?' cur':'')+'"><button type="button" data-ws="'+i+'" title="'+esc(p.miss.length?'Eksik: '+p.miss.join(', '):'Tamam')+'"><i>'+(st==='ok'?'✓':i+1)+'</i><span><b>'+esc(x[1])+'</b><small>'+(st==='ok'?'Tamam':p.miss.length?esc(p.miss[0])+(p.miss.length>1?' · +'+(p.miss.length-1)+' eksik':''):'')+'</small></span></button></li>'}).join('')+'</ol></div>'}
+function stepRefresh(){const bar=$('cfrtRoot')?.querySelector('.cfrt-wz');const old=bar?.querySelector('.cfst');if(!old)return;const t=document.createElement('div');t.innerHTML=stepperHtml(WZ.step);const nw=t.firstElementChild;if(nw.outerHTML===old.outerHTML)return;old.replaceWith(nw);bar.querySelectorAll('[data-ws]').forEach(b=>b.onclick=()=>wzGo(+b.dataset.ws))}
+/* gün başlıkları ve yolculuk satırları: hazır mı? */
+function dayMarks(){const box=$('cfrtDays');if(!box)return;const L=TK();
+  box.querySelectorAll('.cfrt-day[data-day]').forEach(sec=>{const d=sec.dataset.day;const t=teamType(d);const n=ST.filter(s=>s.day_date===d).length;const h=sec.querySelector(':scope>header');if(!h)return;let m=h.querySelector('.cfst-day');if(!m){m=document.createElement('span');m.className='cfst-day';const sp=h.querySelector('.sp');sp?sp.after(m):h.append(m)}
+    const ok=n>0||t!=='gorev';const txt=n?'✓ '+n+' durak':t==='kisisel'?'Kişisel gün':t==='yol'?'Yol günü':t==='bekleme'?'Bekleme':'Durak ekleyin';const cls='cfst-day '+(n?'ok':ok?'mute':'miss');if(m.className!==cls)m.className=cls;if(m.textContent!==txt)m.textContent=txt});
+  box.querySelectorAll('.cfcn[data-ti]').forEach(row=>{const t=L[+row.dataset.ti];if(!t)return;const miss=[];if(!t.date)miss.push('tarih');if(t.mode==='flight'&&(!t.from||!t.to))miss.push('havalimanı');row.classList.toggle('ok',!miss.length);row.classList.toggle('miss',!!miss.length);
+    let m=row.querySelector('.cfcn-st');if(!m){m=document.createElement('span');m.className='cfcn-st';row.querySelector('.cfcn-l')?.append(m)}const txt=miss.length?'eksik: '+miss.join(', '):'✓ hazır';if(m.textContent!==txt)m.textContent=txt})}
+/* aynı gün duraklar arası: neyle gidilecek? (şehir değişikliği olmayan geçişler) */
+const HOPM=[['car','🚗 Araçla'],['rental','🔑 Kiralık araçla'],['taxi','🚕 Taksiyle'],['minibus','🚐 Dolmuş / minibüsle'],['bus','🚌 Şehir içi otobüsle'],['walk','🚶 Yürüyerek']];
+const HOP2LT={taxi:'taksi',minibus:'dolmus',bus:'otobus',rental:'kiralik'};
+const hopKey=s=>s.day_date+'|'+lc(s.place_name||'');
+function hopDefault(){const L=TK();return L.some(t=>CARM.includes(t.mode))||(!L.length&&isCar(R.transport))?'car':'taxi'}
+function hopUi(){const box=$('cfrtDays');if(!box||!R||R.scope==='local'&&false)return;const H=(R.needs&&R.needs.hops)||{};const dis=canEdit?'':' disabled';const def=hopDefault();let first=true;
+  box.querySelectorAll('.cfrt-day[data-day]').forEach(sec=>{sec.querySelectorAll('.cfrt-stop[data-sk]').forEach(row=>{const s=ST.find(x=>x._k===row.dataset.sk);if(!s)return;const prev=row.previousElementSibling;
+    const showIt=!first&&!(prev&&prev.classList.contains('cfcn'))&&!(!prev&&sec.previousElementSibling&&sec.previousElementSibling.classList.contains('cfcn'));first=false;
+    if(!showIt||prev&&prev.classList.contains('cfhop'))return;const v=H[hopKey(s)]||def;
+    row.insertAdjacentHTML('beforebegin','<div class="cfhop"><span>↓ Buraya</span><select aria-label="Bu durağa nasıl gidilecek"'+dis+'>'+HOPM.map(m=>'<option value="'+m[0]+'"'+(v===m[0]?' selected':'')+'>'+m[1]+'</option>').join('')+'</select></div>');
+    const sel=row.previousElementSibling.querySelector('select');sel.onchange=()=>{R.needs=R.needs&&typeof R.needs==='object'?R.needs:{};R.needs.hops={...(R.needs.hops||{}),[hopKey(s)]:sel.value};dirty=true;const k=HOP2LT[sel.value];if(k){try{const L=LT();if(!L.some(x=>x.k===k)){L.push({k,where:''});paintExp()}}catch(_){}}}})})}
+{const _pd3=paintDays;paintDays=function(){const r=_pd3.apply(this,arguments);try{hopUi();dayMarks()}catch(e){console.warn(e)}return r}}
 
 /* ---- kişi seçici: kimler gidiyor / kimler görsün — az yer kaplar, elle isim eklenebilir ---- */
 function pkChanged(f){if(f==='participant_ids'){try{paintExp()}catch(_){}try{paintSum()}catch(_){}}warnSoon()}
@@ -17039,5 +17078,44 @@ html[data-cfp=dark] .cfpk-l button.new{color:#c4f24c}
 .cfpk-l button.new small{font-weight:500;color:var(--mt-ink-3,#71717a)}
 .cfpk-ft{display:flex;align-items:center;gap:8px;justify-content:space-between;border-top:1px solid var(--mt-border,#ececef);padding-top:6px}
 .cfpk-ft .cfrt-msg{font-size:11.5px}
+</style>
+<style id="cf-plan-progress-style">
+.cfst{display:flex;flex-direction:column;gap:10px}
+.cfst-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.cfst-top b{font-size:14px}.cfst-top span{font-size:12.5px;color:var(--mt-ink-3,#71717a)}
+.cfst-top em{flex:1 1 100%;height:6px;border-radius:6px;background:var(--mt-border,#e4e4e7);position:relative;overflow:hidden}
+.cfst-top em::after{content:'';position:absolute;left:0;top:0;bottom:0;width:var(--p);border-radius:6px;background:linear-gradient(90deg,#84cc16,#c4f24c);transition:width .5s cubic-bezier(.22,1,.36,1)}
+.cfst-l{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.cfst-l li button{width:100%;display:flex;gap:9px;align-items:center;text-align:left;border:1px solid var(--mt-border,#e4e4e7);background:var(--mt-panel,#fff);border-radius:12px;padding:8px 10px;cursor:pointer;font:inherit;color:inherit;transition:border-color .2s,box-shadow .2s,transform .15s}
+.cfst-l li button:hover{transform:translateY(-1px)}
+.cfst-l li i{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:800;font-size:12.5px;border:2px solid var(--mt-border-strong,#c7c7cf);color:var(--mt-ink-3,#71717a);transition:.25s}
+.cfst-l li span{display:flex;flex-direction:column;min-width:0}
+.cfst-l li b{font-size:12.5px;line-height:1.2}
+.cfst-l li small{font-size:11px;color:var(--mt-ink-3,#71717a);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cfst-l li.st-ok:not(.cfp-keep) i{background:#84cc16!important;border-color:#84cc16!important;color:#0b0d08!important}
+.cfst-l li.st-ok small{color:#4d7c0f}
+html[data-cfp=dark] .cfst-l li.st-ok small{color:#c4f24c}
+.cfst-l li.st-ok button{border-color:rgba(132,204,22,.55)}
+.cfst-l li.st-part i{border-color:#f59e0b;color:#b45309}
+html[data-cfp=dark] .cfst-l li.st-part i{color:#fbbf24}
+.cfst-l li.st-part small{color:#b45309}
+html[data-cfp=dark] .cfst-l li.st-part small{color:#fbbf24}
+.cfst-l li.cur button{box-shadow:0 0 0 2px #84cc16 inset}
+.cfst-day{font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.cfst-day.ok{background:rgba(132,204,22,.15);color:#4d7c0f}
+html[data-cfp=dark] .cfst-day.ok{color:#c4f24c}
+.cfst-day.miss{background:rgba(245,158,11,.15);color:#b45309}
+html[data-cfp=dark] .cfst-day.miss{color:#fbbf24}
+.cfst-day.mute{background:var(--mt-sunken,#f4f4f5);color:var(--mt-ink-3,#71717a)}
+.cfcn.ok{border-style:solid;border-color:rgba(132,204,22,.55)}
+.cfcn.miss{border-color:#f59e0b}
+.cfcn-st{font-size:11px;font-weight:700}
+.cfcn.ok .cfcn-st{color:#4d7c0f}.cfcn.miss .cfcn-st{color:#b45309}
+html[data-cfp=dark] .cfcn.ok .cfcn-st{color:#c4f24c}html[data-cfp=dark] .cfcn.miss .cfcn-st{color:#fbbf24}
+.cfcn-hint{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px;padding:9px 12px;border-radius:12px;background:rgba(92,200,255,.10);border:1px solid rgba(92,200,255,.35);font-size:13px}
+.cfcn-hint small{flex:1 1 100%;color:var(--mt-ink-3,#71717a)}
+.cfhop{display:flex;align-items:center;gap:8px;margin:2px 0 2px 14px;font-size:12px;color:var(--mt-ink-3,#71717a)}
+.cfhop select{width:auto!important;padding:4px 8px;border:1px dashed var(--mt-border-strong,#c7c7cf);border-radius:999px;font:inherit;font-size:12px;font-weight:600;background:transparent;color:inherit}
+@media (max-width:760px){.cfst-l{grid-template-columns:repeat(2,1fr)}}
 </style>
 </body></html>
