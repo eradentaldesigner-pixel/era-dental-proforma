@@ -6341,7 +6341,7 @@ const act=b=>{try{return (typeof pnAction==='function'&&pnAction(b))||''}catch(e
 function keyOf(b){
   const d=b.dataset;
   if('cfHealthNav' in d)return 'health';if('cfMessagesNav' in d)return 'messages';if('cfInboxNav' in d)return 'inbox';if('cfUsersNav' in d)return 'users';if('cfFilesNav' in d)return 'files';if('cfAnalyticsNav' in d)return 'analytics';if('cfReportNav' in d)return 'reports';
-  /* CepFirma düzeltme: Bekleyenler / Görevler / Otomatik kurallar */if('cfQueueNav' in d)return 'queue';if('cfStock2Nav' in d)return 'stock2';if('cfRoutesNav' in d)return 'routes';if('cfTasksNav' in d)return 'tasks';if('cfAutoNav' in d)return 'rules';
+  /* CepFirma düzeltme: Bekleyenler / Görevler / Otomatik kurallar */if('cfQueueNav' in d)return 'queue';if('cfStock2Nav' in d)return 'stock2';if('cfTrashNav' in d)return 'trash';if('cfRoutesNav' in d)return 'routes';if('cfTasksNav' in d)return 'tasks';if('cfAutoNav' in d)return 'rules';
   if('cfWorkNav' in d)return 'work';if('presenceOpen' in d)return 'presence';if('erOpen' in d)return 'requests';if('securityOpen' in d)return 'security';if('personalSettings' in d)return 'personal';
   if(d.newOfferNav)return 'newOffer';if(d.offerNav)return 'offers';
   const a=act(b);if(a)return a;
@@ -6353,6 +6353,7 @@ function visibleKeys(){
   const v=new Set(['requests','messages','inbox','files','guide','logout','queue','tasks']);if(isMgr())v.add('rules');if(has('organization')||has('crm')||has('service'))v.add('routes');
   for(const k of ['home','calendar','customers','crm','catalog','service','orders','organization'])if(has(k))v.add(k);
   if(has('stock')||has('catalog'))v.add('stock2');
+  if(currentMembership?.role&&currentMembership.role!=='viewer')v.add('trash');
   if(has('archive'))v.add('archive');else if(offersOk())v.add('offers');
   if(isMgr())v.add('users');else if(typeof erAllowed!=='function'||erAllowed())v.add('presence');
   if(isMgr()){v.add('reports');v.add('health')}
@@ -6368,7 +6369,7 @@ const GROUPS=[
   ['SATIŞ',['customers','crm','archive','offers']],
   ['ÜRÜN VE SERVİS',['catalog','stock2','service']],
   ['OPERASYON',['orders','organization','routes']],
-  ['YÖNETİM',['users','presence','reports','rules','files','health','settings','personal','security']]
+  ['YÖNETİM',['users','presence','reports','rules','files','health','trash','settings','personal','security']]
 ];
 const ALWAYS_HIDE=new Set(['work','newOffer','stock','team','analytics']);
 function labelSpan(b){return b.querySelector('.pn-label')||[...b.querySelectorAll(':scope > span')].find(s=>!/(ds-icon|(^|\s)mi(\s|$)|count)/.test(s.className))}
@@ -17521,7 +17522,7 @@ const boss=()=>['owner','admin'].includes(ROLE());
 const say=(m,t)=>{try{showToast(m,t||'success')}catch(_){alert(m)}};
 const lc=s=>String(s||'').toLocaleLowerCase('tr-TR');
 const fmtD=d=>d?new Date(String(d).slice(0,10)+'T12:00:00').toLocaleDateString('tr-TR',{day:'numeric',month:'short',year:'numeric'}):'';
-const errText=e=>{const m=String(e?.message||e||'');return /Could not find the function|schema cache/.test(m)?'Çöp kutusu için veritabanı kurulumu gerekiyor: 2026-11-27-cop-kutusu.sql dosyasını Supabase › SQL Editor’de bir kez çalıştırın.':m};
+const errText=e=>{const m=String(e?.message||e||'');if(/Geçersiz kayıt türü/.test(m))return 'Teklif silmek için veritabanı kurulumu gerekiyor: 2026-11-27-cop-kutusu-teklif.sql dosyasını Supabase › SQL Editor’de bir kez çalıştırın.';return /Could not find the function|schema cache/.test(m)?'Çöp kutusu için veritabanı kurulumu gerekiyor: 2026-11-27-cop-kutusu.sql dosyasını Supabase › SQL Editor’de bir kez çalıştırın.':m};
 const changed=()=>{try{document.dispatchEvent(new CustomEvent('cf-trash-changed'))}catch(_){}try{if(typeof loadArchive==='function'&&document.getElementById('archiveList'))loadArchive()}catch(_){}try{const ov=document.getElementById('offersOverlay');if(ov&&!ov.hidden&&ov.offsetParent!==null&&typeof loadOffers==='function')loadOffers()}catch(_){}};
 const KIND={proforma:['📄','Proforma'],offer:['📝','Teklif'],route:['🗺','Rota']};
 async function rpc(kind,id,action){return sb.rpc('cf_trash',{p_company:C(),p_kind:kind,p_id:+id,p_action:action})}
@@ -17590,6 +17591,9 @@ function archiveHook(){
   const s=document.querySelector('.archive-search');if(s&&!s.querySelector('[data-cftr-open]')){const b=document.createElement('button');b.type='button';b.className='btn light';b.dataset.cftrOpen='';b.textContent='🗑 Çöp kutusu';b.title='Silinenler ve toplu temizlik';b.onclick=()=>open('trash');s.append(b)}
   const nb=[...document.querySelectorAll('#offersOverlay button')].find(x=>/Yeni teklif/.test(x.textContent));if(nb&&!nb.parentElement.querySelector('[data-cftr-open]')){const b=document.createElement('button');b.type='button';b.className='btn light';b.dataset.cftrOpen='';b.textContent='🗑 Çöp kutusu';b.onclick=()=>open('trash');nb.before(b)}}
 setTimeout(archiveHook,0);document.addEventListener('DOMContentLoaded',archiveHook);new MutationObserver(()=>{if((!document.querySelector('.archive-search [data-cftr-open]')&&document.querySelector('.archive-search'))||(!document.querySelector('#offersOverlay [data-cftr-open]')&&document.getElementById('offersOverlay')))archiveHook()}).observe(document.documentElement,{childList:true,subtree:true});
+const TICO='<svg class="cfui-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6M14 11v6"/></svg>';
+function navEntry(){if(!ME()||ROLE()==='viewer')return;document.querySelectorAll('.ds-nav,.md-menu').forEach(nav=>{const ex=nav.querySelectorAll(':scope>[data-cf-trash-nav]');if(ex.length){[...ex].slice(1).forEach(x=>x.remove());return}const ref=nav.querySelector(':scope>[data-pn-action="settings"]')||nav.querySelector(':scope>button');if(!ref)return;const b=document.createElement('button');b.type='button';b.className=ref.className.replace(/active/,'').trim();b.dataset.cfTrashNav='';b.dataset.t='Çöp kutusu';b.innerHTML=nav.matches('.md-menu')?'<span class="mi">'+TICO+'</span>Çöp kutusu':'<span class="ds-icon">'+TICO+'</span><span class="pn-label">Çöp kutusu</span>';b.onclick=e=>{e.preventDefault();open('trash')};ref.before(b)})}
+new MutationObserver(()=>{clearTimeout(navEntry._t);navEntry._t=setTimeout(navEntry,150)}).observe(document.body,{childList:true,subtree:true});setTimeout(navEntry,400);
 window.cfTrash={open,move};
 })();</script>
 <style id="cf-docs-style">
