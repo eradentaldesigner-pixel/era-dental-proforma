@@ -6424,7 +6424,8 @@ function organize(){
 /* ---------- Ortak sayfa sekmeleri ---------- */
 function clickNav(key){const b=[...document.querySelectorAll('.ds-nav > button')].find(x=>keyOf(x)===key);if(b){b.click();return true}return false}
 const TABSETS={
-  docs:[['offers','Teklifler',()=>offersOk(),()=>clickNav('offers')],['archive','Proformalar',()=>has('archive'),()=>clickNav('archive')]],
+  docs:[['offers','Teklifler',()=>offersOk(),()=>clickNav('offers')],['archive','Proformalar',()=>has('archive'),()=>clickNav('archive')],
+    ['harcirah','Harcırah formları',()=>has('archive')&&(has('organization')||has('crm')||has('service')),()=>window.cfDocs?.show('harcirah')],['visits','Ziyaret raporları',()=>has('archive')&&(has('organization')||has('crm')||has('service')),()=>window.cfDocs?.show('visits')],['service','Servis formları',()=>has('archive')&&has('service')&&['owner','admin','manager','service'].includes(currentMembership?.role),()=>window.cfDocs?.show('service')]],
   reports:[['reports','Özet rapor',()=>isMgr(),()=>window.cfOpenReports?.()],['analytics','Analitik',()=>isMgr(),()=>window.cfOpenAnalytics?.()]]
 };
 const PAGES=[
@@ -12962,6 +12963,17 @@ function airLines(){const out=[];if(!R)return out;const o=officeOn()?office():nu
   const z=L[L.length-1];if(z&&z.office&&L.length>=2&&AIRM.includes(legMode('donus')))L.pop()}catch(_){}return L}}
 {const _pm3=paintMap;paintMap=function(){if(map&&!map.__air){const os=map.set.bind(map);map.set=function(mk,ln){let ex=[];try{ex=airLines()}catch(_){}return os(mk,[...(ln||[]),...ex])};map.__air=1}return _pm3.apply(this,arguments)}}
 
+/* ---- belge arşivi: rota açmadan harcırah formu ve ziyaret raporu PDF'i ---- */
+window.cfRouteDocs={
+  async harcirah(id){const r=await sb.from('company_route_requests').select('*').eq('company_id',company()).eq('id',id).maybeSingle();if(r.error||!r.data){toast('Harcırah formu bulunamadı.');return}const q=r.data;
+    if(!q.snapshot||!Object.keys(q.snapshot).length){toast('Bu talepte kayıtlı form yok.');return}await loadPays([q.id]).catch(()=>{});await people();printHtml(formHtml(q.snapshot,{...reqMeta(q),print:true}))},
+  async visits(routeId){const [ro,st,rp,fl]=await Promise.all([sb.from('company_routes').select('*').eq('id',routeId).maybeSingle(),sb.from('company_route_stops').select('*').eq('route_id',routeId),sb.from('company_route_visit_reports').select('*').eq('route_id',routeId),sb.from('company_route_visit_files').select('*').eq('route_id',routeId).order('created_at')]);
+    if(ro.error||!ro.data){toast('Rota bulunamadı.');return}
+    const sv={R,VREP,VFILES,VKEY};const list=(st.data||[]).slice().sort((a,b)=>String(a.day_date||'').localeCompare(String(b.day_date||''))||(+a.position||0)-(+b.position||0));
+    try{R=ro.data;VREP=new Map();VFILES=new Map();VKEY=null;(rp.data||[]).forEach(x=>VREP.set(x.stop_id,x));(fl.data||[]).forEach(x=>{const a=VFILES.get(x.stop_id)||[];a.push(x);VFILES.set(x.stop_id,a)});await printVisits(list)}
+    finally{R=sv.R;VREP=sv.VREP;VFILES=sv.VFILES;VKEY=sv.VKEY}}
+};
+
 /* ---- çöp kutusu: rota silme çöpe taşır; kartta sil simgesi; başlıkta Çöp kutusu ---- */
 const trashOk=x=>!!x&&(x.created_by===me()||['owner','admin'].includes(role()));
 delRoute=async function(){if(!R||!R.id||!window.cfTrash)return;if(await window.cfTrash.move('route',R.id,R.title)){dirty=false;renderList()}};
@@ -17575,5 +17587,92 @@ function archiveHook(){
   const s=document.querySelector('.archive-search');if(s&&!s.querySelector('[data-cftr-open]')){const b=document.createElement('button');b.type='button';b.className='btn light';b.dataset.cftrOpen='';b.textContent='🗑 Çöp kutusu';b.title='Silinenler ve toplu temizlik';b.onclick=()=>open('trash');s.append(b)}}
 setTimeout(archiveHook,0);document.addEventListener('DOMContentLoaded',archiveHook);new MutationObserver(()=>{if(!document.querySelector('.archive-search [data-cftr-open]')&&document.querySelector('.archive-search'))archiveHook()}).observe(document.documentElement,{childList:true,subtree:true});
 window.cfTrash={open,move};
+})();</script>
+<style id="cf-docs-style">
+#archiveOverlay .archive-modal.cfdoc-on>.archive-stats,#archiveOverlay .archive-modal.cfdoc-on>.cf-doc-list-note,#archiveOverlay .archive-modal.cfdoc-on>.archive-search,#archiveOverlay .archive-modal.cfdoc-on>.archive-workspace,#archiveOverlay .archive-modal.cfdoc-on .archive-head .btn:not([onclick*="close"]):not(.cfp-keep-btn){display:none!important}
+#archiveOverlay .archive-modal:not(.cfdoc-on)>#cfdocPane{display:none}
+.cfdoc-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:4px 0 12px}
+.cfdoc-bar input[type=search],.cfdoc-bar select{padding:9px 12px;border:1px solid var(--mt-border,#e4e4e7);border-radius:11px;background:var(--mt-panel,#fff);color:inherit;font:inherit;font-size:13.5px;width:auto}
+.cfdoc-bar input[type=search]{flex:1 1 240px;min-width:200px}
+.cfdoc-bar label{display:inline-flex;gap:6px;align-items:center;font-size:13px;font-weight:600}
+.cfdoc-bar .sum{margin-left:auto;font-size:12.5px;color:var(--mt-ink-3,#71717a)}
+.cfdoc-tbl{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--mt-border,#e4e4e7);border-radius:14px;overflow:hidden;background:var(--mt-panel,#fff)}
+.cfdoc-tbl th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--mt-ink-3,#71717a);text-align:left;padding:10px 12px;border-bottom:1px solid var(--mt-border,#e4e4e7);background:var(--mt-sunken,#fafafa);font-weight:700}
+.cfdoc-tbl td{padding:10px 12px;border-bottom:1px solid var(--mt-border,#ececef);font-size:13.5px;vertical-align:middle}
+.cfdoc-tbl tr:last-child td{border-bottom:0}
+#archiveOverlay #cfdocPane .cfdoc-tbl td,#archiveOverlay #cfdocPane .cfdoc-tbl td b{color:var(--mt-ink,#18181b)!important}#archiveOverlay #cfdocPane .cfdoc-tbl td small{color:var(--mt-ink-3,#71717a)!important}.cfdoc-bar label{white-space:nowrap}
+.cfdoc-tbl td small{display:block;color:var(--mt-ink-3,#71717a);font-size:12px;margin-top:2px}
+.cfdoc-tbl td.n{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.cfdoc-tbl td.a{text-align:right;white-space:nowrap}
+.cfdoc-tbl tbody tr:hover td{background:var(--mt-sunken,#fafafa)}
+.cfdoc-st{font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap;background:var(--mt-sunken,#f4f4f5);color:var(--mt-ink-2,#52525b)}
+.cfdoc-st.g{background:rgba(132,204,22,.15);color:#4d7c0f}.cfdoc-st.b{background:rgba(14,165,233,.13);color:#0369a1}.cfdoc-st.y{background:rgba(217,119,6,.13);color:#b45309}.cfdoc-st.r{background:rgba(220,38,38,.12);color:#b91c1c}
+html[data-cfp=dark] .cfdoc-st.g{color:#c4f24c}html[data-cfp=dark] .cfdoc-st.b{color:#7dd3fc}html[data-cfp=dark] .cfdoc-st.y{color:#fbbf24}html[data-cfp=dark] .cfdoc-st.r{color:#f87171}
+.cfdoc-chips{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}.cfdoc-chips span{font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;background:var(--mt-sunken,#f4f4f5);color:var(--mt-ink-2,#52525b)}
+.cfdoc-empty{padding:40px 20px;text-align:center;color:var(--mt-ink-3,#71717a);border:1px dashed var(--mt-border,#e4e4e7);border-radius:14px}
+.cfdoc-note{font-size:12.5px;color:var(--mt-ink-3,#71717a);margin:10px 2px 0}
+@media (max-width:720px){.cfdoc-tbl thead{display:none}.cfdoc-tbl tr{display:grid;grid-template-columns:1fr auto;border-bottom:1px solid var(--mt-border,#ececef)}.cfdoc-tbl td{border:0;padding:6px 12px}.cfdoc-tbl td.hide-m{display:none}.cfdoc-tbl td.a{grid-column:1/-1;text-align:left;padding-bottom:10px}}
+</style>
+<script id="cf-docs">(function(){'use strict';
+const $=id=>document.getElementById(id);
+const E=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const C=()=>{try{return currentCompanyId}catch(_){return null}},ME=()=>{try{return currentUser?.id||null}catch(_){return null}},ROLE=()=>{try{return currentMembership?.role||''}catch(_){return ''}};
+const say=(m,t)=>{try{showToast(m,t||'success')}catch(_){alert(m)}};
+const lc=s=>String(s||'').toLocaleLowerCase('tr-TR');
+const fmtD=d=>d?new Date(String(d).slice(0,10)+'T12:00:00').toLocaleDateString('tr-TR',{day:'numeric',month:'short',year:'numeric'}):'—';
+const TL=v=>v==null?'—':Number(v).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2})+' ₺';
+const TABS={harcirah:'Harcırah formları',visits:'Ziyaret raporları',service:'Servis formları'};
+const SUBS={harcirah:'Gönderilen bütün harcırah formları. Onaylananlar onay anındaki hâliyle basılır.',visits:'Rotalarda yazılan ziyaret raporları, rota rota. Fotoğraf ve imzalarla birlikte.',service:'Teknik servis kayıtlarının servis formları.'};
+const QST={submitted:['Onay bekliyor','y'],revision:['Düzeltme istendi','y'],rejected:['Reddedildi','r'],approved:['Onaylandı','b'],partial:['Kısmen ödendi','b'],paid:['Ödendi','g'],withdrawn:['Geri çekildi','']};
+const SVS={received:['Teslim alındı','b'],diagnosis:['Arıza tespiti','b'],customer_approval:['Müşteri onayı bekleniyor','y'],parts:['Parça bekleniyor','y'],repair:['Onarımda','b'],ready:['Hazır, teslim bekliyor','g'],delivered:['Teslim edildi','g'],returned:['Yapılamadı / iade','r']};
+const SVL={waiting:['Teslim alındı','b'],following:['İncelemede','b'],approved:['Onarımda / hazır','y'],completed:['Teslim edildi','g'],failed:['Yapılamadı / iade','r']};
+const VT={sales:'Satış',demo:'Demo',install:'Kurulum',training:'Eğitim',scan:'Tarama',collection:'Tahsilat',service:'Servis',other:'Diğer'};
+const S={key:null,rows:[],err:'',q:'',period:'90',mine:false,names:{},busy:false};
+let origTitle=null,origSub=null;
+const modal=()=>$('archiveOverlay')?.querySelector('.archive-modal');
+function names(){return (window.cfPeople?window.cfPeople():Promise.resolve([])).then(L=>{(L||[]).forEach(p=>{const id=p.id||p.user_id;if(id)S.names[id]=p.name||p.full_name||p.display_name||p.email||''})}).catch(()=>{})}
+const who=id=>id===ME()?'Siz':(S.names[id]||'—');
+function since(){if(S.period==='all')return null;return new Date(Date.now()-(+S.period)*864e5).toISOString()}
+function tabsSync(){const bar=modal()?.querySelector('[data-cfnav-tabs]');if(!bar)return;bar.querySelectorAll('[data-cfnav-tab]').forEach(b=>{const on=S.key?b.dataset.cfnavTab===S.key:b.dataset.cfnavTab==='archive';if(on){b.setAttribute('aria-current','page');b.setAttribute('aria-selected','true')}else{b.removeAttribute('aria-current');b.setAttribute('aria-selected','false')}})}
+function head(on){const h=modal()?.querySelector('.archive-head h1, .archive-head h2');const p=modal()?.querySelector('.archive-head .muted, .archive-head p');if(on){if(origTitle==null&&h){origTitle=h.textContent;origSub=p?.textContent??null}if(h)h.textContent=TABS[S.key];if(p)p.textContent=SUBS[S.key]}else{if(h&&origTitle!=null)h.textContent=origTitle;if(p&&origSub!=null)p.textContent=origSub;origTitle=origSub=null}}
+const HIDE=['.archive-stats','.cf-doc-list-note','.archive-search','.archive-workspace'];
+function hideArch(m,on){HIDE.forEach(sel=>m.querySelectorAll(':scope>'+sel).forEach(el=>{if(on)el.style.setProperty('display','none','important');else el.style.removeProperty('display')}));m.querySelectorAll('.archive-head .btn').forEach(b=>{if(/onay bekleyen/i.test(b.textContent)){if(on)b.style.setProperty('display','none','important');else b.style.removeProperty('display')}})}
+function off(){const m=modal();if(!m||!m.classList.contains('cfdoc-on'))return;m.classList.remove('cfdoc-on');hideArch(m,false);S.key=null;head(false);tabsSync()}
+async function show(key){if(!TABS[key])return;let ov=$('archiveOverlay');const vis=ov&&!ov.hidden&&getComputedStyle(ov).display!=='none';if(!vis){try{await appNavigate('archive')}catch(_){}}
+  const m=modal();if(!m)return;let pane=$('cfdocPane');if(!pane){pane=document.createElement('div');pane.id='cfdocPane';const after=m.querySelector('[data-cfnav-tabs]')||m.querySelector('.archive-head');after.insertAdjacentElement('afterend',pane)}
+  S.key=key;S.q='';m.classList.add('cfdoc-on');hideArch(m,true);head(true);tabsSync();pane.innerHTML='<p class="cfdoc-empty">Yükleniyor…</p>';await Promise.all([load(),names()]);paint()}
+async function load(){const c=C(),sn=since(),me=ME();S.err='';S.rows=[];
+  if(S.key==='harcirah'){let q=sb.from('company_route_requests').select('id,route_id,revision,state,amount,submitted_by,submitted_at,decided_at,paid_amount,paid_at').eq('company_id',c).order('submitted_at',{ascending:false}).limit(1000);if(sn)q=q.gte('submitted_at',sn);const r=await q;if(r.error){S.err=r.error.message;return}
+    const ids=[...new Set((r.data||[]).map(x=>x.route_id))];const rt=ids.length?await sb.from('company_routes').select('id,title,start_date,end_date').in('id',ids):{data:[]};const RM=new Map((rt.data||[]).map(x=>[x.id,x]));
+    S.rows=(r.data||[]).filter(x=>RM.has(x.route_id)).map(x=>({...x,route:RM.get(x.route_id),mine:x.submitted_by===me}))}
+  else if(S.key==='visits'){let q=sb.from('company_route_visit_reports').select('id,route_id,visit_type,created_at,created_by').eq('company_id',c).order('created_at',{ascending:false}).limit(3000);if(sn)q=q.gte('created_at',sn);const r=await q;
+    if(r.error){S.err=/does not exist|schema cache|relation|42P01|PGRST205/.test(r.error.message)?'Ziyaret raporları için veritabanı kurulumu gerekiyor (2026-11-26-rota-ziyaret-raporu.sql).':r.error.message;return}
+    const G=new Map();(r.data||[]).forEach(x=>{const g=G.get(x.route_id)||{route_id:x.route_id,n:0,types:{},last:x.created_at,by:new Set()};g.n++;g.types[x.visit_type||'other']=(g.types[x.visit_type||'other']||0)+1;if(x.created_at>g.last)g.last=x.created_at;g.by.add(x.created_by);G.set(x.route_id,g)});
+    const ids=[...G.keys()];const rt=ids.length?await sb.from('company_routes').select('id,title,start_date,end_date,created_by,owner_id').in('id',ids):{data:[]};const RM=new Map((rt.data||[]).map(x=>[x.id,x]));
+    S.rows=[...G.values()].filter(g=>RM.has(g.route_id)).map(g=>{const ro=RM.get(g.route_id);return {...g,route:ro,mine:g.by.has(me)||ro.created_by===me||ro.owner_id===me}}).sort((a,b)=>String(b.last).localeCompare(String(a.last)))}
+  else if(S.key==='service'){let q=sb.from('technical_service_records').select('id,service_number,received_date,status,stage,customer_name,device_name,brand_model,serial_number,created_by,assigned_user_id,created_at,delivered_date').eq('company_id',c).order('created_at',{ascending:false}).limit(1000);if(sn)q=q.gte('created_at',sn);const r=await q;if(r.error){S.err=r.error.message;return}
+    S.rows=(r.data||[]).map(x=>({...x,mine:x.created_by===me||x.assigned_user_id===me}))}}
+function filtered(){const q=lc(S.q);return S.rows.filter(r=>(!S.mine||r.mine)&&(!q||lc(JSON.stringify([r.route?.title,r.customer_name,r.device_name,r.service_number,r.serial_number,r.brand_model,(SVS[r.stage]||SVL[r.status]||[])[0],who(r.submitted_by||r.created_by)])).includes(q)))}
+function paint(){const pane=$('cfdocPane');if(!pane||!S.key)return;const L=filtered();const k=S.key;
+  const bar='<div class="cfdoc-bar"><input type="search" data-dq placeholder="'+({harcirah:'Rota adı veya kişi ara',visits:'Rota adı ara',service:'Servis no, müşteri, cihaz veya seri no ara'}[k])+'" value="'+E(S.q)+'"><select data-dp>'+[['30','Son 30 gün'],['90','Son 3 ay'],['365','Son 1 yıl'],['all','Tümü']].map(o=>'<option value="'+o[0]+'"'+(S.period===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select><label><input type="checkbox" data-dm'+(S.mine?' checked':'')+'> Yalnız benimkiler</label><span class="sum">'+L.length+' belge</span></div>';
+  let body='';
+  if(S.err)body='<div class="cfdoc-empty">⚠ '+E(S.err)+'</div>';
+  else if(!L.length)body='<div class="cfdoc-empty">Bu dönemde '+TABS[k].toLocaleLowerCase('tr-TR')+' yok.'+(S.period!=='all'?' Dönemi “Tümü” yaparak daha eskilere bakabilirsiniz.':'')+'</div>';
+  else if(k==='harcirah')body='<table class="cfdoc-tbl"><thead><tr><th>Rota</th><th>Gönderen</th><th>Gönderim</th><th>Durum</th><th style="text-align:right">Tutar</th><th></th></tr></thead><tbody>'+L.map(x=>{const st=QST[x.state]||[x.state,''];return '<tr><td><b>'+E(x.route.title||'Rota')+'</b><small>'+fmtD(x.route.start_date)+(x.route.end_date&&x.route.end_date!==x.route.start_date?' – '+fmtD(x.route.end_date):'')+(x.revision>1?' · '+x.revision+'. düzeltme':'')+'</small></td><td class="hide-m">'+E(who(x.submitted_by))+'</td><td class="hide-m">'+fmtD(x.submitted_at)+'</td><td><span class="cfdoc-st '+st[1]+'">'+E(st[0])+'</span></td><td class="n">'+TL(x.amount)+(x.state==='paid'&&x.paid_amount!=null&&+x.paid_amount!==+x.amount?'<small>ödenen '+TL(x.paid_amount)+'</small>':'')+'</td><td class="a"><button type="button" class="btn light" data-pdf="'+x.id+'">📄 PDF</button></td></tr>'}).join('')+'</tbody></table>';
+  else if(k==='visits')body='<table class="cfdoc-tbl"><thead><tr><th>Rota</th><th>Tarih</th><th>Ziyaretler</th><th>Son rapor</th><th></th></tr></thead><tbody>'+L.map(x=>'<tr><td><b>'+E(x.route.title||'Rota')+'</b><small>'+E([...x.by].map(who).join(', '))+'</small></td><td class="hide-m">'+fmtD(x.route.start_date)+(x.route.end_date&&x.route.end_date!==x.route.start_date?' – '+fmtD(x.route.end_date):'')+'</td><td><b>'+x.n+' rapor</b><div class="cfdoc-chips">'+Object.entries(x.types).map(([t,n])=>'<span>'+E(VT[t]||t)+' '+n+'</span>').join('')+'</div></td><td class="hide-m">'+fmtD(x.last)+'</td><td class="a"><button type="button" class="btn light" data-pdf="'+x.route_id+'">📄 PDF</button></td></tr>').join('')+'</tbody></table>';
+  else body='<table class="cfdoc-tbl"><thead><tr><th>Servis no</th><th>Müşteri</th><th>Cihaz</th><th>Durum</th><th>Kabul</th><th></th></tr></thead><tbody>'+L.map(x=>'<tr><td><b>'+E(x.service_number||('#'+x.id))+'</b></td><td>'+E(x.customer_name||'—')+'</td><td class="hide-m">'+E(x.device_name||'—')+(x.serial_number?'<small>SN '+E(x.serial_number)+'</small>':'')+'</td><td>'+(()=>{const v=SVS[x.stage]||SVL[x.status]||[x.status||'—',''];return '<span class="cfdoc-st '+v[1]+'">'+E(v[0])+'</span>'})()+'</td><td class="hide-m">'+fmtD(x.received_date||x.created_at)+'</td><td class="a"><button type="button" class="btn light" data-pdf="'+E(x.id)+'">📄 PDF</button></td></tr>').join('')+'</tbody></table>';
+  pane.innerHTML=bar+body+'<p class="cfdoc-note">PDF her açılışta kayıtlı veriden yeniden üretilir, bu yüzden ayrıca yer kaplamaz. Yazdırma penceresinde “PDF olarak kaydet” seçerek bilgisayarınıza indirebilirsiniz.</p>';
+  const qi=pane.querySelector('[data-dq]');qi.oninput=()=>{S.q=qi.value;clearTimeout(qi._t);qi._t=setTimeout(()=>{paint();const n=pane.querySelector('[data-dq]');n.focus();n.setSelectionRange(n.value.length,n.value.length)},220)};
+  pane.querySelector('[data-dp]').onchange=async e=>{S.period=e.target.value;pane.style.opacity='.6';await load();pane.style.opacity='';paint()};
+  pane.querySelector('[data-dm]').onchange=e=>{S.mine=e.target.checked;paint()};
+  pane.querySelectorAll('[data-pdf]').forEach(b=>b.onclick=async()=>{if(S.busy)return;S.busy=true;const t=b.textContent;b.disabled=true;b.textContent='Hazırlanıyor…';try{await pdf(k,k==='service'?b.dataset.pdf:+b.dataset.pdf)}catch(e){say('PDF hazırlanamadı: '+(e?.message||e),'warning')}finally{S.busy=false;b.disabled=false;b.textContent=t}})}
+async function pdf(k,id){
+  if(k==='harcirah'){if(!window.cfRouteDocs)throw Error('Rota modülü yüklenmedi');return window.cfRouteDocs.harcirah(id)}
+  if(k==='visits'){if(!window.cfRouteDocs)throw Error('Rota modülü yüklenmedi');return window.cfRouteDocs.visits(id)}
+  if(k==='service'){if(!['owner','admin','manager','service'].includes(ROLE())){say('Servis formu çıktısını yalnızca yönetici veya teknik servis alabilir.','warning');return}
+    if(typeof editServiceRecord!=='function')throw Error('Servis modülü yüklenmedi');await appNavigate('service');await editServiceRecord(id);await new Promise(r=>setTimeout(r,400));if(typeof printServiceForm==='function')await printServiceForm()}}
+/* Belgeler sekmeleri: sekme çubuğunda Proformalar / Teklifler'e dönünce paneli kapat */
+document.addEventListener('click',e=>{const t=e.target.closest?.('[data-cfnav-tab],[data-pn-action="archive"],[data-offer-nav],[data-pn-action="offers"]');if(!t)return;const k=t.dataset?.cfnavTab;if(k&&TABS[k]){e.preventDefault();e.stopImmediatePropagation();show(k);return}if(S.key&&(k==='archive'||t.matches('[data-pn-action="archive"]'))){e.preventDefault();e.stopImmediatePropagation();off();try{loadArchive()}catch(_){}return}if(S.key)off()},true);
+window.cfDocs={show,off};
 })();</script>
 </body></html>
