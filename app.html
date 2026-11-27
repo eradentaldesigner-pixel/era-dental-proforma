@@ -17523,15 +17523,19 @@ const say=(m,t)=>{try{showToast(m,t||'success')}catch(_){alert(m)}};
 const lc=s=>String(s||'').toLocaleLowerCase('tr-TR');
 const fmtD=d=>d?new Date(String(d).slice(0,10)+'T12:00:00').toLocaleDateString('tr-TR',{day:'numeric',month:'short',year:'numeric'}):'';
 const errText=e=>{const m=String(e?.message||e||'');if(/Geçersiz kayıt türü/.test(m))return 'Teklif silmek için veritabanı kurulumu gerekiyor: 2026-11-27-cop-kutusu-teklif.sql dosyasını Supabase › SQL Editor’de bir kez çalıştırın.';return /Could not find the function|schema cache/.test(m)?'Çöp kutusu için veritabanı kurulumu gerekiyor: 2026-11-27-cop-kutusu.sql dosyasını Supabase › SQL Editor’de bir kez çalıştırın.':m};
-const changed=()=>{try{document.dispatchEvent(new CustomEvent('cf-trash-changed'))}catch(_){}try{if(typeof loadArchive==='function'&&document.getElementById('archiveList'))loadArchive()}catch(_){}try{const ov=document.getElementById('offersOverlay');if(ov&&!ov.hidden&&ov.offsetParent!==null&&typeof loadOffers==='function')loadOffers()}catch(_){}};
+const changed=()=>{try{document.dispatchEvent(new CustomEvent('cf-trash-changed'))}catch(_){}try{if(typeof loadArchive==='function'&&document.getElementById('archiveList'))loadArchive()}catch(_){}try{const ov=document.getElementById('offersOverlay');if(ov&&!ov.hidden&&getComputedStyle(ov).display!=='none'&&typeof loadOffers==='function')loadOffers()}catch(_){}};
 const KIND={proforma:['📄','Proforma'],offer:['📝','Teklif'],route:['🗺','Rota']};
 async function rpc(kind,id,action){return sb.rpc('cf_trash',{p_company:C(),p_kind:kind,p_id:+id,p_action:action})}
 let toastT=0;
 function undoToast(kind,id,label){document.querySelector('.cftr-toast')?.remove();clearTimeout(toastT);const t=document.createElement('div');t.className='cftr-toast';t.setAttribute('role','status');t.innerHTML='<span>“'+E(label)+'” çöp kutusuna taşındı.</span><button type="button">Geri al</button>';document.body.append(t);
   t.querySelector('button').onclick=async()=>{t.remove();const r=await rpc(kind,id,'restore');if(r.error){say(errText(r.error),'warning');return}say('Geri alındı.');changed()};toastT=setTimeout(()=>t.remove(),9000)}
-async function move(kind,id,label){label=label||KIND[kind]?.[1]||'Kayıt';
+function drop(kind,id,el){const sel=[];if(kind==='offer')sel.push('#offersOverlay .cfof-card:has([data-trash-kind="offer"][data-trash-id="'+id+'"])');if(kind==='proforma')sel.push('#archiveList tr[data-quote-row="'+id+'"]');if(kind==='route')sel.push('#cfrtRoot .cfrt-card[data-rid="'+id+'"]');
+  const set=new Set();sel.forEach(q=>{try{document.querySelectorAll(q).forEach(x=>set.add(x))}catch(_){}});const c=el?.closest?.('.cfof-card,.cfrt-card,tr[data-quote-row]');if(c)set.add(c);
+  set.forEach(x=>{x.style.transition='opacity .2s,transform .2s';x.style.opacity='0';x.style.transform='scale(.98)';setTimeout(()=>x.remove(),220)});
+  if(kind==='proforma'){const sd=document.getElementById('archiveSide');if(sd&&el&&sd.contains(el)){sd.classList.remove('cfdp-open');const qa=sd.querySelector('.quote-actions');if(qa)qa.innerHTML='<span class="muted">Belge çöp kutusuna taşındı.</span>'}}}
+async function move(kind,id,label,el){label=label||KIND[kind]?.[1]||'Kayıt';
   if(!confirm('“'+label+'” çöp kutusuna taşınsın mı?\n\n30 gün boyunca Çöp kutusundan geri alabilirsiniz; sonra kendiliğinden silinir.'))return false;
-  const r=await rpc(kind,id,'move');if(r.error){say(errText(r.error),'warning');return false}undoToast(kind,id,label);changed();return true}
+  const r=await rpc(kind,id,'move');if(r.error){say(errText(r.error),'warning');return false}drop(kind,id,el);undoToast(kind,id,label);changed();return true}
 /* ---------- pencere ---------- */
 const S={tab:'trash',items:[],rows:[],sel:new Set(),f:{kind:'all',mine:true,before:'',q:''},busy:false};
 function dlg(){let ov=document.getElementById('cftrOv');if(ov)return ov;ov=document.createElement('div');ov.className='cfq-ov';ov.id='cftrOv';document.body.append(ov);
@@ -17584,7 +17588,7 @@ function bind(ov){ov.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>o
     for(const k of L){const [kind,id]=k.split(':');msg.textContent=(n+f.length+1)+' / '+L.length+'…';const r=await rpc(kind,id,'move');if(r.error){f.push(errText(r.error))}else n++}
     S.sel.clear();say(n+' kayıt çöp kutusuna taşındı'+(f.length?' · '+f.length+' taşınamadı: '+f[0]:''),f.length?'warning':'success');changed();await load();paint()})}
 /* ---------- Belgeler (arşiv) ---------- */
-document.addEventListener('click',e=>{const b=e.target.closest('[data-trash-kind]');if(!b)return;e.preventDefault();e.stopPropagation();move(b.dataset.trashKind,b.dataset.trashId,b.dataset.trashLabel)},true);
+document.addEventListener('click',e=>{const b=e.target.closest('[data-trash-kind]');if(!b)return;e.preventDefault();e.stopPropagation();move(b.dataset.trashKind,b.dataset.trashId,b.dataset.trashLabel,b)},true);
 function archiveHook(){
   if(typeof cfArchiveActions==='function'&&!cfArchiveActions.__cftr){const base=cfArchiveActions;const f=function(p){let h=base.apply(this,arguments);h=String(h||'').replace(/<button[^>]*deleteArchivedProforma\([^)]*'delete'\)[^>]*>[^<]*<\/button>/g,'');
       const ok=p&&!(p.approval_state==='approved'||p.status==='Onaylandı')&&(boss()||(p.prepared_by&&String(p.prepared_by)===ME()));if(ok&&ROLE()!=='viewer')h+='<button type="button" class="btn light cftr-danger" data-trash-kind="proforma" data-trash-id="'+(+p.id)+'" data-trash-label="'+E(p.proforma_number||'Belge')+'" title="Çöp kutusuna taşı (30 gün geri alınabilir)">🗑 Sil</button>';return h};f.__cftr=1;try{cfArchiveActions=f}catch(_){}window.cfArchiveActions=f}
